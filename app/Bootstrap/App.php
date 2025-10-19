@@ -65,13 +65,13 @@ class App
 
     private function registerRoutes(): void
     {
-        $this->router->get('/', 'App\\Controllers\\HomeController@__invoke');
+        $this->router->get('/', 'App\Controllers\HomeController@__invoke');
 
-        $this->router->match(['GET', 'POST'], '/admin/login', 'App\\Controllers\\Admin\\AuthController@login');
-        $this->router->get('/admin/inbox', 'App\\Controllers\\Admin\\InboxController@index');
-        $this->router->get('/admin/curate/{id}', 'App\\Controllers\\Admin\\CurateController@show');
-        $this->router->post('/admin/curate/{id}', 'App\\Controllers\\Admin\\CurateController@store');
-        $this->router->get('/admin/edition/{date}', 'App\\Controllers\\Admin\\EditionController@show');
-        $this->router->get('/admin/feeds', 'App\\Controllers\\Admin\\FeedController@index');
+        $this->router->match(['GET', 'POST'], '/admin/login', 'App\Controllers\Admin\AuthController@login');
+        $this->router->get('/admin/inbox', 'App\Controllers\Admin\InboxController@index');
+        $this->router->get('/admin/curate/{id}', 'App\Controllers\Admin\CurateController@show');
+        $this->router->post('/admin/curate/{id}', 'App\Controllers\Admin\CurateController@store');
+        $this->router->get('/admin/edition/{date}', 'App\Controllers\Admin\EditionController@show');
+        $this->router->get('/admin/feeds', 'App\Controllers\Admin\FeedController@index');
     }
 }

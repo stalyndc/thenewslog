@@ -1,8 +1,8 @@
 <?php
 
-namespace App\\Controllers\\Admin;
+namespace App\Controllers\Admin;
 
-use App\\Controllers\\BaseController;
+use App\Controllers\BaseController;
 
 class CurateController extends BaseController
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\\Controllers;
+namespace App\Controllers;
 
-use Twig\\Environment;
+use Twig\Environment;
 
 abstract class BaseController
 {
