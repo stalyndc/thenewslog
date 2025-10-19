@@ -3,11 +3,16 @@
 namespace App\Bootstrap;
 
 use App\Http\Request;
+use App\Repositories\CuratedLinkRepository;
+use App\Repositories\FeedRepository;
+use App\Repositories\ItemRepository;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Dotenv\Dotenv;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use PDO;
+use PDOException;
 
 class App
 {
@@ -68,6 +73,34 @@ class App
         });
 
         $this->container->singleton(Request::class, static fn (): Request => Request::fromGlobals());
+
+        $this->container->singleton(PDO::class, static function (): PDO {
+            $dsn = sprintf(
+                'mysql:host=%s;dbname=%s;charset=%s',
+                getenv('DB_HOST') ?: '127.0.0.1',
+                getenv('DB_NAME') ?: 'thenewslog',
+                'utf8mb4'
+            );
+
+            $username = getenv('DB_USER') ?: 'root';
+            $password = getenv('DB_PASS') ?: '';
+
+            try {
+                $pdo = new PDO($dsn, $username, $password, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ]);
+            } catch (PDOException $exception) {
+                throw new \RuntimeException('Database connection failed: ' . $exception->getMessage(), 0, $exception);
+            }
+
+            return $pdo;
+        });
+
+        $this->container->singleton(FeedRepository::class, static fn (Container $container): FeedRepository => new FeedRepository($container->get(PDO::class)));
+        $this->container->singleton(ItemRepository::class, static fn (Container $container): ItemRepository => new ItemRepository($container->get(PDO::class)));
+        $this->container->singleton(CuratedLinkRepository::class, static fn (Container $container): CuratedLinkRepository => new CuratedLinkRepository($container->get(PDO::class)));
 
         $logPath = dirname(__DIR__, 2) . '/storage/logs/app.log';
         $logDirectory = dirname($logPath);
