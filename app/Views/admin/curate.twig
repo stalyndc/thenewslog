@@ -1,0 +1,12 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Curate — The News Log{% endblock %}
+
+{% block content %}
+<section>
+    <p>Curate placeholder for item {{ itemId|default('N/A') }}.</p>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+</section>
+{% endblock %}

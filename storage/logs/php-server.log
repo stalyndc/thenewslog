@@ -1,0 +1,22 @@
+[Sun Oct 19 13:59:23 2025] PHP 8.2.29 Development Server (http://127.0.0.1:8000) started
+[Sun Oct 19 13:59:47 2025] 127.0.0.1:34204 Accepted
+[Sun Oct 19 13:59:47 2025] 127.0.0.1:34204 [200]: HEAD /
+[Sun Oct 19 13:59:47 2025] 127.0.0.1:34204 Closing
+[Sun Oct 19 14:00:30 2025] 127.0.0.1:54606 Accepted
+[Sun Oct 19 14:00:30 2025] 127.0.0.1:54606 [200]: GET /
+[Sun Oct 19 14:00:30 2025] 127.0.0.1:54606 Closing
+[Sun Oct 19 14:00:30 2025] 127.0.0.1:54622 Accepted
+[Sun Oct 19 14:00:30 2025] 127.0.0.1:54622 [404]: GET /favicon.ico - No such file or directory
+[Sun Oct 19 14:00:30 2025] 127.0.0.1:54622 Closing
+[Sun Oct 19 14:00:53 2025] 127.0.0.1:35620 Accepted
+[Sun Oct 19 14:00:53 2025] 127.0.0.1:35620 [200]: HEAD /admin/login
+[Sun Oct 19 14:00:53 2025] 127.0.0.1:35620 Closing
+[Sun Oct 19 14:00:55 2025] 127.0.0.1:44456 Accepted
+[Sun Oct 19 14:00:55 2025] 127.0.0.1:44456 [404]: HEAD /rss/editions.xml - No such file or directory
+[Sun Oct 19 14:00:55 2025] 127.0.0.1:44456 Closing
+[Sun Oct 19 14:00:57 2025] 127.0.0.1:44458 Accepted
+[Sun Oct 19 14:00:57 2025] 127.0.0.1:44458 [404]: HEAD /rss/stream.xml - No such file or directory
+[Sun Oct 19 14:00:57 2025] 127.0.0.1:44458 Closing
+[Sun Oct 19 14:01:03 2025] 127.0.0.1:44472 Accepted
+[Sun Oct 19 14:01:03 2025] 127.0.0.1:44472 [200]: GET /?id=1e162b4e-a618-4825-888a-7aa07668b82b&vscodeBrowserReqId=1760896863760
+[Sun Oct 19 14:01:03 2025] 127.0.0.1:44472 Closing
