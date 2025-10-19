@@ -1,0 +1,220 @@
+:root {
+    --font-body: 'Work Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-heading: 'Work Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --color-bg: #f6f7fb;
+    --color-surface: #ffffff;
+    --color-text: #1a1c24;
+    --color-muted: #5c5f72;
+    --color-accent: #2b59ff;
+    --color-border: #dbe1f0;
+    --max-width: 960px;
+    --radius-md: 12px;
+    --shadow-elevated: 0 10px 30px rgba(25, 35, 60, 0.08);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 18px;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.6;
+    background: linear-gradient(180deg, #f8f9ff 0%, #f3f4fa 100%);
+    color: var(--color-text);
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.app-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-header {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(219, 225, 240, 0.8);
+    padding: 1.5rem 1rem;
+}
+
+.app-header__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.brand-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 2.1rem;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.brand-subtitle {
+    color: var(--color-muted);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.app-nav {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+}
+
+.app-nav a {
+    color: var(--color-muted);
+    font-weight: 500;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.app-nav a:hover,
+.app-nav a.is-active {
+    color: var(--color-accent);
+    background-color: rgba(43, 89, 255, 0.1);
+}
+
+.app-main {
+    flex: 1;
+    padding: 2rem 1rem 3rem;
+}
+
+.app-main__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+.card {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(219, 225, 240, 0.7);
+    box-shadow: var(--shadow-elevated);
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.75rem;
+}
+
+.card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    letter-spacing: -0.015em;
+}
+
+.list-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.list-links__item h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.curate-item,
+.curate-existing {
+    background-color: rgba(246, 247, 251, 0.8);
+    border: 1px solid rgba(219, 225, 240, 0.7);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.2rem;
+}
+
+.curate-existing {
+    background-color: rgba(43, 89, 255, 0.05);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: rgba(43, 89, 255, 0.1);
+    color: var(--color-accent);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--color-muted);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+th,
+td {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid rgba(219, 225, 240, 0.7);
+    text-align: left;
+}
+
+th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+}
+
+.app-footer {
+    border-top: 1px solid rgba(219, 225, 240, 0.8);
+    padding: 1.5rem 1rem;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.app-footer__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+}
+
+@media (max-width: 720px) {
+    html {
+        font-size: 17px;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+
+    .app-header__inner {
+        align-items: flex-start;
+    }
+}

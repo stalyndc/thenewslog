@@ -3,10 +3,11 @@
 {% block title %}Curate — The News Log{% endblock %}
 
 {% block content %}
-<section>
+<section class="card">
+    <div class="badge">Curate</div>
     <h2>Curate Item</h2>
     {% if item %}
-        <article>
+        <article class="curate-item">
             <h3>{{ item.title }}</h3>
             <p><strong>Feed:</strong> {{ item.feed_title }}</p>
             {% if item.source_name %}
@@ -18,18 +19,22 @@
         </article>
 
         {% if curated %}
-            <section>
+            <section class="curate-existing">
                 <h3>Existing Curated Entry</h3>
                 <p><strong>Title:</strong> {{ curated.title }}</p>
                 <p><strong>Blurb:</strong> {{ curated.blurb }}</p>
             </section>
         {% endif %}
     {% else %}
-        <p>Item not found.</p>
+        <div class="empty-state">
+            <p>Item not found.</p>
+        </div>
     {% endif %}
 
     {% if message %}
-        <p>{{ message }}</p>
+        <div class="empty-state">
+            <p>{{ message }}</p>
+        </div>
     {% endif %}
 </section>
 {% endblock %}

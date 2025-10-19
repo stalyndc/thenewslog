@@ -3,14 +3,15 @@
 {% block title %}Feed Management — The News Log{% endblock %}
 
 {% block content %}
-<section>
+<section class="card">
+    <div class="badge">Sources</div>
     <h2>Feeds</h2>
     {% if feeds is defined and feeds|length > 0 %}
         <table>
             <thead>
                 <tr>
                     <th>Title</th>
-                    <th>URL</th>
+                    <th>Feed URL</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -18,14 +19,16 @@
             {% for feed in feeds %}
                 <tr>
                     <td>{{ feed.title }}</td>
-                    <td>{{ feed.feed_url }}</td>
+                    <td><a href="{{ feed.feed_url }}" target="_blank" rel="noopener">{{ feed.feed_url }}</a></td>
                     <td>{{ feed.active ? 'Active' : 'Inactive' }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     {% else %}
-        <p>No feeds registered yet.</p>
+        <div class="empty-state">
+            <p>No feeds registered yet.</p>
+        </div>
     {% endif %}
 </section>
 {% endblock %}

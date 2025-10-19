@@ -3,13 +3,14 @@
 {% block title %}Manage Edition — The News Log{% endblock %}
 
 {% block content %}
-<section>
+<section class="card">
+    <div class="badge">Edition</div>
     <h2>Edition for {{ date|default('today') }}</h2>
     {% if links is defined and links|length > 0 %}
-        <ol>
+        <ol class="list-links">
             {% for link in links %}
-                <li>
-                    <strong>{{ link.title }}</strong>
+                <li class="list-links__item">
+                    <h3>{{ link.title }}</h3>
                     {% if link.blurb %}
                         <p>{{ link.blurb }}</p>
                     {% endif %}
@@ -17,7 +18,9 @@
             {% endfor %}
         </ol>
     {% else %}
-        <p>No curated links assigned to this edition yet.</p>
+        <div class="empty-state">
+            <p>No curated links assigned to this edition yet.</p>
+        </div>
     {% endif %}
 </section>
 {% endblock %}

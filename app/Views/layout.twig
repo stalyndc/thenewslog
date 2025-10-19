@@ -2,14 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}The News Log{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/assets/css/main.css">
+    {% block head %}{% endblock %}
 </head>
 <body>
-<header>
-    <h1>The News Log</h1>
-</header>
-<main>
-    {% block content %}{% endblock %}
-</main>
+<div class="app-shell">
+    <header class="app-header">
+        <div class="app-header__inner">
+            <div>
+                <p class="brand-title"><a href="/">The News Log</a></p>
+                <p class="brand-subtitle">Daily human-curated intel across tech, business, and culture.</p>
+            </div>
+            <nav class="app-nav">
+                <a href="/" class="{% if current_nav is defined and current_nav == 'home' %}is-active{% endif %}">Daily Edition</a>
+                <a href="/stream" class="{% if current_nav is defined and current_nav == 'stream' %}is-active{% endif %}">Live Stream</a>
+                <a href="/tags" class="{% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
+                <a href="/admin/login">Editor Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="app-main__inner">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="app-footer__inner">
+            <span>&copy; {{ "now"|date("Y") }} The News Log. Crafted for fast, human-curated discovery.</span>
+        </div>
+    </footer>
+</div>
 </body>
 </html>

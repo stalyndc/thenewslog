@@ -3,7 +3,8 @@
 {% block title %}Inbox — The News Log{% endblock %}
 
 {% block content %}
-<section>
+<section class="card">
+    <div class="badge">Editor Inbox</div>
     <h2>New Items</h2>
     {% if items is defined and items|length > 0 %}
         <table>
@@ -25,7 +26,9 @@
             </tbody>
         </table>
     {% else %}
-        <p>No new items waiting for review.</p>
+        <div class="empty-state">
+            <p>No new items waiting for review.</p>
+        </div>
     {% endif %}
 </section>
 {% endblock %}

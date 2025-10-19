@@ -3,10 +3,14 @@
 {% block title %}Admin Login — The News Log{% endblock %}
 
 {% block content %}
-<section>
+<section class="card">
+    <div class="badge">Editor Access</div>
+    <h2>Sign In</h2>
     <p>Admin login placeholder.</p>
     {% if message %}
-        <p>{{ message }}</p>
+        <div class="empty-state">
+            <p>{{ message }}</p>
+        </div>
     {% endif %}
 </section>
 {% endblock %}
