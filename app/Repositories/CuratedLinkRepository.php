@@ -199,4 +199,43 @@ SQL;
 
         return (int) ($row['aggregate'] ?? 0);
     }
+
+    public function streamCountForTag(int $tagId): int
+    {
+        $row = $this->fetch(
+            'SELECT COUNT(*) AS aggregate FROM curated_link_tag WHERE tag_id = :tag_id',
+            ['tag_id' => $tagId]
+        );
+
+        return (int) ($row['aggregate'] ?? 0);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function streamForTag(int $tagId, int $page = 1, int $perPage = 20): array
+    {
+        $perPage = max(1, min(100, $perPage));
+        $page = max(1, $page);
+        $offset = ($page - 1) * $perPage;
+
+        $sql = <<<'SQL'
+SELECT cl.*, e.edition_date
+FROM curated_link_tag clt
+JOIN curated_links cl ON cl.id = clt.curated_link_id
+LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id
+LEFT JOIN editions e ON e.id = ecl.edition_id
+WHERE clt.tag_id = :tag_id
+ORDER BY cl.published_at DESC, cl.created_at DESC
+LIMIT :limit OFFSET :offset
+SQL;
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(':tag_id', $tagId, \PDO::PARAM_INT);
+        $statement->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll() ?: [];
+    }
 }

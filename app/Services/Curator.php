@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\CuratedLinkRepository;
 use App\Repositories\EditionRepository;
 use App\Repositories\ItemRepository;
+use App\Repositories\TagRepository;
 
 class Curator
 {
@@ -14,14 +15,18 @@ class Curator
 
     private EditionRepository $editions;
 
+    private TagRepository $tags;
+
     public function __construct(
         ItemRepository $items,
         CuratedLinkRepository $curatedLinks,
-        EditionRepository $editions
+        EditionRepository $editions,
+        TagRepository $tags
     ) {
         $this->items = $items;
         $this->curatedLinks = $curatedLinks;
         $this->editions = $editions;
+        $this->tags = $tags;
     }
 
     /**
@@ -75,6 +80,9 @@ class Curator
         $position = $this->curatedLinks->nextPositionForEdition((int) $edition['id']);
         $this->curatedLinks->attachToEdition($curatedId, (int) $edition['id'], $position);
 
+        $tags = isset($input['tags']) ? $this->splitTags($input['tags']) : [];
+        $this->tags->syncForCuratedLink($curatedId, $tags);
+
         $this->items->markCurated($itemId);
 
         return [
@@ -82,6 +90,21 @@ class Curator
             'curated' => $this->curatedLinks->find($curatedId),
             'edition' => $edition,
         ];
+    }
+
+    private function splitTags(null|string|array $value): array
+    {
+        if ($value === null) {
+            return [];
+        }
+
+        if (is_array($value)) {
+            return $value;
+        }
+
+        $parts = array_map('trim', explode(',', $value));
+
+        return array_filter($parts, static fn (string $tag): bool => $tag !== '');
     }
 
     private function resolveEditionDate(?string $date): string

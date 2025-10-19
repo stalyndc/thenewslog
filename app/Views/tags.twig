@@ -1,0 +1,30 @@
+{% extends 'layout.twig' %}
+
+{% set current_nav = 'tags' %}
+
+{% block title %}Topics — The News Log{% endblock %}
+
+{% block content %}
+<section class="card card--edition">
+    <header class="card__header">
+        <div class="badge">Topics</div>
+        <h2>Browse by Tag</h2>
+    </header>
+
+    {% if tags %}
+        <ul class="tag-directory">
+            {% for tag in tags %}
+                <li>
+                    <a href="/tags/{{ tag.slug }}">
+                        #{{ tag.name }} <span class="tag-count">({{ tag.link_count }})</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-state">
+            <p>No tags yet. Curate links with tags to get started.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

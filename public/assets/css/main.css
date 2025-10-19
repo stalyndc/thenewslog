@@ -224,6 +224,52 @@ a:hover {
     color: #65d6ce;
 }
 
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+}
+
+.tag-pill {
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background-color: rgba(0, 173, 181, 0.15);
+    color: var(--color-accent);
+    font-size: 0.75rem;
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+}
+
+.tag-pill:hover,
+.tag-pill:focus {
+    background-color: rgba(0, 173, 181, 0.25);
+    text-decoration: none;
+}
+
+.tag-pill--active {
+    background-color: rgba(0, 173, 181, 0.35);
+}
+
+.tag-directory {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.tag-directory a {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.tag-count {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    margin-left: 0.35rem;
+}
+
 .curate-item,
 .curate-existing {
     background-color: rgba(238, 238, 238, 0.05);

@@ -55,6 +55,11 @@
                 <input id="edition_date" name="edition_date" type="date" class="input-control" value="{{ form.edition_date|default('') }}" required>
             </div>
 
+            <div class="form-group">
+                <label for="tags">Tags (comma separated)</label>
+                <input id="tags" name="tags" type="text" class="input-control" value="{{ form.tags|default('') }}" placeholder="e.g. AI, Startups">
+            </div>
+
             <div class="form-group form-group--inline">
                 <label class="checkbox">
                     <input type="checkbox" name="publish_now" value="1" {% if form.publish_now %}checked{% endif %}>

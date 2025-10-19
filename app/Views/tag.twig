@@ -1,9 +1,59 @@
 {% extends 'layout.twig' %}
 
-{% block title %}Tag — The News Log{% endblock %}
+{% set current_nav = 'tags' %}
+
+{% block title %}{{ tag.name }} — Topics — The News Log{% endblock %}
 
 {% block content %}
-<section>
-    <p>Tag landing placeholder.</p>
+<section class="card card--edition">
+    <header class="card__header">
+        <div class="badge">Tag • {{ tag.name }}</div>
+        <h2>Curated Links</h2>
+    </header>
+
+    {% if items %}
+        <ul class="list-links">
+            {% for link in items %}
+                <li class="list-links__item">
+                    <div class="list-links__title-row">
+                        <a class="link-title" href="{{ link.source_url ?? link.url }}" target="_blank" rel="noopener">
+                            {{ link.title }}
+                        </a>
+                        <a class="link-source" href="{{ link.source_url ?? link.url }}" target="_blank" rel="noopener" aria-label="Read source for {{ link.title }}">↗</a>
+                    </div>
+                    {% if link.source_name %}
+                        <span class="badge badge--muted">{{ link.source_name }}</span>
+                    {% endif %}
+                    {% if link.blurb %}
+                        <p>{{ link.blurb }}</p>
+                    {% endif %}
+                    {% set linkTags = tagsByLink[link.id]|default([]) %}
+                    {% if linkTags %}
+                        <div class="tag-list">
+                            {% for currentTag in linkTags %}
+                                <a class="tag-pill {% if currentTag.id == tag.id %}tag-pill--active{% endif %}" href="/tags/{{ currentTag.slug }}">#{{ currentTag.name }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% if total_pages > 1 %}
+            <nav class="pagination">
+                {% if page > 1 %}
+                    <a class="pagination__link" href="?page={{ page - 1 }}">Previous</a>
+                {% endif %}
+                <span class="pagination__status">Page {{ page }} of {{ total_pages }}</span>
+                {% if page < total_pages %}
+                    <a class="pagination__link" href="?page={{ page + 1 }}">Next</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <p>No curated links yet for {{ tag.name }}.</p>
+        </div>
+    {% endif %}
 </section>
 {% endblock %}

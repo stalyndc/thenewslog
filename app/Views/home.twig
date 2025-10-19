@@ -27,6 +27,14 @@
                     {% if link.blurb %}
                         <p>{{ link.blurb }}</p>
                     {% endif %}
+                    {% set linkTags = tagsByLink[link.id]|default([]) %}
+                    {% if linkTags %}
+                        <div class="tag-list">
+                            {% for tag in linkTags %}
+                                <a class="tag-pill" href="/tags/{{ tag.slug }}">#{{ tag.name }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>

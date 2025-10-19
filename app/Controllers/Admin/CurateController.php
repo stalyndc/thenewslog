@@ -7,6 +7,7 @@ use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
 use App\Repositories\EditionRepository;
 use App\Repositories\ItemRepository;
+use App\Repositories\TagRepository;
 use App\Services\Auth;
 use App\Services\Curator;
 use Twig\Environment;
@@ -21,19 +22,23 @@ class CurateController extends AdminController
 
     private Curator $curator;
 
+    private TagRepository $tags;
+
     public function __construct(
         Environment $view,
         Auth $auth,
         ItemRepository $items,
         CuratedLinkRepository $curatedLinks,
         EditionRepository $editions,
-        Curator $curator
+        Curator $curator,
+        TagRepository $tags
     ) {
         parent::__construct($view, $auth);
         $this->items = $items;
         $this->curatedLinks = $curatedLinks;
         $this->editions = $editions;
         $this->curator = $curator;
+        $this->tags = $tags;
     }
 
     public function show(int $id): Response
@@ -41,7 +46,13 @@ class CurateController extends AdminController
         $item = $this->safeFindItem($id);
         $curated = $this->resolveCuratedFromItem($item);
         $edition = $curated ? $this->editions->findByCuratedLink((int) $curated['id']) : null;
-        $form = $this->buildFormState($item, $curated, null);
+        $existingTags = [];
+        if ($curated) {
+            $tagMap = $this->tags->tagsForCuratedLinks([(int) $curated['id']]);
+            $existingTags = $tagMap[(int) $curated['id']] ?? [];
+        }
+
+        $form = $this->buildFormState($item, $curated, null, $existingTags);
 
         return $this->render('admin/curate.twig', [
             'item' => $item,
@@ -59,6 +70,7 @@ class CurateController extends AdminController
             'edition_date' => $request->input('edition_date'),
             'is_pinned' => $request->input('is_pinned') === '1',
             'publish_now' => $request->input('publish_now') === '1',
+            'tags' => $request->input('tags'),
         ];
 
         $message = null;
@@ -77,7 +89,13 @@ class CurateController extends AdminController
         $item = $result['item'] ?? $this->safeFindItem($id);
         $curated = $result['curated'] ?? $this->resolveCuratedFromItem($item);
         $edition = $result['edition'] ?? ($curated ? $this->editions->findByCuratedLink((int) $curated['id']) : null);
-        $form = $this->buildFormState($item, $curated, $payload);
+        $existingTags = [];
+        if ($curated) {
+            $tagMap = $this->tags->tagsForCuratedLinks([(int) $curated['id']]);
+            $existingTags = $tagMap[(int) $curated['id']] ?? [];
+        }
+
+        $form = $this->buildFormState($item, $curated, $payload, $existingTags);
 
         return $this->render('admin/curate.twig', [
             'item' => $item,
@@ -102,7 +120,7 @@ class CurateController extends AdminController
         }
     }
 
-    private function buildFormState(?array $item, ?array $curated, ?array $payload): array
+    private function buildFormState(?array $item, ?array $curated, ?array $payload, array $existingTags): array
     {
         $payload = $payload ?? [];
         $defaultDate = date('Y-m-d');
@@ -118,6 +136,7 @@ class CurateController extends AdminController
             'edition_date' => $payload['edition_date'] ?? $defaultDate,
             'is_pinned' => (bool) ($payload['is_pinned'] ?? ($curated['is_pinned'] ?? false)),
             'publish_now' => (bool) ($payload['publish_now'] ?? false),
+            'tags' => $this->tagsToString($payload['tags'] ?? null, $existingTags),
         ];
     }
 
@@ -139,5 +158,22 @@ class CurateController extends AdminController
         $trimmed = trim($value);
 
         return $trimmed === '' ? null : $trimmed;
+    }
+
+    private function tagsToString(null|string|array $payloadTags, array $existingTags): string
+    {
+        if (is_string($payloadTags)) {
+            return $payloadTags;
+        }
+
+        if (is_array($payloadTags)) {
+            return implode(', ', $payloadTags);
+        }
+
+        if (!empty($existingTags)) {
+            return implode(', ', array_map(static fn ($tag) => $tag['name'], $existingTags));
+        }
+
+        return '';
     }
 }

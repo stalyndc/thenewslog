@@ -5,16 +5,20 @@ namespace App\Controllers;
 use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
+use App\Repositories\TagRepository;
 use Twig\Environment;
 
 class HomeController extends BaseController
 {
     private CuratedLinkRepository $curatedLinks;
 
-    public function __construct(Environment $view, CuratedLinkRepository $curatedLinks)
+    private TagRepository $tags;
+
+    public function __construct(Environment $view, CuratedLinkRepository $curatedLinks, TagRepository $tags)
     {
         parent::__construct($view);
         $this->curatedLinks = $curatedLinks;
+        $this->tags = $tags;
     }
 
     public function __invoke(Request $request): Response
@@ -35,10 +39,13 @@ class HomeController extends BaseController
 
         $editionDisplay = $editionDate ? date('D, M j, Y', strtotime($editionDate)) : null;
 
+        $tags = $this->tags->tagsForCuratedLinks(array_column($links, 'id'));
+
         return $this->render('home.twig', [
             'links' => $links,
             'edition_date' => $editionDate,
             'edition_display' => $editionDisplay,
+            'tagsByLink' => $tags,
         ]);
     }
 

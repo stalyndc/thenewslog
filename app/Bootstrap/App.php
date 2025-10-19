@@ -7,6 +7,7 @@ use App\Repositories\CuratedLinkRepository;
 use App\Repositories\EditionRepository;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
+use App\Repositories\TagRepository;
 use App\Services\Auth;
 use App\Services\Curator;
 use App\Services\FeedFetcher;
@@ -100,10 +101,12 @@ class App
         $this->container->singleton(ItemRepository::class, static fn (Container $container): ItemRepository => new ItemRepository($container->get(PDO::class)));
         $this->container->singleton(CuratedLinkRepository::class, static fn (Container $container): CuratedLinkRepository => new CuratedLinkRepository($container->get(PDO::class)));
         $this->container->singleton(EditionRepository::class, static fn (Container $container): EditionRepository => new EditionRepository($container->get(PDO::class)));
+        $this->container->singleton(TagRepository::class, static fn (Container $container): TagRepository => new TagRepository($container->get(PDO::class)));
         $this->container->singleton(Curator::class, static fn (Container $container): Curator => new Curator(
             $container->get(ItemRepository::class),
             $container->get(CuratedLinkRepository::class),
-            $container->get(EditionRepository::class)
+            $container->get(EditionRepository::class),
+            $container->get(TagRepository::class)
         ));
         $this->container->singleton(FeedIo::class, static fn (): FeedIo => FeedIoFactory::create()->getFeedIo());
         $this->container->singleton(FeedFetcher::class, static fn (Container $container): FeedFetcher => new FeedFetcher(
@@ -174,6 +177,8 @@ class App
         $this->router->get('/admin/feeds', 'App\Controllers\Admin\FeedController@index');
         $this->router->get('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
         $this->router->get('/stream', 'App\Controllers\StreamController@__invoke');
+        $this->router->get('/tags', 'App\Controllers\TagController@index');
+        $this->router->get('/tags/{slug}', 'App\Controllers\TagController@show');
         $this->router->setNotFoundHandler('App\Controllers\ErrorController@notFound');
     }
 }
