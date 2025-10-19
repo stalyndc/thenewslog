@@ -2,10 +2,12 @@
 
 namespace App\Controllers;
 
+use App\Http\Response;
+
 class HomeController extends BaseController
 {
-    public function __invoke(): void
+    public function __invoke(): Response
     {
-        $this->render('home.twig');
+        return $this->render('home.twig');
     }
 }

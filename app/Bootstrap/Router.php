@@ -2,6 +2,8 @@
 
 namespace App\Bootstrap;
 
+use App\Http\Response;
+
 class Router
 {
     private Container $container;
@@ -10,6 +12,8 @@ class Router
      * @var array<string, array<int, array{pattern: string, parameters: array<int, string>, handler: mixed}>>
      */
     private array $routes = [];
+
+    private mixed $notFoundHandler = null;
 
     public function __construct(Container $container)
     {
@@ -33,7 +37,12 @@ class Router
         }
     }
 
-    public function dispatch(string $method, string $path): void
+    public function setNotFoundHandler(mixed $handler): void
+    {
+        $this->notFoundHandler = $handler;
+    }
+
+    public function dispatch(string $method, string $path): Response
     {
         $method = strtoupper($method);
         $path = $this->normalizePath($path);
@@ -48,14 +57,15 @@ class Router
                     }
                 }
 
-                $this->invoke($route['handler'], $arguments);
-
-                return;
+                return $this->invoke($route['handler'], $arguments);
             }
         }
 
-        http_response_code(404);
-        echo '404 Not Found';
+        if ($this->notFoundHandler !== null) {
+            return $this->invoke($this->notFoundHandler, []);
+        }
+
+        return new Response('404 Not Found', 404);
     }
 
     private function addRoute(string $method, string $path, mixed $handler): void
@@ -71,34 +81,55 @@ class Router
         ];
     }
 
-    private function invoke(mixed $handler, array $arguments): void
+    private function invoke(mixed $handler, array $arguments): Response
     {
-        if (is_string($handler) && str_contains($handler, '@')) {
-            [$class, $method] = explode('@', $handler, 2);
-            $instance = $this->container->get($class);
-            $this->container->call([$instance, $method], $arguments);
+        $result = match (true) {
+            is_string($handler) && str_contains($handler, '@') => $this->invokeClassString($handler, $arguments),
+            is_array($handler) => $this->invokeClassArray($handler, $arguments),
+            is_callable($handler) => $this->container->call($handler, $arguments),
+            default => throw new \InvalidArgumentException('Invalid route handler provided.'),
+        };
 
-            return;
+        return $this->normalizeResponse($result);
+    }
+
+    private function invokeClassString(string $handler, array $arguments): mixed
+    {
+        [$class, $method] = explode('@', $handler, 2);
+        $instance = $this->container->get($class);
+
+        return $this->container->call([$instance, $method], $arguments);
+    }
+
+    private function invokeClassArray(array $handler, array $arguments): mixed
+    {
+        [$classOrInstance, $method] = $handler;
+        $instance = is_string($classOrInstance)
+            ? $this->container->get($classOrInstance)
+            : $classOrInstance;
+
+        return $this->container->call([$instance, $method], $arguments);
+    }
+
+    private function normalizeResponse(mixed $result): Response
+    {
+        if ($result instanceof Response) {
+            return $result;
         }
 
-        if (is_array($handler)) {
-            [$classOrInstance, $method] = $handler;
-            $instance = is_string($classOrInstance)
-                ? $this->container->get($classOrInstance)
-                : $classOrInstance;
-
-            $this->container->call([$instance, $method], $arguments);
-
-            return;
+        if (is_string($result)) {
+            return new Response($result);
         }
 
-        if (is_callable($handler)) {
-            $this->container->call($handler, $arguments);
-
-            return;
+        if ($result === null) {
+            return new Response();
         }
 
-        throw new \InvalidArgumentException('Invalid route handler provided.');
+        if (is_array($result) || is_object($result)) {
+            return Response::json($result);
+        }
+
+        return new Response((string) $result);
     }
 
     private function compilePath(string $path): array

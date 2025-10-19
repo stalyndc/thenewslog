@@ -3,17 +3,19 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Http\Request;
+use App\Http\Response;
 
 class AuthController extends BaseController
 {
-    public function login(): void
+    public function login(Request $request): Response
     {
-        $isPost = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
-
         $context = [
-            'message' => $isPost ? 'Authentication logic not yet implemented.' : null,
+            'message' => $request->isPost()
+                ? 'Authentication logic not yet implemented.'
+                : null,
         ];
 
-        $this->render('admin/login.twig', $context);
+        return $this->render('admin/login.twig', $context);
     }
 }

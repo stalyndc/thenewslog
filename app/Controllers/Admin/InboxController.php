@@ -3,11 +3,12 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Http\Response;
 
 class InboxController extends BaseController
 {
-    public function index(): void
+    public function index(): Response
     {
-        $this->render('admin/inbox.twig');
+        return $this->render('admin/inbox.twig');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Http\Response;
 use Twig\Environment;
 
 abstract class BaseController
@@ -13,8 +14,13 @@ abstract class BaseController
         $this->view = $view;
     }
 
-    protected function render(string $template, array $context = []): void
+    protected function render(string $template, array $context = [], int $status = 200): Response
     {
-        echo $this->view->render($template, $context);
+        $html = $this->view->render($template, $context);
+
+        $response = new Response($html, $status);
+        $response->setHeader('Content-Type', 'text/html; charset=utf-8');
+
+        return $response;
     }
 }

@@ -2,6 +2,9 @@
 
 namespace App\Bootstrap;
 
+use App\Http\Request;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Symfony\Component\Dotenv\Dotenv;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -27,10 +30,12 @@ class App
 
     public function handle(): void
     {
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+        /** @var Request $request */
+        $request = $this->container->get(Request::class);
 
-        $this->router->dispatch($method, $path);
+        $response = $this->router->dispatch($request->method(), $request->path());
+
+        $response->send();
     }
 
     private function bootstrapEnvironment(): void
@@ -61,6 +66,22 @@ class App
 
             return new Environment($loader);
         });
+
+        $this->container->singleton(Request::class, static fn (): Request => Request::fromGlobals());
+
+        $logPath = dirname(__DIR__, 2) . '/storage/logs/app.log';
+        $logDirectory = dirname($logPath);
+
+        if (!is_dir($logDirectory)) {
+            mkdir($logDirectory, 0775, true);
+        }
+
+        $this->container->singleton(Logger::class, static function () use ($logPath): Logger {
+            $logger = new Logger('app');
+            $logger->pushHandler(new StreamHandler($logPath));
+
+            return $logger;
+        });
     }
 
     private function registerRoutes(): void
@@ -73,5 +94,6 @@ class App
         $this->router->post('/admin/curate/{id}', 'App\Controllers\Admin\CurateController@store');
         $this->router->get('/admin/edition/{date}', 'App\Controllers\Admin\EditionController@show');
         $this->router->get('/admin/feeds', 'App\Controllers\Admin\FeedController@index');
+        $this->router->setNotFoundHandler('App\Controllers\ErrorController@notFound');
     }
 }
