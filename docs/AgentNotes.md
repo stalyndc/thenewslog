@@ -14,6 +14,7 @@
 - Added tagging workflow: curate form accepts tags, tag pages (`/tags`, `/tags/{slug}`) render filtered streams, and links render tag pills.
 - Added public RSS feeds (`/rss/daily.xml`, `/rss/stream.xml`) with head/footer links for discovery.
 - Admin edition screen now supports manual reorder + publish/draft toggle.
+- Public edition archive: `/editions` (paginated list) and `/editions/{date}` (full edition view) reuse linking/tag display.
 
 ## Next Recommended Steps
 

@@ -11,7 +11,7 @@ Initial scaffold generated from PRD and Agents guidelines.
 ## Local Development
 
 - Run the built-in PHP server: `php -S 127.0.0.1:8000 -t public`.
-- Visit `http://127.0.0.1:8000/` for the reader view (Daily Edition), `/stream` for the live stream, and `/tags` to browse topics; `/admin/login` for the admin portal.
+- Visit `http://127.0.0.1:8000/` for the reader view (Daily Edition), `/stream` for the live stream, `/editions` for the archive, and `/tags` to browse topics; `/admin/login` for the admin portal.
 - Authenticated admin routes are under `/admin/*`; log in via `/admin` with the credentials configured in `.env`.
 
 ## Admin Workflow

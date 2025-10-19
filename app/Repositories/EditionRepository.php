@@ -93,4 +93,54 @@ SQL;
             ]
         );
     }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function publishedWithCounts(int $page = 1, int $perPage = 12): array
+    {
+        $perPage = max(1, min(50, $perPage));
+        $page = max(1, $page);
+        $offset = ($page - 1) * $perPage;
+
+        $sql = <<<'SQL'
+SELECT e.*, COUNT(DISTINCT cl.id) AS link_count
+FROM editions e
+JOIN edition_curated_link ecl ON ecl.edition_id = e.id
+JOIN curated_links cl ON cl.id = ecl.curated_link_id AND cl.published_at IS NOT NULL
+GROUP BY e.id
+ORDER BY e.edition_date DESC
+LIMIT :limit OFFSET :offset
+SQL;
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll() ?: [];
+    }
+
+    public function countPublished(): int
+    {
+        $row = $this->fetch(
+            'SELECT COUNT(DISTINCT e.id) AS aggregate FROM editions e JOIN edition_curated_link ecl ON e.id = ecl.edition_id JOIN curated_links cl ON cl.id = ecl.curated_link_id AND cl.published_at IS NOT NULL'
+        );
+
+        return (int) ($row['aggregate'] ?? 0);
+    }
+
+    public function findPublishedByDate(string $date): ?array
+    {
+        $sql = <<<'SQL'
+SELECT e.*
+FROM editions e
+JOIN edition_curated_link ecl ON ecl.edition_id = e.id
+JOIN curated_links cl ON cl.id = ecl.curated_link_id AND cl.published_at IS NOT NULL
+WHERE e.edition_date = :edition_date
+LIMIT 1
+SQL;
+
+        return $this->fetch($sql, ['edition_date' => $date]);
+    }
 }

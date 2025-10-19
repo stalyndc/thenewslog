@@ -1,0 +1,43 @@
+{% extends 'layout.twig' %}
+
+{% set current_nav = 'editions' %}
+
+{% block title %}Past Editions — The News Log{% endblock %}
+
+{% block content %}
+<section class="card card--edition">
+    <header class="card__header">
+        <div class="badge">Edition Archive</div>
+        <h2>Past Daily Editions</h2>
+    </header>
+
+    {% if editions %}
+        <ul class="edition-list">
+            {% for edition in editions %}
+                <li class="edition-list__item">
+                    <div>
+                        <a class="edition-list__date" href="/editions/{{ edition.edition_date }}">{{ edition.edition_date }}</a>
+                        <p class="edition-list__meta">{{ edition.link_count }} curated links{% if edition.published_at %} • Published {{ edition.published_at|default('') }}{% endif %}</p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% if total_pages > 1 %}
+            <nav class="pagination">
+                {% if page > 1 %}
+                    <a class="pagination__link" href="?page={{ page - 1 }}">Previous</a>
+                {% endif %}
+                <span class="pagination__status">Page {{ page }} of {{ total_pages }}</span>
+                {% if page < total_pages %}
+                    <a class="pagination__link" href="?page={{ page + 1 }}">Next</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <p>No published editions yet. Curate and publish the first one to populate this archive.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

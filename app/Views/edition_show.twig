@@ -1,29 +1,25 @@
 {% extends 'layout.twig' %}
 
-{% set current_nav = 'home' %}
+{% set current_nav = 'editions' %}
 
-{% block title %}Home — The News Log{% endblock %}
+{% block title %}{{ edition.edition_date }} — Daily Edition — The News Log{% endblock %}
 
 {% block content %}
 <section class="card card--edition">
     <header class="card__header">
-        <div class="badge">
-            Daily Edition
-            {% if edition_display and edition_date %}
-                — <a class="badge-link" href="/editions/{{ edition_date }}">{{ edition_display }}</a>
-            {% endif %}
-        </div>
-        <h2>Latest Curated Links</h2>
+        <div class="badge">Daily Edition • {{ edition.edition_date }}</div>
+        <h2>{{ edition.title }}</h2>
+        {% if edition.published_at %}
+            <p class="edition-meta">Published {{ edition.published_at }}</p>
+        {% endif %}
     </header>
 
-    {% if links is defined and links|length > 0 %}
+    {% if links %}
         <ul class="list-links">
             {% for link in links %}
                 <li class="list-links__item">
                     <div class="list-links__title-row">
-                        <a class="link-title" href="{{ link.source_url ?? link.url }}" target="_blank" rel="noopener">
-                            {{ link.title }}
-                        </a>
+                        <a class="link-title" href="{{ link.source_url ?? link.url }}" target="_blank" rel="noopener">{{ link.title }}</a>
                         <a class="link-source" href="{{ link.source_url ?? link.url }}" target="_blank" rel="noopener" aria-label="Read source for {{ link.title }}">↗</a>
                     </div>
                     {% if link.source_name %}
@@ -45,7 +41,7 @@
         </ul>
     {% else %}
         <div class="empty-state">
-            <p>No curated links published yet. Check back soon.</p>
+            <p>No curated links for this edition.</p>
         </div>
     {% endif %}
 </section>
