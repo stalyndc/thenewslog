@@ -12,6 +12,7 @@
 - Implemented feed ingestion service using Feed-io + Guzzle, seed helper for default feeds, and cron script integration.
 - Split Daily Edition vs Live Stream: home now shows today's published edition (with date badge) while `/stream` lists the full published history.
 - Added tagging workflow: curate form accepts tags, tag pages (`/tags`, `/tags/{slug}`) render filtered streams, and links render tag pills.
+- Added public RSS feeds (`/rss/daily.xml`, `/rss/stream.xml`) with head/footer links for discovery.
 
 ## Next Recommended Steps
 

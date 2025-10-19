@@ -26,6 +26,12 @@ Initial scaffold generated from PRD and Agents guidelines.
 - Trigger fetch manually: `php scripts/cron_fetch.php`.
 - Production cron suggestion: `*/30 * * * * php /path/to/scripts/cron_fetch.php >> /path/to/storage/logs/fetch.log 2>&1`.
 
+## RSSFeeds
+
+- Daily Edition RSS: `/rss/daily.xml`
+- Live Stream RSS: `/rss/stream.xml`
+- Both feeds include the latest 20–50 curated links with title, link, and blurb for syndication.
+
 ## Logs
 
 - Application logs write to `storage/logs/app.log` (created automatically on bootstrap).

@@ -183,7 +183,7 @@ SQL;
         $page = max(1, $page);
         $offset = ($page - 1) * $perPage;
 
-        $sql = 'SELECT cl.*, e.edition_date FROM curated_links cl LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id LEFT JOIN editions e ON e.id = ecl.edition_id ORDER BY cl.published_at DESC, cl.created_at DESC LIMIT :limit OFFSET :offset';
+        $sql = 'SELECT cl.*, e.edition_date FROM curated_links cl LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id LEFT JOIN editions e ON e.id = ecl.edition_id WHERE cl.published_at IS NOT NULL ORDER BY cl.published_at DESC, cl.created_at DESC LIMIT :limit OFFSET :offset';
 
         $statement = $this->connection->prepare($sql);
         $statement->bindValue(':limit', $perPage, \PDO::PARAM_INT);
@@ -195,7 +195,7 @@ SQL;
 
     public function countStream(): int
     {
-        $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM curated_links');
+        $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM curated_links WHERE published_at IS NOT NULL');
 
         return (int) ($row['aggregate'] ?? 0);
     }
@@ -203,7 +203,7 @@ SQL;
     public function streamCountForTag(int $tagId): int
     {
         $row = $this->fetch(
-            'SELECT COUNT(*) AS aggregate FROM curated_link_tag WHERE tag_id = :tag_id',
+            'SELECT COUNT(*) AS aggregate FROM curated_link_tag clt JOIN curated_links cl ON cl.id = clt.curated_link_id WHERE clt.tag_id = :tag_id AND cl.published_at IS NOT NULL',
             ['tag_id' => $tagId]
         );
 
@@ -226,6 +226,7 @@ JOIN curated_links cl ON cl.id = clt.curated_link_id
 LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id
 LEFT JOIN editions e ON e.id = ecl.edition_id
 WHERE clt.tag_id = :tag_id
+  AND cl.published_at IS NOT NULL
 ORDER BY cl.published_at DESC, cl.created_at DESC
 LIMIT :limit OFFSET :offset
 SQL;

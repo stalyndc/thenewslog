@@ -457,6 +457,25 @@ th {
     text-align: center;
 }
 
+.app-footer__nav {
+    margin-top: 0.6rem;
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.app-footer__nav a {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+}
+
+.app-footer__nav a:hover,
+.app-footer__nav a:focus {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
 @media (max-width: 720px) {
     html {
         font-size: 17px;

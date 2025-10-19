@@ -179,6 +179,8 @@ class App
         $this->router->get('/stream', 'App\Controllers\StreamController@__invoke');
         $this->router->get('/tags', 'App\Controllers\TagController@index');
         $this->router->get('/tags/{slug}', 'App\Controllers\TagController@show');
+        $this->router->get('/rss/daily.xml', 'App\Controllers\RssController@daily');
+        $this->router->get('/rss/stream.xml', 'App\Controllers\RssController@stream');
         $this->router->setNotFoundHandler('App\Controllers\ErrorController@notFound');
     }
 }
