@@ -3,20 +3,55 @@
 {% block title %}Manage Edition — The News Log{% endblock %}
 
 {% block content %}
-<section class="card">
-    <div class="badge">Edition</div>
-    <h2>Edition for {{ date|default('today') }}</h2>
+<section class="card card--edition">
+    <header class="card__header">
+        <div class="badge">Edition • {{ date }}</div>
+        <h2>Manage Daily Edition</h2>
+        {% if edition %}
+            <p class="edition-meta">Status: <strong>{{ edition.status|capitalize }}</strong>{% if edition.published_at %} • Published {{ edition.published_at }}{% endif %}</p>
+        {% endif %}
+    </header>
+
+    {% if error %}
+        <div class="alert alert--error">{{ error }}</div>
+    {% endif %}
+
+    {% if message %}
+        <div class="alert alert--success">{{ message }}</div>
+    {% endif %}
+
     {% if links is defined and links|length > 0 %}
-        <ol class="list-links">
-            {% for link in links %}
-                <li class="list-links__item">
-                    <h3>{{ link.title }}</h3>
-                    {% if link.blurb %}
-                        <p>{{ link.blurb }}</p>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ol>
+        <form method="post" class="form">
+            <input type="hidden" name="action" value="reorder">
+            <div class="order-list">
+                {% for link in links %}
+                    <div class="order-row">
+                        <input type="number" name="positions[{{ link.id }}]" value="{{ link.position|default(loop.index) }}" min="1" class="input-order">
+                        <div class="order-row__body">
+                            <p class="order-title">{{ link.title }}</p>
+                            {% if link.blurb %}
+                                <p class="order-blurb">{{ link.blurb }}</p>
+                            {% endif %}
+                        </div>
+                        <a class="order-link" href="/admin/curate/{{ link.item_id }}">Edit</a>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Order</button>
+            </div>
+        </form>
+
+        <form method="post" class="form form-inline">
+            <input type="hidden" name="action" value="status">
+            {% if edition.status == 'published' %}
+                <input type="hidden" name="status" value="draft">
+                <button type="submit" class="btn btn-primary">Revert to Draft</button>
+            {% else %}
+                <input type="hidden" name="status" value="published">
+                <button type="submit" class="btn btn-primary">Publish Edition</button>
+            {% endif %}
+        </form>
     {% else %}
         <div class="empty-state">
             <p>No curated links assigned to this edition yet.</p>

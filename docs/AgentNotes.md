@@ -13,6 +13,7 @@
 - Split Daily Edition vs Live Stream: home now shows today's published edition (with date badge) while `/stream` lists the full published history.
 - Added tagging workflow: curate form accepts tags, tag pages (`/tags`, `/tags/{slug}`) render filtered streams, and links render tag pills.
 - Added public RSS feeds (`/rss/daily.xml`, `/rss/stream.xml`) with head/footer links for discovery.
+- Admin edition screen now supports manual reorder + publish/draft toggle.
 
 ## Next Recommended Steps
 

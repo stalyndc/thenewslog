@@ -140,6 +140,32 @@ SQL;
         return true;
     }
 
+    public function updateEditionPositions(int $editionId, array $positions): void
+    {
+        if (empty($positions)) {
+            return;
+        }
+
+        $this->connection->beginTransaction();
+
+        try {
+            $statement = $this->connection->prepare('UPDATE edition_curated_link SET position = :position WHERE edition_id = :edition_id AND curated_link_id = :link_id');
+
+            foreach ($positions as $linkId => $position) {
+                $statement->execute([
+                    'position' => max(1, (int) $position),
+                    'edition_id' => $editionId,
+                    'link_id' => (int) $linkId,
+                ]);
+            }
+
+            $this->connection->commit();
+        } catch (\Throwable $exception) {
+            $this->connection->rollBack();
+            throw $exception;
+        }
+    }
+
     public function update(int $id, array $attributes): bool
     {
         $sql = <<<'SQL'

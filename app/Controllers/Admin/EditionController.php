@@ -2,8 +2,10 @@
 
 namespace App\Controllers\Admin;
 
+use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
+use App\Repositories\EditionRepository;
 use App\Services\Auth;
 use Twig\Environment;
 
@@ -11,23 +13,65 @@ class EditionController extends AdminController
 {
     private CuratedLinkRepository $curatedLinks;
 
-    public function __construct(Environment $view, Auth $auth, CuratedLinkRepository $curatedLinks)
+    private EditionRepository $editions;
+
+    public function __construct(Environment $view, Auth $auth, CuratedLinkRepository $curatedLinks, EditionRepository $editions)
     {
         parent::__construct($view, $auth);
         $this->curatedLinks = $curatedLinks;
+        $this->editions = $editions;
     }
 
-    public function show(string $date): Response
+    public function show(Request $request, string $date): Response
     {
+        $edition = $this->editions->ensureForDate($date);
+
+        if ($request->method() === 'POST') {
+            $action = $request->input('action');
+
+            try {
+                if ($action === 'reorder') {
+                    $positions = $request->input('positions', []);
+                    if (is_array($positions)) {
+                        $this->curatedLinks->updateEditionPositions((int) $edition['id'], $positions);
+                    }
+
+                    return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=order');
+                }
+
+                if ($action === 'status') {
+                    $status = $request->input('status', 'draft');
+                    $this->editions->updateStatus((int) $edition['id'], $status === 'published' ? 'published' : 'draft');
+
+                    return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=' . ($status === 'published' ? 'published' : 'draft'));
+                }
+            } catch (\Throwable) {
+                return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=error');
+            }
+        }
+
         try {
-            $links = $this->curatedLinks->forEditionDate($date);
+            $links = $this->curatedLinks->forEditionDate($edition['edition_date']);
         } catch (\Throwable $exception) {
             $links = [];
         }
 
+        $flash = $request->query('flash');
+        $message = match ($flash) {
+            'order' => 'Edition order updated.',
+            'published' => 'Edition marked as published.',
+            'draft' => 'Edition reverted to draft.',
+            default => null,
+        };
+
+        $error = $flash === 'error' ? 'Unable to update edition. Please try again.' : null;
+
         return $this->render('admin/edition.twig', [
-            'date' => $date,
+            'date' => $edition['edition_date'],
+            'edition' => $edition,
             'links' => $links,
+            'message' => $error ? null : $message,
+            'error' => $error,
         ]);
     }
 }

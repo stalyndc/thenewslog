@@ -69,4 +69,28 @@ SQL;
 
         return $this->fetch($sql, ['curated_link_id' => $curatedLinkId]);
     }
+
+    public function updateStatus(int $editionId, string $status): void
+    {
+        $allowed = ['draft', 'scheduled', 'published'];
+
+        if (!in_array($status, $allowed, true)) {
+            throw new \InvalidArgumentException(sprintf('Invalid edition status "%s"', $status));
+        }
+
+        $publishedAt = null;
+
+        if ($status === 'published') {
+            $publishedAt = date('Y-m-d H:i:s');
+        }
+
+        $this->execute(
+            'UPDATE editions SET status = :status, published_at = :published_at, updated_at = CURRENT_TIMESTAMP WHERE id = :id',
+            [
+                'status' => $status,
+                'published_at' => $publishedAt,
+                'id' => $editionId,
+            ]
+        );
+    }
 }

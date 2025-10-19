@@ -110,12 +110,24 @@ SQL;
             }
         }
 
+        $uniqueNames = [];
+        $seen = [];
+
+        foreach ($normalizedNames as $name) {
+            $key = mb_strtolower($name);
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $uniqueNames[] = $name;
+        }
+
         $this->connection->beginTransaction();
 
         try {
             $desiredIds = [];
 
-            foreach ($normalizedNames as $name) {
+            foreach ($uniqueNames as $name) {
                 $tag = $this->ensure($name);
                 $desiredIds[] = (int) $tag['id'];
             }

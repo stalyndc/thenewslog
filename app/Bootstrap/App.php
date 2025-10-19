@@ -173,7 +173,7 @@ class App
         $this->router->get('/admin/inbox', 'App\Controllers\Admin\InboxController@index');
         $this->router->get('/admin/curate/{id}', 'App\Controllers\Admin\CurateController@show');
         $this->router->post('/admin/curate/{id}', 'App\Controllers\Admin\CurateController@store');
-        $this->router->get('/admin/edition/{date}', 'App\Controllers\Admin\EditionController@show');
+        $this->router->match(['GET', 'POST'], '/admin/edition/{date}', 'App\Controllers\Admin\EditionController@show');
         $this->router->get('/admin/feeds', 'App\Controllers\Admin\FeedController@index');
         $this->router->get('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
         $this->router->get('/stream', 'App\Controllers\StreamController@__invoke');
