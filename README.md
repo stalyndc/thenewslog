@@ -37,6 +37,16 @@ Initial scaffold generated from PRD and Agents guidelines.
 - Live Stream RSS: `/rss/stream.xml`
 - Both feeds include the latest 20–50 curated links with title, link, and blurb for syndication.
 
+## Deployment Notes (Future)
+
+- Plan: push this repo to GitHub, then deploy to Hostinger shared hosting.
+- Before deploying, run `composer install --no-dev` locally (or commit vendor/ if Hostinger lacks Composer).
+- Regenerate sitemap via `php scripts/generate_sitemap.php > public/sitemap.xml` so `/sitemap.xml` is fresh.
+- Update `.env` with Hostinger DB credentials and `BASE_URL` for the live domain.
+- Configure Hostinger cron: `*/30 * * * * php /home/USER/public_html/scripts/cron_fetch.php >> /home/USER/logs/fetch.log 2>&1`.
+- Consider setting up a GitHub Action to run `composer ci` on push before deploying.
+- Newsletter: plan to add an email subscribe form later (likely via MailerSend/Mailgun or exportable CSV service).
+
 ## Logs
 
 - Application logs write to `storage/logs/app.log` (created automatically on bootstrap).

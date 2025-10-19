@@ -9,9 +9,18 @@ class FeedRepository extends BaseRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function all(): array
+    public function all(int $page = 1, int $perPage = 25): array
     {
-        return $this->fetchAll('SELECT * FROM feeds ORDER BY title ASC');
+        $perPage = max(1, min(100, $perPage));
+        $page = max(1, $page);
+        $offset = ($page - 1) * $perPage;
+
+        $statement = $this->connection->prepare('SELECT * FROM feeds ORDER BY title ASC LIMIT :limit OFFSET :offset');
+        $statement->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll() ?: [];
     }
 
     /**
@@ -130,6 +139,13 @@ SQL;
     public function failingCount(): int
     {
         $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM feeds WHERE fail_count >= 3');
+
+        return (int) ($row['aggregate'] ?? 0);
+    }
+
+    public function countAll(): int
+    {
+        $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM feeds');
 
         return (int) ($row['aggregate'] ?? 0);
     }

@@ -20,14 +20,22 @@ class FeedController extends AdminController
 
     public function index(): Response
     {
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $perPage = 25;
+
         try {
-            $feeds = $this->feeds->all();
+            $feeds = $this->feeds->all($page, $perPage);
         } catch (\Throwable $exception) {
             $feeds = [];
         }
 
+        $total = $this->feeds->countAll();
+        $totalPages = max(1, (int) ceil(max(1, $total) / $perPage));
+
         return $this->render('admin/feeds.twig', $this->withAdminMetrics([
             'feeds' => $feeds,
+            'page' => $page,
+            'total_pages' => $totalPages,
         ]));
     }
 }

@@ -7,22 +7,30 @@ class ItemRepository extends BaseRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function inbox(int $limit = 25): array
+    public function inbox(int $limit = 25, int $page = 1, ?int $feedId = null): array
     {
         $limit = max(1, min(100, $limit));
+        $page = max(1, $page);
+        $offset = ($page - 1) * $limit;
         $sql = <<<'SQL'
 SELECT items.*, feeds.title AS feed_title
 FROM items
 JOIN feeds ON feeds.id = items.feed_id
 WHERE items.status = 'new'
 ORDER BY items.published_at IS NULL, items.published_at DESC, items.created_at DESC
-LIMIT %d
+LIMIT %d OFFSET %d
 SQL;
 
-        $sql = sprintf($sql, $limit);
+        $sql = sprintf($sql, $limit, $offset);
+
+        if ($feedId !== null) {
+            $sql = str_replace('WHERE items.status = \'new\'', 'WHERE items.status = \'new\' AND items.feed_id = :feed_id', $sql);
+            return $this->fetchAll($sql, ['feed_id' => $feedId]);
+        }
 
         return $this->fetchAll($sql);
     }
+
 
     public function find(int $id): ?array
     {
@@ -89,15 +97,24 @@ SQL;
         return $this->execute($sql, ['id' => $id]);
     }
 
+    public function countNew(?int $feedId = null): int
+    {
+        if ($feedId === null) {
+            return $this->countByStatus('new');
+        }
+
+        $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM items WHERE status = :status AND feed_id = :feed_id', [
+            'status' => 'new',
+            'feed_id' => $feedId,
+        ]);
+
+        return (int) ($row['aggregate'] ?? 0);
+    }
+
     public function countByStatus(string $status): int
     {
         $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM items WHERE status = :status', ['status' => $status]);
 
         return (int) ($row['aggregate'] ?? 0);
-    }
-
-    public function countNew(): int
-    {
-        return $this->countByStatus('new');
     }
 }

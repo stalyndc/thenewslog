@@ -12,19 +12,34 @@
                 <tr>
                     <th>Title</th>
                     <th>Feed URL</th>
+                    <th>Last Checked</th>
+                    <th>Fail Count</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody>
             {% for feed in feeds %}
-                <tr>
+                <tr class="{% if feed.fail_count >= 3 %}feed-row--warn{% endif %}">
                     <td>{{ feed.title }}</td>
                     <td><a href="{{ feed.feed_url }}" target="_blank" rel="noopener">{{ feed.feed_url }}</a></td>
+                    <td>{{ feed.last_checked_at ?: '–' }}</td>
+                    <td>{{ feed.fail_count }}</td>
                     <td>{{ feed.active ? 'Active' : 'Inactive' }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+        {% if total_pages is defined and total_pages > 1 %}
+            <nav class="pagination">
+                {% if page > 1 %}
+                    <a class="pagination__link" href="?page={{ page - 1 }}">Previous</a>
+                {% endif %}
+                <span class="pagination__status">Page {{ page }} of {{ total_pages }}</span>
+                {% if page < total_pages %}
+                    <a class="pagination__link" href="?page={{ page + 1 }}">Next</a>
+                {% endif %}
+            </nav>
+        {% endif %}
     {% else %}
         <div class="empty-state">
             <p>No feeds registered yet.</p>

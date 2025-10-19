@@ -52,7 +52,7 @@ abstract class AdminController extends BaseController
         return $context;
     }
 
-    private function formatRelative(string $timestamp): string
+    protected function formatRelative(string $timestamp): string
     {
         $time = strtotime($timestamp);
 

@@ -551,6 +551,10 @@ tbody tr:hover {
     background-color: rgba(0, 173, 181, 0.08);
 }
 
+.feed-row--warn {
+    border-left: 4px solid #ff9d76;
+}
+
 th,
 td {
     padding: 0.75rem 0.5rem;
@@ -629,4 +633,36 @@ th {
 .pagination__status {
     color: var(--color-muted);
     font-size: 0.9rem;
+}
+.inbox-filter {
+    margin-bottom: 1.25rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.inbox-filter label {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+}
+
+.table-badge {
+    display: inline-flex;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background-color: rgba(0, 173, 181, 0.15);
+    color: var(--color-accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.time-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--color-muted);
 }

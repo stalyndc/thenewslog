@@ -6,6 +6,16 @@
 <section class="card">
     <div class="badge">Editor Inbox</div>
     <h2>New Items</h2>
+    <form method="get" class="form-inline inbox-filter">
+        <label for="feed_id">Filter by Feed</label>
+        <select id="feed_id" name="feed_id" class="input-control">
+            <option value="">All feeds</option>
+            {% for feed in feeds %}
+                <option value="{{ feed.id }}" {% if selected_feed_id is not null and feed.id == selected_feed_id %}selected{% endif %}>{{ feed.title }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Apply</button>
+    </form>
     {% if items is defined and items|length > 0 %}
         <table>
             <thead>
@@ -19,12 +29,28 @@
             {% for item in items %}
                 <tr>
                     <td><a href="/admin/curate/{{ item.id }}">{{ item.title }}</a></td>
-                    <td>{{ item.feed_title }}</td>
-                    <td>{{ item.published_at ?: '—' }}</td>
+                    <td><span class="table-badge">{{ item.feed_title }}</span></td>
+                    <td>
+                        {{ item.published_at ?: '—' }}
+                        {% if item.published_relative %}
+                            <span class="time-badge">{{ item.published_relative }}</span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+        {% if total_pages is defined and total_pages > 1 %}
+            <nav class="pagination">
+                {% if page > 1 %}
+                    <a class="pagination__link" href="?page={{ page - 1 }}">Previous</a>
+                {% endif %}
+                <span class="pagination__status">Page {{ page }} of {{ total_pages }}</span>
+                {% if page < total_pages %}
+                    <a class="pagination__link" href="?page={{ page + 1 }}">Next</a>
+                {% endif %}
+            </nav>
+        {% endif %}
     {% else %}
         <div class="empty-state">
             <p>No new items waiting for review.</p>

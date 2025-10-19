@@ -17,6 +17,7 @@
 - Public edition archive: `/editions` (paginated list) and `/editions/{date}` (full edition view) reuse linking/tag display.
 - Sitemap generator (`scripts/generate_sitemap.php`) now outputs `/sitemap.xml` covering editions, tags, and key routes.
 - Admin header now surfaces inbox count + last fetch status when authenticated.
+- TODO (future): add email subscriber service integration once live (MailerSend/Mailgun or CSV export) to power footer subscribe form.
 
 ## Next Recommended Steps
 
