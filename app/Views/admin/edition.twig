@@ -23,10 +23,10 @@
     {% if links is defined and links|length > 0 %}
         <form method="post" class="form">
             <input type="hidden" name="action" value="reorder">
-            <div class="order-list">
+            <div class="order-list" data-reorder-list>
                 {% for link in links %}
-                    <div class="order-row">
-                        <input type="number" name="positions[{{ link.id }}]" value="{{ link.position|default(loop.index) }}" min="1" class="input-order">
+                    <div class="order-row" data-id="{{ link.id }}">
+                        <input type="number" name="positions[{{ link.id }}]" value="{{ link.position|default(loop.index) }}" min="1" class="input-order" data-order-input>
                         <div class="order-row__body">
                             <p class="order-title">{{ link.title }}</p>
                             {% if link.blurb %}

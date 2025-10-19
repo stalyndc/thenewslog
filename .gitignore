@@ -1,0 +1,8 @@
+node_modules/
+public/assets/app.js
+public/assets/app.js.map
+public/assets/app.css
+public/assets/app-*.js
+public/assets/app-*.js.map
+package-lock.json
+dist/

@@ -7,7 +7,7 @@
 {% block content %}
 <section class="card card--edition">
     <header class="card__header">
-        <div class="badge">Live Stream{% if last_updated %} • Updated {{ last_updated }}{% endif %}</div>
+        <div class="badge">Live Stream{% if last_updated %} • Updated <span data-time="{{ last_updated.iso }}">{{ last_updated.relative }}</span>{% endif %}</div>
         <h2>Latest Curated Links</h2>
     </header>
 

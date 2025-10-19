@@ -32,8 +32,8 @@
                     <td><span class="table-badge">{{ item.feed_title }}</span></td>
                     <td>
                         {{ item.published_at ?: '—' }}
-                        {% if item.published_relative %}
-                            <span class="time-badge">{{ item.published_relative }}</span>
+                        {% if item.published_relative and item.published_at %}
+                            <span class="time-badge" data-time="{{ item.published_at }}">{{ item.published_relative }}</span>
                         {% endif %}
                     </td>
                 </tr>

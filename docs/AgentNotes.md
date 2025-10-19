@@ -18,6 +18,7 @@
 - Sitemap generator (`scripts/generate_sitemap.php`) now outputs `/sitemap.xml` covering editions, tags, and key routes.
 - Admin header now surfaces inbox count + last fetch status when authenticated.
 - TODO (future): add email subscriber service integration once live (MailerSend/Mailgun or CSV export) to power footer subscribe form.
+- TypeScript build scaffold added (`resources/ts/`, Vite config); bundle served as `/assets/app.js` (sticky masthead, reorder helper, timeago updates).
 
 ## Next Recommended Steps
 

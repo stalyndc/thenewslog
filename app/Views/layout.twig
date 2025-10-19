@@ -14,7 +14,8 @@
 </head>
 <body>
 <div class="app-shell">
-    <header class="app-header">
+    <div class="masthead-sentinel"></div>
+    <header class="app-header masthead">
         <div class="app-header__inner">
             <div>
                 <p class="brand-title"><a href="/">The News Log</a></p>
@@ -58,5 +59,8 @@
         </div>
     </footer>
 </div>
+<script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
+<link rel="preload" href="/assets/app.js" as="script">
+<script defer src="/assets/app.js"></script>
 </body>
 </html>

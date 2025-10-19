@@ -46,7 +46,7 @@ class StreamController extends BaseController
     /**
      * @param array<int, array<string, mixed>> $items
      */
-    private function deriveLastUpdated(array $items): ?string
+    private function deriveLastUpdated(array $items): ?array
     {
         $timestamps = [];
 
@@ -66,7 +66,13 @@ class StreamController extends BaseController
 
         $latest = max($timestamps);
         $diffMinutes = max(0, (int) floor((time() - $latest) / 60));
+        $iso = gmdate('c', $latest);
 
-        return $diffMinutes === 0 ? 'Just now' : sprintf('%d min ago', $diffMinutes);
+        $relative = $diffMinutes === 0 ? 'Just now' : sprintf('%d min ago', $diffMinutes);
+
+        return [
+            'relative' => $relative,
+            'iso' => $iso,
+        ];
     }
 }

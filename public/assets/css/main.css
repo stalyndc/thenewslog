@@ -58,6 +58,13 @@ a:hover {
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(0, 173, 181, 0.2);
     padding: 1.5rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.masthead.is-stuck {
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
 }
 
 .app-header__inner {
@@ -665,4 +672,8 @@ th {
     margin-left: 0.5rem;
     font-size: 0.75rem;
     color: var(--color-muted);
+}
+.masthead-sentinel {
+    position: relative;
+    height: 1px;
 }

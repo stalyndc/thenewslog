@@ -37,6 +37,15 @@ Initial scaffold generated from PRD and Agents guidelines.
 - Live Stream RSS: `/rss/stream.xml`
 - Both feeds include the latest 20–50 curated links with title, link, and blurb for syndication.
 
+## Frontend Assets
+
+- TypeScript sources live in `resources/ts/`. Build with:
+  ```bash
+  npm install
+  npm run build
+  ```
+- Built assets land in `public/assets/app.js`; include in deploy uploads alongside PHP files.
+
 ## Deployment Notes (Future)
 
 - Plan: push this repo to GitHub, then deploy to Hostinger shared hosting.
