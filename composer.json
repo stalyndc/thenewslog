@@ -1,0 +1,11 @@
+{
+    "name": "thenewslog/thenewslog",
+    "description": "Scaffold for TheNewsLog.org",
+    "type": "project",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

@@ -1,0 +1,1 @@
+-- Placeholder for initial database migration schema.
