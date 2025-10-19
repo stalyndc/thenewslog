@@ -6,6 +6,7 @@ use App\Http\Request;
 use App\Repositories\CuratedLinkRepository;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
+use App\Services\Auth;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Dotenv\Dotenv;
@@ -84,6 +85,7 @@ class App
             };
         });
 
+        $this->container->singleton(Auth::class, static fn (): Auth => new Auth());
         $this->container->singleton(FeedRepository::class, static fn (Container $container): FeedRepository => new FeedRepository($container->get(PDO::class)));
         $this->container->singleton(ItemRepository::class, static fn (Container $container): ItemRepository => new ItemRepository($container->get(PDO::class)));
         $this->container->singleton(CuratedLinkRepository::class, static fn (Container $container): CuratedLinkRepository => new CuratedLinkRepository($container->get(PDO::class)));
@@ -140,12 +142,14 @@ class App
     {
         $this->router->get('/', 'App\Controllers\HomeController@__invoke');
 
+        $this->router->match(['GET', 'POST'], '/admin', 'App\Controllers\Admin\AuthController@login');
         $this->router->match(['GET', 'POST'], '/admin/login', 'App\Controllers\Admin\AuthController@login');
         $this->router->get('/admin/inbox', 'App\Controllers\Admin\InboxController@index');
         $this->router->get('/admin/curate/{id}', 'App\Controllers\Admin\CurateController@show');
         $this->router->post('/admin/curate/{id}', 'App\Controllers\Admin\CurateController@store');
         $this->router->get('/admin/edition/{date}', 'App\Controllers\Admin\EditionController@show');
         $this->router->get('/admin/feeds', 'App\Controllers\Admin\FeedController@index');
+        $this->router->get('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
         $this->router->setNotFoundHandler('App\Controllers\ErrorController@notFound');
     }
 }

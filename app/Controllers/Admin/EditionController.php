@@ -2,18 +2,18 @@
 
 namespace App\Controllers\Admin;
 
-use App\Controllers\BaseController;
 use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
+use App\Services\Auth;
 use Twig\Environment;
 
-class EditionController extends BaseController
+class EditionController extends AdminController
 {
     private CuratedLinkRepository $curatedLinks;
 
-    public function __construct(Environment $view, CuratedLinkRepository $curatedLinks)
+    public function __construct(Environment $view, Auth $auth, CuratedLinkRepository $curatedLinks)
     {
-        parent::__construct($view);
+        parent::__construct($view, $auth);
         $this->curatedLinks = $curatedLinks;
     }
 

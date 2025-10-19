@@ -6,6 +6,14 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Bootstrap\App;
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'cookie_samesite' => 'Lax',
+    ]);
+}
+
 try {
     $app = new App();
     $app->handle();

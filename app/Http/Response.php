@@ -65,4 +65,12 @@ class Response
 
         return $response;
     }
+
+    public static function redirect(string $url, int $status = 302): self
+    {
+        $response = new self('', $status);
+        $response->setHeader('Location', $url);
+
+        return $response;
+    }
 }

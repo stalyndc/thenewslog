@@ -2,18 +2,18 @@
 
 namespace App\Controllers\Admin;
 
-use App\Controllers\BaseController;
 use App\Http\Response;
 use App\Repositories\ItemRepository;
+use App\Services\Auth;
 use Twig\Environment;
 
-class InboxController extends BaseController
+class InboxController extends AdminController
 {
     private ItemRepository $items;
 
-    public function __construct(Environment $view, ItemRepository $items)
+    public function __construct(Environment $view, Auth $auth, ItemRepository $items)
     {
-        parent::__construct($view);
+        parent::__construct($view, $auth);
         $this->items = $items;
     }
 
