@@ -15,6 +15,7 @@
 - Added public RSS feeds (`/rss/daily.xml`, `/rss/stream.xml`) with head/footer links for discovery.
 - Admin edition screen now supports manual reorder + publish/draft toggle.
 - Public edition archive: `/editions` (paginated list) and `/editions/{date}` (full edition view) reuse linking/tag display.
+- Sitemap generator (`scripts/generate_sitemap.php`) now outputs `/sitemap.xml` covering editions, tags, and key routes.
 
 ## Next Recommended Steps
 

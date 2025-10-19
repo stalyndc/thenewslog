@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>http://localhost/</loc>
+  </url>
+  <url>
+    <loc>http://localhost/stream</loc>
+  </url>
+  <url>
+    <loc>http://localhost/editions</loc>
+  </url>
+  <url>
+    <loc>http://localhost/tags</loc>
+  </url>
+  <url>
+    <loc>http://localhost/rss/daily.xml</loc>
+  </url>
+  <url>
+    <loc>http://localhost/rss/stream.xml</loc>
+  </url>
+  <url>
+    <loc>http://localhost/editions/2025-10-19</loc>
+    <lastmod>2025-10-19T16:52:07+00:00</lastmod>
+  </url>
+  <url>
+    <loc>http://localhost/tags/ai</loc>
+  </url>
+  <url>
+    <loc>http://localhost/tags/news</loc>
+  </url>
+  <url>
+    <loc>http://localhost/tags/sony</loc>
+  </url>
+  <url>
+    <loc>http://localhost/tags/x</loc>
+  </url>
+</urlset>

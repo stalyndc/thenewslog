@@ -183,6 +183,7 @@ class App
         $this->router->get('/editions/{date}', 'App\Controllers\EditionArchiveController@show');
         $this->router->get('/rss/daily.xml', 'App\Controllers\RssController@daily');
         $this->router->get('/rss/stream.xml', 'App\Controllers\RssController@stream');
+        $this->router->get('/sitemap.xml', 'App\Controllers\SitemapController@__invoke');
         $this->router->setNotFoundHandler('App\Controllers\ErrorController@notFound');
     }
 }

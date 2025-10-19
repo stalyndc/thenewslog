@@ -26,6 +26,11 @@ Initial scaffold generated from PRD and Agents guidelines.
 - Trigger fetch manually: `php scripts/cron_fetch.php`.
 - Production cron suggestion: `*/30 * * * * php /path/to/scripts/cron_fetch.php >> /path/to/storage/logs/fetch.log 2>&1`.
 
+## Sitemap
+
+- Generate sitemap: `php scripts/generate_sitemap.php > public/sitemap.xml` (run after publishing new editions).
+- Served at `/sitemap.xml`; add to search console or robots.txt as needed.
+
 ## RSSFeeds
 
 - Daily Edition RSS: `/rss/daily.xml`
