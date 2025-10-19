@@ -112,12 +112,15 @@ class App
             throw new \RuntimeException('Database connection failed: PDO MySQL driver is not installed. Enable the pdo_mysql extension.');
         }
 
-        $dsn = sprintf(
-            'mysql:host=%s;dbname=%s;charset=%s',
-            $config['host'] ?? '127.0.0.1',
-            $config['database'] ?? 'thenewslog',
-            $config['charset'] ?? 'utf8mb4'
-        );
+        $host = $config['host'] ?? '127.0.0.1';
+        $port = $config['port'] ?? '3306';
+        $charset = $config['charset'] ?? 'utf8mb4';
+        $database = $config['database'] ?? 'thenewslog';
+        $socket = $config['socket'] ?? null;
+
+        $dsn = $socket
+            ? sprintf('mysql:unix_socket=%s;dbname=%s;charset=%s', $socket, $database, $charset)
+            : sprintf('mysql:host=%s;port=%s;dbname=%s;charset=%s', $host, $port, $database, $charset);
 
         $username = $config['user'] ?? 'root';
         $password = $config['password'] ?? '';
