@@ -8,13 +8,16 @@
 - Introduced PDO bootstrap in `app/Bootstrap/App.php` and fleshed out repositories (`app/Repositories/*`) for feeds, items, and curated links.
 - Controllers now pull real data where available (home stream, admin inbox/feeds/edition/curate) with Twig templates updated to render result sets gracefully when empty.
 - Added session-based admin auth: `/admin` login, `/admin/logout`, protected admin controllers via `AdminController` base, and styled login form.
+- Completed curation workflow: POST `/admin/curate/:id` saves curated links, auto-creates editions, and provides UI feedback.
+- Implemented feed ingestion service using Feed-io + Guzzle, seed helper for default feeds, and cron script integration.
+- Split Daily Edition vs Live Stream: home now shows today's published edition (with date badge) while `/stream` lists the full published history.
 
 ## Next Recommended Steps
 
-1. Build the curation form flow (persist curated links, attach to editions, mark items curated).
-2. Wire ingest service (Guzzle + Feed-io) to populate `items` through repositories.
-3. Add read endpoints (stream RSS, sitemap) once edition publishing is solid.
-4. Consider adding PHPStan/PHPCS or feature tests atop the new Composer `test` script.
+1. Flesh out feed management UI (CRUD, fail counts) and ingestion housekeeping (retry/backoff, logging dashboard).
+2. Implement tag pages and public RSS endpoints sourced from curated links.
+3. Build edition ordering tools (drag/drop or manual weight) and publish toggles.
+4. Add automated tests/static analysis (PHPStan/PHPCS) for repositories and controllers.
 
 ## Environment Notes
 

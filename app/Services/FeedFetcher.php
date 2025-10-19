@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Helpers\Url;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use FeedIo\FeedIo;
+use FeedIo\Feed\ItemInterface;
 use FeedIo\Reader\ReadErrorException;
-use FeedIo\Reader\Result; 
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
+use FeedIo\Reader\Result;
 use Psr\Log\LoggerInterface;
 
 class FeedFetcher
@@ -36,9 +37,7 @@ class FeedFetcher
 
     public function fetch(): void
     {
-        $feeds = $this->feeds->active();
-
-        foreach ($feeds as $feed) {
+        foreach ($this->feeds->active() as $feed) {
             $this->fetchFeed($feed);
         }
     }
@@ -50,14 +49,21 @@ class FeedFetcher
     {
         try {
             $result = $this->feedIo->read($feed['feed_url']);
-            $this->processFeedResult($feed, $result);
+            $inserted = $this->processFeedResult($feed, $result);
             $this->feeds->touchChecked((int) $feed['id']);
+
+            $this->logger->info('Feed processed', [
+                'feed' => $feed['feed_url'],
+                'inserted' => $inserted,
+            ]);
         } catch (ReadErrorException $exception) {
+            $this->feeds->incrementFailCount((int) $feed['id']);
             $this->logger->error('Failed to read feed', [
                 'feed' => $feed['feed_url'],
                 'error' => $exception->getMessage(),
             ]);
         } catch (\Throwable $exception) {
+            $this->feeds->incrementFailCount((int) $feed['id']);
             $this->logger->error('Unexpected error while fetching feed', [
                 'feed' => $feed['feed_url'],
                 'error' => $exception->getMessage(),
@@ -65,10 +71,12 @@ class FeedFetcher
         }
     }
 
-    private function processFeedResult(array $feed, Result $result): void
+    private function processFeedResult(array $feed, Result $result): int
     {
         $resource = $result->getFeed();
+        $inserted = 0;
 
+        /** @var ItemInterface $item */
         foreach ($resource as $item) {
             $link = $item->getLink();
 
@@ -83,36 +91,23 @@ class FeedFetcher
                 continue;
             }
 
-            $publishedAt = $item->getLastModified() ?: $item->getLastModifiedSince();
+            $publishedAt = $item->getLastModified() ?: $item->getPublishedDate();
 
             $this->items->create([
-                'feed_id' => $feed['id'],
+                'feed_id' => (int) $feed['id'],
                 'title' => $item->getTitle() ?: $link,
                 'url' => $normalizedUrl,
                 'url_hash' => $hash,
-                'summary_raw' => $item->getDescription(),
+                'summary_raw' => $item->getContent() ?: null,
                 'author' => $item->getAuthor()?->getName(),
                 'published_at' => $publishedAt ? $publishedAt->format('Y-m-d H:i:s') : null,
                 'source_name' => $resource->getTitle() ?: $feed['title'],
                 'status' => 'new',
             ]);
+
+            $inserted++;
         }
-    }
 
-    public static function buildFeedIo(ClientInterface $client = null): FeedIo
-    {
-        $client ??= new Client([
-            'timeout' => 10,
-            'allow_redirects' => true,
-        ]);
-
-        $logger = new \Psr\Log\NullLogger();
-        $httpClient = new \FeedIo\Adapter\Guzzle\Client($client);
-        $adapter = new \FeedIo\Adapter\Guzzle\Client($client);
-
-        $feedIo = new FeedIo($adapter, $logger);
-        $feedIo->getPsr18Client()->setClient($httpClient);
-
-        return $feedIo;
+        return $inserted;
     }
 }

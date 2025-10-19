@@ -104,13 +104,22 @@ a:hover {
     font-weight: 500;
     padding: 0.35rem 0.65rem;
     border-radius: 999px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .app-nav a:hover,
 .app-nav a.is-active {
     color: var(--color-accent);
     background-color: rgba(0, 173, 181, 0.18);
+}
+
+.app-nav a.is-active {
+    box-shadow: 0 0 14px rgba(0, 173, 181, 0.25);
+    color: #ffffff;
+}
+
+.app-nav a:not(.is-active):hover {
+    text-decoration: underline;
 }
 
 .app-main {
@@ -129,8 +138,19 @@ a:hover {
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-elevated);
-    padding: 1.75rem 2rem;
-    margin-bottom: 1.75rem;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.card.card--edition {
+    margin-top: 1.25rem;
+}
+
+.card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
 }
 
 .card h2 {
@@ -147,7 +167,7 @@ a:hover {
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .list-links__item h3 {
@@ -157,9 +177,51 @@ a:hover {
     color: var(--color-text);
 }
 
+.list-links__item {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(238, 238, 238, 0.06);
+}
+
+.list-links__item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
 .list-links__item p {
     margin: 0;
     color: var(--color-muted);
+}
+
+.list-links__title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.link-title {
+    color: var(--color-text);
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-decoration: none;
+    flex: 1;
+    transition: color 0.2s ease;
+}
+
+.link-title:hover,
+.link-title:focus {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+.link-source {
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    transition: color 0.2s ease;
+}
+
+.link-source:hover,
+.link-source:focus {
+    color: #65d6ce;
 }
 
 .curate-item,
@@ -186,6 +248,11 @@ a:hover {
     color: var(--color-accent);
     letter-spacing: 0.06em;
     text-transform: uppercase;
+}
+
+.badge--muted {
+    background-color: rgba(238, 238, 238, 0.06);
+    color: var(--color-text);
 }
 
 .empty-state {
@@ -356,4 +423,21 @@ th {
     .app-header__inner {
         align-items: flex-start;
     }
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.pagination__link {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.pagination__status {
+    color: var(--color-muted);
+    font-size: 0.9rem;
 }

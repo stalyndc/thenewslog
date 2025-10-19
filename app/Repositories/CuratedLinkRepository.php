@@ -29,6 +29,9 @@ SQL;
     /**
      * @return array<int, array<string, mixed>>
      */
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function forEditionDate(string $date): array
     {
         $sql = <<<'SQL'
@@ -51,6 +54,44 @@ SQL;
     public function findByItem(int $itemId): ?array
     {
         return $this->fetch('SELECT * FROM curated_links WHERE item_id = :item_id', ['item_id' => $itemId]);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function publishedForEditionDate(string $date, int $limit = 20): array
+    {
+        $sql = <<<'SQL'
+SELECT cl.*, e.edition_date
+FROM editions e
+JOIN edition_curated_link ecl ON ecl.edition_id = e.id
+JOIN curated_links cl ON cl.id = ecl.curated_link_id
+WHERE e.edition_date = :edition_date
+  AND cl.published_at IS NOT NULL
+ORDER BY ecl.position ASC, cl.published_at DESC
+LIMIT :limit
+SQL;
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(':edition_date', $date);
+        $statement->bindValue(':limit', max(1, min(100, $limit)), \PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll() ?: [];
+    }
+
+    public function latestPublishedEdition(): ?array
+    {
+        $sql = <<<'SQL'
+SELECT e.*
+FROM editions e
+JOIN edition_curated_link ecl ON ecl.edition_id = e.id
+JOIN curated_links cl ON cl.id = ecl.curated_link_id AND cl.published_at IS NOT NULL
+ORDER BY e.edition_date DESC
+LIMIT 1
+SQL;
+
+        return $this->fetch($sql);
     }
 
     public function create(array $attributes): int
@@ -134,5 +175,28 @@ SQL;
         );
 
         return (int) ($result['next'] ?? 1);
+    }
+
+    public function stream(int $page = 1, int $perPage = 20): array
+    {
+        $perPage = max(1, min(100, $perPage));
+        $page = max(1, $page);
+        $offset = ($page - 1) * $perPage;
+
+        $sql = 'SELECT cl.*, e.edition_date FROM curated_links cl LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id LEFT JOIN editions e ON e.id = ecl.edition_id ORDER BY cl.published_at DESC, cl.created_at DESC LIMIT :limit OFFSET :offset';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll() ?: [];
+    }
+
+    public function countStream(): int
+    {
+        $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM curated_links');
+
+        return (int) ($row['aggregate'] ?? 0);
     }
 }

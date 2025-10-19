@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
 use Twig\Environment;
@@ -16,16 +17,43 @@ class HomeController extends BaseController
         $this->curatedLinks = $curatedLinks;
     }
 
-    public function __invoke(): Response
+    public function __invoke(Request $request): Response
     {
-        try {
-            $links = $this->curatedLinks->latestPublished(10);
-        } catch (\Throwable $exception) {
-            $links = [];
+        $dateParam = $request->query('date');
+        $requestedDate = $this->parseEditionDate($dateParam);
+
+        $editionDate = $requestedDate ?? date('Y-m-d');
+        $links = $this->curatedLinks->publishedForEditionDate($editionDate, 12);
+
+        if (empty($links)) {
+            $latestEdition = $this->curatedLinks->latestPublishedEdition();
+            if ($latestEdition !== null) {
+                $editionDate = $latestEdition['edition_date'];
+                $links = $this->curatedLinks->publishedForEditionDate($editionDate, 12);
+            }
         }
+
+        $editionDisplay = $editionDate ? date('D, M j, Y', strtotime($editionDate)) : null;
 
         return $this->render('home.twig', [
             'links' => $links,
+            'edition_date' => $editionDate,
+            'edition_display' => $editionDisplay,
         ]);
+    }
+
+    private function parseEditionDate(?string $value): ?string
+    {
+        if ($value === null || trim($value) === '') {
+            return null;
+        }
+
+        $timestamp = strtotime($value);
+
+        if ($timestamp === false) {
+            return null;
+        }
+
+        return date('Y-m-d', $timestamp);
     }
 }

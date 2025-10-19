@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Helpers\Url;
+
 class FeedRepository extends BaseRepository
 {
     /**
@@ -23,6 +25,11 @@ class FeedRepository extends BaseRepository
     public function find(int $id): ?array
     {
         return $this->fetch('SELECT * FROM feeds WHERE id = :id', ['id' => $id]);
+    }
+
+    public function findByFeedUrl(string $feedUrl): ?array
+    {
+        return $this->fetch('SELECT * FROM feeds WHERE feed_url = :feed_url', ['feed_url' => $feedUrl]);
     }
 
     public function create(array $attributes): int
@@ -61,12 +68,55 @@ SQL;
         ]);
     }
 
+    public function ensure(array $attributes): array
+    {
+        $feedUrl = Url::normalize($attributes['feed_url'] ?? '');
+        $existing = $this->findByFeedUrl($feedUrl);
+
+        $payload = [
+            'title' => $attributes['title'] ?? $feedUrl,
+            'site_url' => $attributes['site_url'] ?? $this->inferSiteUrl($feedUrl),
+            'feed_url' => $feedUrl,
+            'active' => (int) ($attributes['active'] ?? 1),
+        ];
+
+        if ($existing !== null) {
+            $this->update((int) $existing['id'], $payload);
+
+            return $this->find((int) $existing['id']) ?? $payload;
+        }
+
+        $id = $this->create($payload);
+
+        return $this->find($id) ?? $payload;
+    }
+
     public function touchChecked(int $id): bool
     {
-        $sql = $this->connection->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'
-            ? 'UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP WHERE id = :id'
-            : 'UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP WHERE id = :id';
+        return $this->execute('UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP, fail_count = 0 WHERE id = :id', ['id' => $id]);
+    }
 
-        return $this->execute($sql, ['id' => $id]);
+    public function incrementFailCount(int $id): void
+    {
+        $this->execute('UPDATE feeds SET fail_count = fail_count + 1 WHERE id = :id', ['id' => $id]);
+    }
+
+    public function resetFailCount(int $id): void
+    {
+        $this->execute('UPDATE feeds SET fail_count = 0 WHERE id = :id', ['id' => $id]);
+    }
+
+    private function inferSiteUrl(string $feedUrl): string
+    {
+        $parts = parse_url($feedUrl);
+
+        if ($parts === false || empty($parts['host'])) {
+            return $feedUrl;
+        }
+
+        $scheme = $parts['scheme'] ?? 'https';
+        $host = $parts['host'];
+
+        return sprintf('%s://%s', $scheme, $host);
     }
 }

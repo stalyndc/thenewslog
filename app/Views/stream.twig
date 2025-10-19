@@ -1,0 +1,45 @@
+{% extends 'layout.twig' %}
+
+{% set current_nav = 'stream' %}
+
+{% block title %}Live Stream — The News Log{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="badge">Live Stream</div>
+    <h2>Latest Curated Links</h2>
+
+    {% if items %}
+        <ul class="list-links">
+            {% for link in items %}
+                <li class="list-links__item">
+                    <h3>{{ link.title }}</h3>
+                    {% if link.source_name %}
+                        <span class="badge">{{ link.source_name }}</span>
+                    {% endif %}
+                    {% if link.blurb %}
+                        <p>{{ link.blurb }}</p>
+                    {% endif %}
+                    <p><a href="{{ link.source_url ?? link.url }}" target="_blank" rel="noopener">Read source ↗</a></p>
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% if total_pages > 1 %}
+            <nav class="pagination">
+                {% if page > 1 %}
+                    <a class="pagination__link" href="?page={{ page - 1 }}">Previous</a>
+                {% endif %}
+                <span class="pagination__status">Page {{ page }} of {{ total_pages }}</span>
+                {% if page < total_pages %}
+                    <a class="pagination__link" href="?page={{ page + 1 }}">Next</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <p>No curated links yet. Check back soon.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

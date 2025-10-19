@@ -9,6 +9,7 @@ use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Auth;
 use App\Services\Curator;
+use App\Services\FeedFetcher;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Dotenv\Dotenv;
@@ -16,6 +17,8 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use PDO;
 use PDOException;
+use FeedIo\Factory as FeedIoFactory;
+use FeedIo\FeedIo;
 
 class App
 {
@@ -44,6 +47,11 @@ class App
         $response = $this->router->dispatch($request->method(), $request->path());
 
         $response->send();
+    }
+
+    public function container(): Container
+    {
+        return $this->container;
     }
 
     private function bootstrapEnvironment(): void
@@ -96,6 +104,13 @@ class App
             $container->get(ItemRepository::class),
             $container->get(CuratedLinkRepository::class),
             $container->get(EditionRepository::class)
+        ));
+        $this->container->singleton(FeedIo::class, static fn (): FeedIo => FeedIoFactory::create()->getFeedIo());
+        $this->container->singleton(FeedFetcher::class, static fn (Container $container): FeedFetcher => new FeedFetcher(
+            $container->get(FeedRepository::class),
+            $container->get(ItemRepository::class),
+            $container->get(FeedIo::class),
+            $container->get(Logger::class)
         ));
 
         $logPath = dirname(__DIR__, 2) . '/storage/logs/app.log';
@@ -158,6 +173,7 @@ class App
         $this->router->get('/admin/edition/{date}', 'App\Controllers\Admin\EditionController@show');
         $this->router->get('/admin/feeds', 'App\Controllers\Admin\FeedController@index');
         $this->router->get('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
+        $this->router->get('/stream', 'App\Controllers\StreamController@__invoke');
         $this->router->setNotFoundHandler('App\Controllers\ErrorController@notFound');
     }
 }

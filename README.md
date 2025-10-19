@@ -11,7 +11,7 @@ Initial scaffold generated from PRD and Agents guidelines.
 ## Local Development
 
 - Run the built-in PHP server: `php -S 127.0.0.1:8000 -t public`.
-- Visit `http://127.0.0.1:8000/` for the reader view or `/admin/login` for the admin placeholder.
+- Visit `http://127.0.0.1:8000/` for the reader view (Daily Edition) or `/stream` for the live stream; `/admin/login` for the admin portal.
 - Authenticated admin routes are under `/admin/*`; log in via `/admin` with the credentials configured in `.env`.
 
 ## Admin Workflow
@@ -19,6 +19,12 @@ Initial scaffold generated from PRD and Agents guidelines.
 - Inbox: `/admin/inbox` lists new items pulled from feeds (once ingestion runs).
 - Curate: use `/admin/curate/:id` to craft a title/blurb, pick an edition date, and optionally publish/pin the link. Saving auto-creates the edition if needed and marks the item curated.
 - Editions: review assembled sets at `/admin/edition/:date` (currently read-only until ordering is implemented).
+
+## Feed Ingestion
+
+- Seed default feeds (optional): `php scripts/seed_feeds.php` (reads `config/feeds.seed.php`).
+- Trigger fetch manually: `php scripts/cron_fetch.php`.
+- Production cron suggestion: `*/30 * * * * php /path/to/scripts/cron_fetch.php >> /path/to/storage/logs/fetch.log 2>&1`.
 
 ## Logs
 
