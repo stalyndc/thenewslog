@@ -6,6 +6,15 @@
 <section class="card">
     <div class="badge">Curate</div>
     <h2>Curate Item</h2>
+
+    {% if error %}
+        <div class="alert alert--error">{{ error }}</div>
+    {% endif %}
+
+    {% if message %}
+        <div class="alert alert--success">{{ message }}</div>
+    {% endif %}
+
     {% if item %}
         <article class="curate-item">
             <h3>{{ item.title }}</h3>
@@ -16,6 +25,7 @@
             {% if item.summary_raw %}
                 <p>{{ item.summary_raw }}</p>
             {% endif %}
+            <p><a href="{{ item.url }}" target="_blank" rel="noopener">Open original link ↗</a></p>
         </article>
 
         {% if curated %}
@@ -23,17 +33,46 @@
                 <h3>Existing Curated Entry</h3>
                 <p><strong>Title:</strong> {{ curated.title }}</p>
                 <p><strong>Blurb:</strong> {{ curated.blurb }}</p>
+                {% if edition %}
+                    <p><strong>Edition:</strong> {{ edition.edition_date }} ({{ edition.status|capitalize }})</p>
+                {% endif %}
             </section>
         {% endif %}
+
+        <form method="post" class="form">
+            <div class="form-group">
+                <label for="title">Curated Title</label>
+                <input id="title" name="title" type="text" class="input-control" value="{{ form.title|default('') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="blurb">One-line Blurb</label>
+                <textarea id="blurb" name="blurb" class="input-control" rows="3" required>{{ form.blurb|default('') }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="edition_date">Edition Date</label>
+                <input id="edition_date" name="edition_date" type="date" class="input-control" value="{{ form.edition_date|default('') }}" required>
+            </div>
+
+            <div class="form-group form-group--inline">
+                <label class="checkbox">
+                    <input type="checkbox" name="publish_now" value="1" {% if form.publish_now %}checked{% endif %}>
+                    <span>Publish immediately</span>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" name="is_pinned" value="1" {% if form.is_pinned %}checked{% endif %}>
+                    <span>Pin this link</span>
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Curated Link</button>
+            </div>
+        </form>
     {% else %}
         <div class="empty-state">
             <p>Item not found.</p>
-        </div>
-    {% endif %}
-
-    {% if message %}
-        <div class="empty-state">
-            <p>{{ message }}</p>
         </div>
     {% endif %}
 </section>

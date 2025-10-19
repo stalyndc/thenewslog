@@ -89,4 +89,50 @@ SQL;
             'position' => $position,
         ]);
     }
+
+    public function detachFromEditions(int $curatedLinkId): bool
+    {
+        $sql = 'DELETE FROM edition_curated_link WHERE curated_link_id = :curated_link_id';
+
+        $this->execute($sql, ['curated_link_id' => $curatedLinkId]);
+
+        return true;
+    }
+
+    public function update(int $id, array $attributes): bool
+    {
+        $sql = <<<'SQL'
+UPDATE curated_links
+SET title = :title,
+    blurb = :blurb,
+    source_name = :source_name,
+    source_url = :source_url,
+    is_pinned = :is_pinned,
+    curator_notes = :curator_notes,
+    published_at = :published_at,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = :id
+SQL;
+
+        return $this->execute($sql, [
+            'id' => $id,
+            'title' => $attributes['title'] ?? '',
+            'blurb' => $attributes['blurb'] ?? '',
+            'source_name' => $attributes['source_name'] ?? null,
+            'source_url' => $attributes['source_url'] ?? null,
+            'is_pinned' => (int) ($attributes['is_pinned'] ?? 0),
+            'curator_notes' => $attributes['curator_notes'] ?? null,
+            'published_at' => $attributes['published_at'] ?? null,
+        ]);
+    }
+
+    public function nextPositionForEdition(int $editionId): int
+    {
+        $result = $this->fetch(
+            'SELECT COALESCE(MAX(position) + 1, 1) AS next FROM edition_curated_link WHERE edition_id = :edition_id',
+            ['edition_id' => $editionId]
+        );
+
+        return (int) ($result['next'] ?? 1);
+    }
 }

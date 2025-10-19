@@ -4,9 +4,11 @@ namespace App\Bootstrap;
 
 use App\Http\Request;
 use App\Repositories\CuratedLinkRepository;
+use App\Repositories\EditionRepository;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Auth;
+use App\Services\Curator;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Dotenv\Dotenv;
@@ -89,6 +91,12 @@ class App
         $this->container->singleton(FeedRepository::class, static fn (Container $container): FeedRepository => new FeedRepository($container->get(PDO::class)));
         $this->container->singleton(ItemRepository::class, static fn (Container $container): ItemRepository => new ItemRepository($container->get(PDO::class)));
         $this->container->singleton(CuratedLinkRepository::class, static fn (Container $container): CuratedLinkRepository => new CuratedLinkRepository($container->get(PDO::class)));
+        $this->container->singleton(EditionRepository::class, static fn (Container $container): EditionRepository => new EditionRepository($container->get(PDO::class)));
+        $this->container->singleton(Curator::class, static fn (Container $container): Curator => new Curator(
+            $container->get(ItemRepository::class),
+            $container->get(CuratedLinkRepository::class),
+            $container->get(EditionRepository::class)
+        ));
 
         $logPath = dirname(__DIR__, 2) . '/storage/logs/app.log';
         $logDirectory = dirname($logPath);

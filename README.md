@@ -14,6 +14,12 @@ Initial scaffold generated from PRD and Agents guidelines.
 - Visit `http://127.0.0.1:8000/` for the reader view or `/admin/login` for the admin placeholder.
 - Authenticated admin routes are under `/admin/*`; log in via `/admin` with the credentials configured in `.env`.
 
+## Admin Workflow
+
+- Inbox: `/admin/inbox` lists new items pulled from feeds (once ingestion runs).
+- Curate: use `/admin/curate/:id` to craft a title/blurb, pick an edition date, and optionally publish/pin the link. Saving auto-creates the edition if needed and marks the item curated.
+- Editions: review assembled sets at `/admin/edition/:date` (currently read-only until ordering is implemented).
+
 ## Logs
 
 - Application logs write to `storage/logs/app.log` (created automatically on bootstrap).

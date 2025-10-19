@@ -8,6 +8,7 @@
     --color-muted: rgba(238, 238, 238, 0.65);
     --color-accent: #00adb5;
     --color-border: rgba(238, 238, 238, 0.1);
+    --color-error: #ff6b6b;
     --max-width: 960px;
     --radius-md: 14px;
     --shadow-elevated: 0 18px 40px rgba(12, 16, 23, 0.4);
@@ -205,6 +206,12 @@ a:hover {
     gap: 0.45rem;
 }
 
+.form-group--inline {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
 .form-group label {
     font-size: 0.9rem;
     font-weight: 600;
@@ -256,6 +263,40 @@ a:hover {
 .btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 16px 30px rgba(0, 173, 181, 0.4);
+}
+
+.checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+}
+
+.checkbox input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-accent);
+}
+
+.alert {
+    padding: 0.9rem 1.1rem;
+    border-radius: 12px;
+    margin-bottom: 1.2rem;
+    font-size: 0.95rem;
+    border-left: 4px solid transparent;
+}
+
+.alert--success {
+    background-color: rgba(0, 173, 181, 0.12);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.alert--error {
+    background-color: rgba(255, 107, 107, 0.12);
+    border-color: var(--color-error);
+    color: #ffdada;
 }
 
 table {
