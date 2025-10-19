@@ -4,6 +4,28 @@
 
 {% block content %}
 <section>
-    <p>Feed management placeholder.</p>
+    <h2>Feeds</h2>
+    {% if feeds is defined and feeds|length > 0 %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>URL</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for feed in feeds %}
+                <tr>
+                    <td>{{ feed.title }}</td>
+                    <td>{{ feed.feed_url }}</td>
+                    <td>{{ feed.active ? 'Active' : 'Inactive' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No feeds registered yet.</p>
+    {% endif %}
 </section>
 {% endblock %}

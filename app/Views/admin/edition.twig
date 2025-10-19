@@ -4,6 +4,20 @@
 
 {% block content %}
 <section>
-    <p>Edition management placeholder for {{ date|default('today') }}.</p>
+    <h2>Edition for {{ date|default('today') }}</h2>
+    {% if links is defined and links|length > 0 %}
+        <ol>
+            {% for link in links %}
+                <li>
+                    <strong>{{ link.title }}</strong>
+                    {% if link.blurb %}
+                        <p>{{ link.blurb }}</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    {% else %}
+        <p>No curated links assigned to this edition yet.</p>
+    {% endif %}
 </section>
 {% endblock %}

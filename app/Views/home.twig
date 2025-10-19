@@ -4,6 +4,23 @@
 
 {% block content %}
 <section>
-    <p>Home page placeholder.</p>
+    <h2>Latest Curated Links</h2>
+    {% if links is defined and links|length > 0 %}
+        <ul>
+            {% for link in links %}
+                <li>
+                    <strong>{{ link.title }}</strong>
+                    {% if link.source_name %}
+                        <span>— {{ link.source_name }}</span>
+                    {% endif %}
+                    {% if link.blurb %}
+                        <p>{{ link.blurb }}</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No curated links published yet. Check back soon.</p>
+    {% endif %}
 </section>
 {% endblock %}

@@ -4,6 +4,28 @@
 
 {% block content %}
 <section>
-    <p>Inbox placeholder.</p>
+    <h2>New Items</h2>
+    {% if items is defined and items|length > 0 %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Feed</th>
+                    <th>Published</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+                <tr>
+                    <td><a href="/admin/curate/{{ item.id }}">{{ item.title }}</a></td>
+                    <td>{{ item.feed_title }}</td>
+                    <td>{{ item.published_at ?: '—' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No new items waiting for review.</p>
+    {% endif %}
 </section>
 {% endblock %}

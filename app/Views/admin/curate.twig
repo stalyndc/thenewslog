@@ -4,7 +4,30 @@
 
 {% block content %}
 <section>
-    <p>Curate placeholder for item {{ itemId|default('N/A') }}.</p>
+    <h2>Curate Item</h2>
+    {% if item %}
+        <article>
+            <h3>{{ item.title }}</h3>
+            <p><strong>Feed:</strong> {{ item.feed_title }}</p>
+            {% if item.source_name %}
+                <p><strong>Source:</strong> {{ item.source_name }}</p>
+            {% endif %}
+            {% if item.summary_raw %}
+                <p>{{ item.summary_raw }}</p>
+            {% endif %}
+        </article>
+
+        {% if curated %}
+            <section>
+                <h3>Existing Curated Entry</h3>
+                <p><strong>Title:</strong> {{ curated.title }}</p>
+                <p><strong>Blurb:</strong> {{ curated.blurb }}</p>
+            </section>
+        {% endif %}
+    {% else %}
+        <p>Item not found.</p>
+    {% endif %}
+
     {% if message %}
         <p>{{ message }}</p>
     {% endif %}
