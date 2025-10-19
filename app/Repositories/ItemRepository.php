@@ -88,4 +88,16 @@ SQL;
 
         return $this->execute($sql, ['id' => $id]);
     }
+
+    public function countByStatus(string $status): int
+    {
+        $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM items WHERE status = :status', ['status' => $status]);
+
+        return (int) ($row['aggregate'] ?? 0);
+    }
+
+    public function countNew(): int
+    {
+        return $this->countByStatus('new');
+    }
 }

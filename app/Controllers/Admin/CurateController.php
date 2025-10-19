@@ -6,6 +6,7 @@ use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
 use App\Repositories\EditionRepository;
+use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Repositories\TagRepository;
 use App\Services\Auth;
@@ -31,9 +32,10 @@ class CurateController extends AdminController
         CuratedLinkRepository $curatedLinks,
         EditionRepository $editions,
         Curator $curator,
-        TagRepository $tags
+        TagRepository $tags,
+        FeedRepository $feeds
     ) {
-        parent::__construct($view, $auth);
+        parent::__construct($view, $auth, $items, $feeds);
         $this->items = $items;
         $this->curatedLinks = $curatedLinks;
         $this->editions = $editions;
@@ -54,12 +56,12 @@ class CurateController extends AdminController
 
         $form = $this->buildFormState($item, $curated, null, $existingTags);
 
-        return $this->render('admin/curate.twig', [
+        return $this->render('admin/curate.twig', $this->withAdminMetrics([
             'item' => $item,
             'curated' => $curated,
             'edition' => $edition,
             'form' => $form,
-        ]);
+        ]));
     }
 
     public function store(Request $request, int $id): Response
@@ -97,14 +99,14 @@ class CurateController extends AdminController
 
         $form = $this->buildFormState($item, $curated, $payload, $existingTags);
 
-        return $this->render('admin/curate.twig', [
+        return $this->render('admin/curate.twig', $this->withAdminMetrics([
             'item' => $item,
             'curated' => $curated,
             'edition' => $edition,
             'form' => $form,
             'message' => $message,
             'error' => $error,
-        ]);
+        ]));
     }
 
     private function resolveCuratedFromItem(?array $item): ?array
@@ -134,7 +136,7 @@ class CurateController extends AdminController
             'title' => $payload['title'] ?? ($curated['title'] ?? ($item['title'] ?? '')),
             'blurb' => $payload['blurb'] ?? ($curated['blurb'] ?? ''),
             'edition_date' => $payload['edition_date'] ?? $defaultDate,
-            'is_pinned' => (bool) ($payload['is_pinned'] ?? ($curated['is_pinned'] ?? false)),
+            'is_pinned' => (bool) ($payload['is_pinned'] ?? (((int) ($curated['is_pinned'] ?? 0)) === 1)),
             'publish_now' => (bool) ($payload['publish_now'] ?? false),
             'tags' => $this->tagsToString($payload['tags'] ?? null, $existingTags),
         ];

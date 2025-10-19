@@ -119,4 +119,18 @@ SQL;
 
         return sprintf('%s://%s', $scheme, $host);
     }
+
+    public function latestFetchTime(): ?string
+    {
+        $row = $this->fetch('SELECT MAX(last_checked_at) AS last_checked FROM feeds');
+
+        return $row['last_checked'] ?? null;
+    }
+
+    public function failingCount(): int
+    {
+        $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM feeds WHERE fail_count >= 3');
+
+        return (int) ($row['aggregate'] ?? 0);
+    }
 }

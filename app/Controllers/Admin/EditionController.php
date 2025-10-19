@@ -6,6 +6,8 @@ use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
 use App\Repositories\EditionRepository;
+use App\Repositories\FeedRepository;
+use App\Repositories\ItemRepository;
 use App\Services\Auth;
 use Twig\Environment;
 
@@ -15,9 +17,9 @@ class EditionController extends AdminController
 
     private EditionRepository $editions;
 
-    public function __construct(Environment $view, Auth $auth, CuratedLinkRepository $curatedLinks, EditionRepository $editions)
+    public function __construct(Environment $view, Auth $auth, CuratedLinkRepository $curatedLinks, EditionRepository $editions, ItemRepository $items, FeedRepository $feeds)
     {
-        parent::__construct($view, $auth);
+        parent::__construct($view, $auth, $items, $feeds);
         $this->curatedLinks = $curatedLinks;
         $this->editions = $editions;
     }
@@ -66,12 +68,12 @@ class EditionController extends AdminController
 
         $error = $flash === 'error' ? 'Unable to update edition. Please try again.' : null;
 
-        return $this->render('admin/edition.twig', [
+        return $this->render('admin/edition.twig', $this->withAdminMetrics([
             'date' => $edition['edition_date'],
             'edition' => $edition,
             'links' => $links,
             'message' => $error ? null : $message,
             'error' => $error,
-        ]);
+        ]));
     }
 }

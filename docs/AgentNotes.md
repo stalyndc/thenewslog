@@ -16,6 +16,7 @@
 - Admin edition screen now supports manual reorder + publish/draft toggle.
 - Public edition archive: `/editions` (paginated list) and `/editions/{date}` (full edition view) reuse linking/tag display.
 - Sitemap generator (`scripts/generate_sitemap.php`) now outputs `/sitemap.xml` covering editions, tags, and key routes.
+- Admin header now surfaces inbox count + last fetch status when authenticated.
 
 ## Next Recommended Steps
 

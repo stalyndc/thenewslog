@@ -26,6 +26,17 @@
                 <a href="/editions" class="{% if current_nav is defined and current_nav == 'editions' %}is-active{% endif %}">Past Editions</a>
                 <a href="/tags" class="{% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
             </nav>
+            {% if admin_metrics is defined %}
+                <div class="admin-meta">
+                    <a class="admin-meta__link" href="/admin/inbox">Inbox{% if admin_metrics.inbox_count is not null %} ({{ admin_metrics.inbox_count }}){% endif %}</a>
+                    {% if admin_metrics.last_fetch %}
+                        <span class="admin-meta__status">Last fetch {{ admin_metrics.last_fetch }}</span>
+                    {% endif %}
+                    {% if admin_metrics.failing_feeds is defined and admin_metrics.failing_feeds > 0 %}
+                        <span class="admin-meta__status admin-meta__status--warn">{{ admin_metrics.failing_feeds }} feed{{ admin_metrics.failing_feeds == 1 ? '' : 's' }} failing</span>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </header>
 
