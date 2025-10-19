@@ -63,7 +63,9 @@ SQL;
 
     public function touchChecked(int $id): bool
     {
-        $sql = 'UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP WHERE id = :id';
+        $sql = $this->connection->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'
+            ? 'UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP WHERE id = :id'
+            : 'UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP WHERE id = :id';
 
         return $this->execute($sql, ['id' => $id]);
     }

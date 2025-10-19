@@ -75,27 +75,13 @@ class App
         $this->container->singleton(Request::class, static fn (): Request => Request::fromGlobals());
 
         $this->container->singleton(PDO::class, static function (): PDO {
-            $dsn = sprintf(
-                'mysql:host=%s;dbname=%s;charset=%s',
-                getenv('DB_HOST') ?: '127.0.0.1',
-                getenv('DB_NAME') ?: 'thenewslog',
-                'utf8mb4'
-            );
+            $config = require dirname(__DIR__, 2) . '/config/database.php';
+            $driver = $config['driver'] ?? 'mysql';
 
-            $username = getenv('DB_USER') ?: 'root';
-            $password = getenv('DB_PASS') ?: '';
-
-            try {
-                $pdo = new PDO($dsn, $username, $password, [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                ]);
-            } catch (PDOException $exception) {
-                throw new \RuntimeException('Database connection failed: ' . $exception->getMessage(), 0, $exception);
-            }
-
-            return $pdo;
+            return match ($driver) {
+                'mysql' => self::createMysqlPdo($config),
+                default => throw new \RuntimeException(sprintf('Unsupported database driver "%s"', $driver)),
+            };
         });
 
         $this->container->singleton(FeedRepository::class, static fn (Container $container): FeedRepository => new FeedRepository($container->get(PDO::class)));
@@ -115,6 +101,36 @@ class App
 
             return $logger;
         });
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    private static function createMysqlPdo(array $config): PDO
+    {
+        if (!in_array('mysql', PDO::getAvailableDrivers(), true)) {
+            throw new \RuntimeException('Database connection failed: PDO MySQL driver is not installed. Enable the pdo_mysql extension.');
+        }
+
+        $dsn = sprintf(
+            'mysql:host=%s;dbname=%s;charset=%s',
+            $config['host'] ?? '127.0.0.1',
+            $config['database'] ?? 'thenewslog',
+            $config['charset'] ?? 'utf8mb4'
+        );
+
+        $username = $config['user'] ?? 'root';
+        $password = $config['password'] ?? '';
+
+        try {
+            return new PDO($dsn, $username, $password, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+        } catch (PDOException $exception) {
+            throw new \RuntimeException('Database connection failed: ' . $exception->getMessage(), 0, $exception);
+        }
     }
 
     private function registerRoutes(): void

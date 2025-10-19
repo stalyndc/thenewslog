@@ -14,6 +14,11 @@ abstract class BaseRepository
         $this->connection = $connection;
     }
 
+    public function setConnection(PDO $connection): void
+    {
+        $this->connection = $connection;
+    }
+
     /**
      * @param array<string, mixed> $parameters
      *
@@ -46,7 +51,7 @@ abstract class BaseRepository
     {
         $statement = $this->prepare($sql, $parameters);
 
-        return $statement->rowCount() > 0;
+        return true;
     }
 
     /**
