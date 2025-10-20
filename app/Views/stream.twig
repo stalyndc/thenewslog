@@ -7,7 +7,7 @@
 {% block content %}
 <section class="card card--edition">
     <header class="card__header">
-        <div class="badge">Live Stream{% if last_updated %} • Updated <span data-time="{{ last_updated.iso }}">{{ last_updated.relative }}</span>{% endif %}</div>
+        <div class="badge">Live Stream{% if last_updated %} • Updated <span class="badge__timestamp" data-time="{{ last_updated.iso }}">{{ last_updated.relative }}</span>{% endif %}</div>
         <h2>Latest Curated Links</h2>
     </header>
 
@@ -26,6 +26,13 @@
                     {% endif %}
                     {% if link.blurb %}
                         <p>{{ link.blurb }}</p>
+                    {% endif %}
+                    {% if is_admin|default(false) %}
+                        <div class="link-admin-actions">
+                            <a class="link-edit" href="/admin/curate/{{ link.item_id ?? link.id }}">
+                                {% if link.blurb %}Edit blurb{% else %}Add blurb{% endif %}
+                            </a>
+                        </div>
                     {% endif %}
                     {% set linkTags = tagsByLink[link.id]|default([]) %}
                     {% if linkTags %}

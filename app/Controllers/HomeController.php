@@ -6,6 +6,7 @@ use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
 use App\Repositories\TagRepository;
+use App\Services\Auth;
 use Twig\Environment;
 
 class HomeController extends BaseController
@@ -14,11 +15,14 @@ class HomeController extends BaseController
 
     private TagRepository $tags;
 
-    public function __construct(Environment $view, CuratedLinkRepository $curatedLinks, TagRepository $tags)
+    private Auth $auth;
+
+    public function __construct(Environment $view, CuratedLinkRepository $curatedLinks, TagRepository $tags, Auth $auth)
     {
         parent::__construct($view);
         $this->curatedLinks = $curatedLinks;
         $this->tags = $tags;
+        $this->auth = $auth;
     }
 
     public function __invoke(Request $request): Response
@@ -46,6 +50,7 @@ class HomeController extends BaseController
             'edition_date' => $editionDate,
             'edition_display' => $editionDisplay,
             'tagsByLink' => $tags,
+            'is_admin' => $this->auth->check(),
         ]);
     }
 

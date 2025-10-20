@@ -220,6 +220,26 @@ a:hover {
     color: var(--color-muted);
 }
 
+.link-admin-actions {
+    margin-top: 0.5rem;
+}
+
+.link-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+}
+
+.link-edit:hover,
+.link-edit:focus {
+    text-decoration: underline;
+}
+
 .list-links__title-row {
     display: flex;
     align-items: center;
@@ -364,6 +384,11 @@ a:hover {
     color: var(--color-accent);
     letter-spacing: 0.06em;
     text-transform: uppercase;
+}
+
+.badge__timestamp {
+    display: inline-flex;
+    margin-left: 0.35rem;
 }
 
 .badge--muted {

@@ -32,6 +32,13 @@
                     {% if link.blurb %}
                         <p>{{ link.blurb }}</p>
                     {% endif %}
+                    {% if is_admin|default(false) %}
+                        <div class="link-admin-actions">
+                            <a class="link-edit" href="/admin/curate/{{ link.item_id ?? link.id }}">
+                                {% if link.blurb %}Edit blurb{% else %}Add blurb{% endif %}
+                            </a>
+                        </div>
+                    {% endif %}
                     {% set linkTags = tagsByLink[link.id]|default([]) %}
                     {% if linkTags %}
                         <div class="tag-list">
