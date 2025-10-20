@@ -23,7 +23,9 @@
                 <p><strong>Source:</strong> {{ item.source_name }}</p>
             {% endif %}
             {% if item.summary_raw %}
-                <p>{{ item.summary_raw }}</p>
+                <div class="curate-item__summary">
+                    {{ item.summary_raw|striptags('<p><br><strong><em><a><ul><ol><li>')|raw }}
+                </div>
             {% endif %}
             <p><a href="{{ item.url }}" target="_blank" rel="noopener">Open original link ↗</a></p>
         </article>
