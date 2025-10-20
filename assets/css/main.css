@@ -222,22 +222,46 @@ a:hover {
 
 .link-admin-actions {
     margin-top: 0.5rem;
-}
-
-.link-edit {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-accent);
+    gap: 0.5rem;
 }
 
-.link-edit:hover,
-.link-edit:focus {
-    text-decoration: underline;
+.link-admin-actions__form {
+    margin: 0;
+}
+
+.link-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(228, 173, 98, 0.35);
+    background-color: rgba(228, 173, 98, 0.08);
+    color: #e4ad62;
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    padding: 0;
+    cursor: pointer;
+}
+
+.link-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.link-icon:hover,
+.link-icon:focus {
+    background-color: rgba(228, 173, 98, 0.16);
+    border-color: rgba(228, 173, 98, 0.55);
+    text-decoration: none;
+    outline: none;
+}
+
+.link-icon:focus-visible {
+    box-shadow: 0 0 0 3px rgba(228, 173, 98, 0.3);
+    outline: none;
 }
 
 .list-links__title-row {
