@@ -85,7 +85,8 @@ class CurateController extends AdminController
         } catch (\InvalidArgumentException $exception) {
             $error = $exception->getMessage();
         } catch (\Throwable $exception) {
-            $error = 'Something went wrong while saving the curated link.';
+            error_log(sprintf('CurateController::store error: %s in %s:%d', $exception->getMessage(), $exception->getFile(), $exception->getLine()));
+            $error = 'Something went wrong while saving the curated link: ' . $exception->getMessage();
         }
 
         $item = $result['item'] ?? $this->safeFindItem($id);
