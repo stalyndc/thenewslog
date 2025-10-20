@@ -180,10 +180,10 @@ class App
         $this->router->post('/admin/curate/{id}/delete', 'App\Controllers\Admin\CurateController@destroy');
         $this->router->match(['GET', 'POST'], '/admin/edition/{date}', 'App\Controllers\Admin\EditionController@show');
         $this->router->get('/admin/feeds', 'App\Controllers\Admin\FeedController@index');
+        $this->router->post('/admin/feeds/refresh', 'App\Controllers\Admin\FeedController@refresh');
         $this->router->post('/admin/feeds', 'App\Controllers\Admin\FeedController@store');
         $this->router->post('/admin/feeds/{id}', 'App\Controllers\Admin\FeedController@update');
         $this->router->post('/admin/feeds/{id}/delete', 'App\Controllers\Admin\FeedController@destroy');
-        $this->router->post('/admin/feeds/refresh', 'App\Controllers\Admin\FeedController@refresh');
         $this->router->post('/admin/inbox/delete', 'App\Controllers\Admin\InboxController@delete');
         $this->router->get('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
         $this->router->get('/stream', 'App\Controllers\StreamController@__invoke');
