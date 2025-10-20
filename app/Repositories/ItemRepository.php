@@ -92,7 +92,7 @@ SQL;
 
     public function markCurated(int $id): bool
     {
-        $sql = 'UPDATE items SET status = \'curated\', curated_at = CURRENT_TIMESTAMP WHERE id = :id';
+        $sql = 'UPDATE items SET status = \'curated\', updated_at = CURRENT_TIMESTAMP WHERE id = :id';
 
         return $this->execute($sql, ['id' => $id]);
     }
