@@ -23,9 +23,26 @@
                 <p><strong>Source:</strong> {{ item.source_name }}</p>
             {% endif %}
             {% if item.summary_raw %}
-                <div class="curate-item__summary">
-                    {{ item.summary_raw|striptags('<p><br><strong><em><a><ul><ol><li>')|raw }}
-                </div>
+                {% set cleaned_summary = item.summary_raw
+                    |replace({
+                        '</p>': '\n\n',
+                        '<br>': '\n',
+                        '<br/>': '\n',
+                        '<br />': '\n',
+                        '\r\n': '\n',
+                        '\r': '\n',
+                        '&nbsp;': ' '
+                    })
+                    |striptags %}
+                {% if cleaned_summary|trim %}
+                    <div class="curate-item__summary">
+                        {% for paragraph in cleaned_summary|split('\n\n') %}
+                            {% if paragraph|trim %}
+                                <p>{{ paragraph|trim }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
             {% endif %}
             <p><a href="{{ item.url }}" target="_blank" rel="noopener">Open original link ↗</a></p>
         </article>

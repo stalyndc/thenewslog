@@ -344,6 +344,15 @@ a:hover {
     background-color: rgba(0, 173, 181, 0.12);
 }
 
+.curate-item__summary p {
+    margin: 0 0 0.75rem;
+    line-height: 1.55;
+}
+
+.curate-item__summary p:last-child {
+    margin-bottom: 0;
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
