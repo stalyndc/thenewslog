@@ -10,7 +10,7 @@ Initial scaffold generated from PRD and Agents guidelines.
 
 ## Local Development
 
-- Run the built-in PHP server: `php -S 127.0.0.1:8000 -t public`.
+- Run the built-in PHP server: `php -S 127.0.0.1:8000 -t .`.
 - Visit `http://127.0.0.1:8000/` for the reader view (Daily Edition), `/stream` for the live stream, `/editions` for the archive, and `/tags` to browse topics; `/admin/login` for the admin portal.
 - Authenticated admin routes are under `/admin/*`; log in via `/admin` with the credentials configured in `.env`.
 
@@ -28,7 +28,7 @@ Initial scaffold generated from PRD and Agents guidelines.
 
 ## Sitemap
 
-- Generate sitemap: `php scripts/generate_sitemap.php > public/sitemap.xml` (run after publishing new editions).
+- Generate sitemap: `php scripts/generate_sitemap.php > sitemap.xml` (run after publishing new editions).
 - Served at `/sitemap.xml`; add to search console or robots.txt as needed.
 
 ## RSSFeeds
@@ -44,13 +44,13 @@ Initial scaffold generated from PRD and Agents guidelines.
   npm install
   npm run build
   ```
-- Built assets land in `public/assets/app.js`; include in deploy uploads alongside PHP files.
+- Built assets land in `assets/app.js`; include in deploy uploads alongside PHP files.
 
 ## Deployment Notes (Future)
 
 - Plan: push this repo to GitHub, then deploy to Hostinger shared hosting.
 - Before deploying, run `composer install --no-dev` locally (or commit vendor/ if Hostinger lacks Composer).
-- Regenerate sitemap via `php scripts/generate_sitemap.php > public/sitemap.xml` so `/sitemap.xml` is fresh.
+- Regenerate sitemap via `php scripts/generate_sitemap.php > sitemap.xml` so `/sitemap.xml` is fresh.
 - Update `.env` with Hostinger DB credentials and `BASE_URL` for the live domain.
 - Configure Hostinger cron: `*/30 * * * * php /home/USER/public_html/scripts/cron_fetch.php >> /home/USER/logs/fetch.log 2>&1`.
 - Consider setting up a GitHub Action to run `composer ci` on push before deploying.
