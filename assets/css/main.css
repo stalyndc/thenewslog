@@ -427,6 +427,13 @@ a:hover {
     margin-top: 1.5rem;
 }
 
+.admin-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
 .form-section,
 .table-section {
     margin-bottom: 2rem;
