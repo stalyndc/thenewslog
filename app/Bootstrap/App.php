@@ -62,6 +62,7 @@ class App
 
         $envFiles = [
             $projectRoot . '/.env',
+            $projectRoot . '/.env.production',
             $projectRoot . '/.env.local',
         ];
 

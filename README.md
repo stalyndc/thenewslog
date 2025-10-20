@@ -48,12 +48,11 @@ Initial scaffold generated from PRD and Agents guidelines.
 
 ## Deployment Notes (Future)
 
-- Plan: push this repo to GitHub, then deploy to Hostinger shared hosting.
-- Before deploying, run `composer install --no-dev` locally (or commit vendor/ if Hostinger lacks Composer).
-- Regenerate sitemap via `php scripts/generate_sitemap.php > sitemap.xml` so `/sitemap.xml` is fresh.
-- Update `.env` with Hostinger DB credentials and `BASE_URL` for the live domain.
+- Keep local development values in `.env` (ignored by git).
+- For production, create `.env.production` on the server (use `.env.production.example` as the template). Never commit real credentials.
+- When packaging for Hostinger, **do not overwrite** the server’s `.env.production`; deploy code + assets only.
+- Run `composer install --no-dev` locally, `npm run build`, generate `sitemap.xml`, then upload `index.php`, `.htaccess`, `assets/`, `vendor/`, etc.
 - Configure Hostinger cron: `*/30 * * * * php /home/USER/public_html/scripts/cron_fetch.php >> /home/USER/logs/fetch.log 2>&1`.
-- Consider setting up a GitHub Action to run `composer ci` on push before deploying.
 - Newsletter: plan to add an email subscribe form later (likely via MailerSend/Mailgun or exportable CSV service).
 
 ## Logs
