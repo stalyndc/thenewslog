@@ -60,16 +60,18 @@ class App
         $dotenv = new Dotenv();
         $projectRoot = dirname(__DIR__, 2);
 
-        $envFiles = [
-            $projectRoot . '/.env',
-            $projectRoot . '/.env.production',
-            $projectRoot . '/.env.local',
-        ];
+        $productionEnv = $projectRoot . '/.env.production';
+        $localEnv = $projectRoot . '/.env.local';
+        $baseEnv = $projectRoot . '/.env';
 
-        foreach ($envFiles as $file) {
-            if (is_file($file)) {
-                $dotenv->usePutenv()->load($file);
-            }
+        if (is_file($productionEnv)) {
+            $dotenv->usePutenv()->load($productionEnv);
+        } elseif (is_file($baseEnv)) {
+            $dotenv->usePutenv()->load($baseEnv);
+        }
+
+        if (is_file($localEnv)) {
+            $dotenv->usePutenv()->load($localEnv);
         }
     }
 
