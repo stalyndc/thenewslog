@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
@@ -21,35 +22,59 @@ class InboxController extends AdminController
         $this->feeds = $feeds;
     }
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $context = $this->buildContext($request);
+
+        return $this->render('admin/inbox.twig', $this->withAdminMetrics($context));
+    }
+
+    public function partial(Request $request): Response
+    {
+        $context = $this->buildContext($request);
+
+        return $this->render('admin/partials/inbox_table.twig', $context);
+    }
+
+    public function delete(Request $request): Response
+    {
+        $id = (int) $request->input('id', 0);
+
+        if ($id > 0) {
+            $this->items->delete($id);
+        }
+
+        return new Response('', 204);
+    }
+
+    private function buildContext(Request $request): array
+    {
+        $page = max(1, (int) $request->query('page', 1));
         $perPage = 25;
-        $feedId = isset($_GET['feed_id']) && $_GET['feed_id'] !== '' ? (int) $_GET['feed_id'] : null;
+        $feedParam = $request->query('feed_id');
+        $feedId = ($feedParam !== null && $feedParam !== '') ? (int) $feedParam : null;
 
         try {
-            $inbox = $this->items->inbox($perPage, $page, $feedId);
+            $items = $this->items->inbox($perPage, $page, $feedId);
         } catch (\Throwable $exception) {
-            $inbox = [];
+            $items = [];
         }
 
         $total = $this->items->countNew($feedId);
         $totalPages = max(1, (int) ceil(max(1, $total) / $perPage));
 
-        foreach ($inbox as &$item) {
+        foreach ($items as &$item) {
             $timestamp = $item['published_at'] ?? $item['created_at'] ?? null;
             $item['published_relative'] = $timestamp ? $this->formatRelative($timestamp) : null;
         }
         unset($item);
 
-        $feedOptions = $this->feeds->active();
-
-        return $this->render('admin/inbox.twig', $this->withAdminMetrics([
-            'items' => $inbox,
+        return [
+            'items' => $items,
             'page' => $page,
             'total_pages' => $totalPages,
-            'feeds' => $feedOptions,
+            'feeds' => $this->feeds->active(),
             'selected_feed_id' => $feedId,
-        ]));
+        ];
     }
 }

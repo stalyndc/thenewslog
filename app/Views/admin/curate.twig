@@ -75,6 +75,10 @@
                 <button type="submit" class="btn btn-primary">Save Curated Link</button>
             </div>
         </form>
+
+        <form method="post" action="/admin/curate/{{ item.id }}/delete" class="form-inline" onsubmit="return confirm('Delete this item?');">
+            <button type="submit" class="btn btn-secondary">Delete Item</button>
+        </form>
     {% else %}
         <div class="empty-state">
             <p>Item not found.</p>

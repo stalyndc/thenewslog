@@ -6,7 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
   enableReorder();
 });
 
-// Copy-to-clipboard for data-copy buttons
+document.addEventListener("htmx:afterSwap", () => {
+  hydrateTimeAgo();
+  enableReorder();
+});
 
 document.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
@@ -21,23 +24,6 @@ document.addEventListener("click", (event) => {
   }
 
   navigator.clipboard.writeText(value).catch(() => {
-    // no-op; clipboard failures silently ignored
+    // ignore errors
   });
 });
-
-// Sticky masthead on scroll
-
-const masthead = document.querySelector<HTMLElement>(".masthead-sentinel");
-const header = document.querySelector<HTMLElement>(".masthead");
-
-if (masthead && header) {
-  const observer = new IntersectionObserver(
-    ([entry]) => {
-      header.classList.toggle("is-stuck", !entry.isIntersecting);
-    },
-    {
-      threshold: [1],
-    }
-  );
-  observer.observe(masthead);
-}

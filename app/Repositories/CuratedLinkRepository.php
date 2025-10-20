@@ -265,4 +265,9 @@ SQL;
 
         return $statement->fetchAll() ?: [];
     }
+
+    public function delete(int $id): bool
+    {
+        return $this->execute('DELETE FROM curated_links WHERE id = :id', ['id' => $id]);
+    }
 }

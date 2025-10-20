@@ -109,6 +109,25 @@ class CurateController extends AdminController
         ]));
     }
 
+    public function destroy(Request $request, int $id): Response
+    {
+        $item = $this->safeFindItem($id);
+
+        if ($item === null) {
+            return Response::redirect('/admin/inbox?flash=missing');
+        }
+
+        $curated = $this->curatedLinks->findByItem($item['id']);
+
+        if ($curated !== null) {
+            $this->curatedLinks->delete((int) $curated['id']);
+        } else {
+            $this->items->delete($item['id']);
+        }
+
+        return Response::redirect('/admin/inbox?flash=deleted');
+    }
+
     private function resolveCuratedFromItem(?array $item): ?array
     {
         if ($item === null) {

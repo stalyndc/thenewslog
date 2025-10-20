@@ -171,10 +171,13 @@ class App
         $this->router->match(['GET', 'POST'], '/admin', 'App\Controllers\Admin\AuthController@login');
         $this->router->match(['GET', 'POST'], '/admin/login', 'App\Controllers\Admin\AuthController@login');
         $this->router->get('/admin/inbox', 'App\Controllers\Admin\InboxController@index');
+        $this->router->get('/admin/inbox/partial', 'App\Controllers\Admin\InboxController@partial');
         $this->router->get('/admin/curate/{id}', 'App\Controllers\Admin\CurateController@show');
         $this->router->post('/admin/curate/{id}', 'App\Controllers\Admin\CurateController@store');
+        $this->router->post('/admin/curate/{id}/delete', 'App\Controllers\Admin\CurateController@destroy');
         $this->router->match(['GET', 'POST'], '/admin/edition/{date}', 'App\Controllers\Admin\EditionController@show');
         $this->router->get('/admin/feeds', 'App\Controllers\Admin\FeedController@index');
+        $this->router->post('/admin/inbox/delete', 'App\Controllers\Admin\InboxController@delete');
         $this->router->get('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
         $this->router->get('/stream', 'App\Controllers\StreamController@__invoke');
         $this->router->get('/tags', 'App\Controllers\TagController@index');

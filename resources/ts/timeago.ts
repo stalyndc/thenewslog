@@ -25,6 +25,11 @@ function timeAgo(iso: string): string {
 
 export function hydrateTimeAgo(): void {
   document.querySelectorAll<HTMLElement>("[data-time]").forEach((el) => {
+    if (el.dataset.timeBound === '1') {
+      return;
+    }
+
+    el.dataset.timeBound = '1';
     const iso = el.dataset.time;
     if (!iso) {
       return;

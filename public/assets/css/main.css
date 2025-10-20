@@ -58,13 +58,6 @@ a:hover {
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(0, 173, 181, 0.2);
     padding: 1.5rem 1rem;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-}
-
-.masthead.is-stuck {
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
 }
 
 .app-header__inner {
@@ -135,6 +128,8 @@ a:hover {
     gap: 0.85rem;
     font-size: 0.85rem;
     color: var(--color-muted);
+    margin-top: 0.5rem;
+    width: 100%;
 }
 
 .admin-meta__link {
@@ -457,6 +452,23 @@ a:hover {
     box-shadow: 0 16px 30px rgba(0, 173, 181, 0.4);
 }
 
+.btn-secondary {
+    background: rgba(238, 238, 238, 0.08);
+    color: var(--color-text);
+    box-shadow: none;
+}
+
+.btn-secondary:hover {
+    transform: none;
+    box-shadow: 0 0 0 2px rgba(238, 238, 238, 0.15);
+}
+
+.btn-inline {
+    margin-left: 0.5rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+}
+
 .order-list {
     display: grid;
     gap: 1rem;
@@ -672,8 +684,4 @@ th {
     margin-left: 0.5rem;
     font-size: 0.75rem;
     color: var(--color-muted);
-}
-.masthead-sentinel {
-    position: relative;
-    height: 1px;
 }

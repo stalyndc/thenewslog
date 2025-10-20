@@ -1,0 +1,11 @@
+(function(){
+  const MINUTE=60*1e3,HOUR=60*MINUTE,DAY=24*HOUR;
+  function timeAgo(iso){const date=new Date(iso);if(Number.isNaN(date.getTime()))return iso;const diff=Math.max(0,Date.now()-date.getTime());if(diff<HOUR){const mins=Math.floor(diff/MINUTE)||0;return mins<=1?"1 min ago":`${mins} min ago`;}if(diff<DAY){const hrs=Math.floor(diff/HOUR);return hrs<=1?"1 hr ago":`${hrs} hrs ago`;}const days=Math.floor(diff/DAY);return days<=1?"1 day ago":`${days} days ago`;}
+  function hydrateTimeAgo(){document.querySelectorAll("[data-time]").forEach((el)=>{if(el.dataset.timeBound==='1'){return;}el.dataset.timeBound='1';const iso=el.dataset.time;if(!iso){return;}const update=()=>{el.textContent=timeAgo(iso);};update();const timer=window.setInterval(update,6e4);el.addEventListener("htmx:beforeSwap",()=>window.clearInterval(timer),{once:!0});});}
+  function updatePositions(container){const rows=Array.from(container.querySelectorAll("[data-order-input]"));rows.forEach((input,index)=>{input.value=String(index+1);});}
+  function enableReorder(){const list=document.querySelector("[data-reorder-list]");if(!list){return;}if(list.dataset.reorderBound==='1'){return;}list.dataset.reorderBound='1';let dragging=null;const rows=Array.from(list.querySelectorAll("[data-id]"));rows.forEach((row)=>{row.draggable=!0;row.addEventListener("dragstart",()=>{dragging=row;row.classList.add("is-dragging");});row.addEventListener("dragend",()=>{row.classList.remove("is-dragging");dragging=null;updatePositions(list);});row.addEventListener("dragover",(event)=>{event.preventDefault();const target=event.currentTarget;if(!dragging||dragging===target){return;}const box=target.getBoundingClientRect();const isBefore=event.clientY-box.top<box.height/2;list.insertBefore(dragging,isBefore?target:target.nextSibling);});});}
+  function init(){hydrateTimeAgo();enableReorder();}
+  document.addEventListener("DOMContentLoaded",init);
+  document.addEventListener("htmx:afterSwap",init);
+  document.addEventListener("click",(event)=>{const target=event.target;const button=target&&target.closest?target.closest("[data-copy]"):null;if(!button){return;}const value=button.getAttribute("data-copy");if(!value){return;}navigator.clipboard.writeText(value).catch(()=>{});});
+})();

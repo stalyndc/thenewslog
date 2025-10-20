@@ -17,6 +17,12 @@ export function enableReorder(): void {
     return;
   }
 
+  if (list.dataset.reorderBound === '1') {
+    return;
+  }
+
+  list.dataset.reorderBound = '1';
+
   let dragging: ReorderRow | null = null;
 
   const rows = Array.from(list.querySelectorAll<ReorderRow>("[data-id]"));
@@ -41,9 +47,9 @@ export function enableReorder(): void {
         return;
       }
 
-      const box = target.getBoundingClientRect();
-      const isBefore = (event.clientY - box.top) < box.height / 2;
-      list.insertBefore(dragging, isBefore ? target : target.nextSibling);
+        const box = target.getBoundingClientRect();
+        const isBefore = (event.clientY - box.top) < box.height / 2;
+        list.insertBefore(dragging, isBefore ? target : target.nextSibling);
+      });
     });
-  });
 }

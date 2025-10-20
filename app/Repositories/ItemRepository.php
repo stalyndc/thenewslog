@@ -117,4 +117,9 @@ SQL;
 
         return (int) ($row['aggregate'] ?? 0);
     }
+
+    public function delete(int $id): bool
+    {
+        return $this->execute('DELETE FROM items WHERE id = :id', ['id' => $id]);
+    }
 }

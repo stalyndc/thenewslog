@@ -1,0 +1,59 @@
+{% if items is defined and items|length > 0 %}
+    <table>
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Feed</th>
+            <th>Published</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+            <tr id="row-{{ item.id }}">
+                <td><a href="/admin/curate/{{ item.id }}">{{ item.title }}</a></td>
+                <td><span class="table-badge">{{ item.feed_title }}</span></td>
+                <td>
+                    {{ item.published_at ?: '—' }}
+                    {% if item.published_relative and item.published_at %}
+                        <span class="time-badge" data-time="{{ item.published_at }}">{{ item.published_relative }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button type="button"
+                            class="btn btn-secondary btn-inline"
+                            hx-post="/admin/inbox/delete"
+                            hx-vals='{"id":"{{ item.id }}"}'
+                            hx-target="#row-{{ item.id }}"
+                            hx-swap="outerHTML"
+                            onclick="return confirm('Delete this item?');">Delete</button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if total_pages is defined and total_pages > 1 %}
+        <nav class="pagination">
+            {% if page > 1 %}
+                <a class="pagination__link" href="?page={{ page - 1 }}{% if selected_feed_id %}&feed_id={{ selected_feed_id }}{% endif %}"
+                   hx-get="/admin/inbox/partial?page={{ page - 1 }}{% if selected_feed_id %}&feed_id={{ selected_feed_id }}{% endif %}"
+                   hx-target="#inbox-list"
+                   hx-swap="innerHTML"
+                   hx-push-url="true">Previous</a>
+            {% endif %}
+            <span class="pagination__status">Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <a class="pagination__link" href="?page={{ page + 1 }}{% if selected_feed_id %}&feed_id={{ selected_feed_id }}{% endif %}"
+                   hx-get="/admin/inbox/partial?page={{ page + 1 }}{% if selected_feed_id %}&feed_id={{ selected_feed_id }}{% endif %}"
+                   hx-target="#inbox-list"
+                   hx-swap="innerHTML"
+                   hx-push-url="true">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <p>No new items waiting for review.</p>
+    </div>
+{% endif %}
