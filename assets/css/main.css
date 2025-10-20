@@ -427,6 +427,23 @@ a:hover {
     margin-top: 1.5rem;
 }
 
+.form-section,
+.table-section {
+    margin-bottom: 2rem;
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -461,6 +478,17 @@ a:hover {
 .btn-secondary:hover {
     transform: none;
     box-shadow: 0 0 0 2px rgba(238, 238, 238, 0.15);
+}
+
+.btn-danger {
+    background: rgba(255, 107, 107, 0.25);
+    color: #ffdada;
+    box-shadow: none;
+}
+
+.btn-danger:hover {
+    transform: none;
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.35);
 }
 
 .btn-inline {

@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
@@ -18,9 +19,125 @@ class FeedController extends AdminController
         $this->feeds = $feeds;
     }
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $context = $this->buildContext($request);
+
+        $flash = $request->query('flash');
+        $error = $request->query('error');
+
+        if ($flash) {
+            $context['message'] = match ($flash) {
+                'created' => 'Feed added successfully.',
+                'updated' => 'Feed updated successfully.',
+                'deleted' => 'Feed removed successfully.',
+                default => null,
+            };
+        }
+
+        if ($error) {
+            $context['error'] = match ($error) {
+                'missing' => 'Feed not found.',
+                default => null,
+            };
+        }
+
+        return $this->render('admin/feeds.twig', $this->withAdminMetrics($context));
+    }
+
+    public function store(Request $request): Response
+    {
+        $title = trim((string) $request->input('title'));
+        $feedUrl = trim((string) $request->input('feed_url'));
+        $siteUrl = trim((string) $request->input('site_url'));
+        $active = $request->input('active') === '1';
+
+        if ($title === '' || $feedUrl === '') {
+            $context = $this->buildContext($request, [
+                'error' => 'Title and feed URL are required.',
+                'create_values' => [
+                    'title' => $title,
+                    'feed_url' => $feedUrl,
+                    'site_url' => $siteUrl,
+                    'active' => $active ? 1 : 0,
+                ],
+            ]);
+
+            return $this->render('admin/feeds.twig', $this->withAdminMetrics($context), 422);
+        }
+
+        if ($siteUrl === '') {
+            $siteUrl = $feedUrl;
+        }
+
+        $this->feeds->ensure([
+            'title' => $title,
+            'feed_url' => $feedUrl,
+            'site_url' => $siteUrl,
+            'active' => $active ? 1 : 0,
+        ]);
+
+        return Response::redirect('/admin/feeds?flash=created');
+    }
+
+    public function update(Request $request, int $id): Response
+    {
+        $feed = $this->feeds->find($id);
+
+        if ($feed === null) {
+            return Response::redirect('/admin/feeds?error=missing');
+        }
+
+        $title = trim((string) $request->input('title'));
+        $feedUrl = trim((string) $request->input('feed_url'));
+        $siteUrl = trim((string) $request->input('site_url'));
+        $active = $request->input('active') === '1';
+
+        if ($title === '' || $feedUrl === '') {
+            $context = $this->buildContext($request, [
+                'error' => 'Title and feed URL are required.',
+                'edit_feed' => [
+                    'id' => $id,
+                    'title' => $title,
+                    'feed_url' => $feedUrl,
+                    'site_url' => $siteUrl,
+                    'active' => $active ? 1 : 0,
+                ],
+            ]);
+
+            return $this->render('admin/feeds.twig', $this->withAdminMetrics($context), 422);
+        }
+
+        if ($siteUrl === '') {
+            $siteUrl = $feedUrl;
+        }
+
+        $this->feeds->update($id, [
+            'title' => $title,
+            'feed_url' => $feedUrl,
+            'site_url' => $siteUrl,
+            'active' => $active ? 1 : 0,
+        ]);
+
+        return Response::redirect('/admin/feeds?flash=updated');
+    }
+
+    public function destroy(int $id): Response
+    {
+        $feed = $this->feeds->find($id);
+
+        if ($feed === null) {
+            return Response::redirect('/admin/feeds?error=missing');
+        }
+
+        $this->feeds->delete($id);
+
+        return Response::redirect('/admin/feeds?flash=deleted');
+    }
+
+    private function buildContext(Request $request, array $overrides = []): array
+    {
+        $page = max(1, (int) $request->query('page', 1));
         $perPage = 25;
 
         try {
@@ -32,10 +149,36 @@ class FeedController extends AdminController
         $total = $this->feeds->countAll();
         $totalPages = max(1, (int) ceil(max(1, $total) / $perPage));
 
-        return $this->render('admin/feeds.twig', $this->withAdminMetrics([
+        $editFeed = $overrides['edit_feed'] ?? null;
+
+        if ($editFeed === null) {
+            $editId = $request->query('edit');
+            if ($editId !== null && $editId !== '') {
+                $editFeed = $this->feeds->find((int) $editId);
+            }
+        }
+
+        $context = [
             'feeds' => $feeds,
             'page' => $page,
             'total_pages' => $totalPages,
-        ]));
+            'edit_feed' => $editFeed,
+            'create_values' => $overrides['create_values'] ?? [
+                'title' => '',
+                'feed_url' => '',
+                'site_url' => '',
+                'active' => 1,
+            ],
+        ];
+
+        if (isset($overrides['message'])) {
+            $context['message'] = $overrides['message'];
+        }
+
+        if (isset($overrides['error'])) {
+            $context['error'] = $overrides['error'];
+        }
+
+        return $context;
     }
 }

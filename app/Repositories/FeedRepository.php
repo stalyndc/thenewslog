@@ -149,4 +149,9 @@ SQL;
 
         return (int) ($row['aggregate'] ?? 0);
     }
+
+    public function delete(int $id): bool
+    {
+        return $this->execute('DELETE FROM feeds WHERE id = :id', ['id' => $id]);
+    }
 }

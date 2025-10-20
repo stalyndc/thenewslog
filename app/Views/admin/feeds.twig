@@ -5,30 +5,123 @@
 {% block content %}
 <section class="card">
     <div class="badge">Sources</div>
-    <h2>Feeds</h2>
+    <h2>Manage Feeds</h2>
+
+    {% if error %}
+        <div class="alert alert--error">{{ error }}</div>
+    {% endif %}
+
+    {% if message %}
+        <div class="alert alert--success">{{ message }}</div>
+    {% endif %}
+
+    <section class="form-section">
+        <h3>Add a Feed</h3>
+        <form method="post" action="/admin/feeds" class="form">
+            <div class="form-group">
+                <label for="create-title">Title</label>
+                <input id="create-title" name="title" type="text" class="input-control" value="{{ create_values.title|default('') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="create-feed-url">Feed URL</label>
+                <input id="create-feed-url" name="feed_url" type="url" class="input-control" value="{{ create_values.feed_url|default('') }}" placeholder="https://example.com/rss" required>
+            </div>
+
+            <div class="form-group">
+                <label for="create-site-url">Site URL</label>
+                <input id="create-site-url" name="site_url" type="url" class="input-control" value="{{ create_values.site_url|default('') }}" placeholder="https://example.com">
+            </div>
+
+            <div class="form-group form-group--inline">
+                <label class="checkbox">
+                    <input type="checkbox" name="active" value="1" {% if create_values.active|default(1) == 1 %}checked{% endif %}>
+                    <span>Active</span>
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add Feed</button>
+            </div>
+        </form>
+    </section>
+
+    {% if edit_feed %}
+        <section class="form-section">
+            <h3>Edit Feed: {{ edit_feed.title }}</h3>
+            <form method="post" action="/admin/feeds/{{ edit_feed.id }}" class="form">
+                <div class="form-group">
+                    <label for="edit-title">Title</label>
+                    <input id="edit-title" name="title" type="text" class="input-control" value="{{ edit_feed.title }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-feed-url">Feed URL</label>
+                    <input id="edit-feed-url" name="feed_url" type="url" class="input-control" value="{{ edit_feed.feed_url }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-site-url">Site URL</label>
+                    <input id="edit-site-url" name="site_url" type="url" class="input-control" value="{{ edit_feed.site_url }}">
+                </div>
+
+                <div class="form-group form-group--inline">
+                    <label class="checkbox">
+                        <input type="checkbox" name="active" value="1" {% if edit_feed.active == 1 %}checked{% endif %}>
+                        <span>Active</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a class="btn btn-secondary" href="/admin/feeds{% if page > 1 %}?page={{ page }}{% endif %}">Cancel</a>
+                </div>
+            </form>
+        </section>
+    {% endif %}
+
     {% if feeds is defined and feeds|length > 0 %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Feed URL</th>
-                    <th>Last Checked</th>
-                    <th>Fail Count</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for feed in feeds %}
-                <tr class="{% if feed.fail_count >= 3 %}feed-row--warn{% endif %}">
-                    <td>{{ feed.title }}</td>
-                    <td><a href="{{ feed.feed_url }}" target="_blank" rel="noopener">{{ feed.feed_url }}</a></td>
-                    <td>{{ feed.last_checked_at ?: '–' }}</td>
-                    <td>{{ feed.fail_count }}</td>
-                    <td>{{ feed.active ? 'Active' : 'Inactive' }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <section class="table-section">
+            <h3>Existing Sources</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Feed URL</th>
+                        <th>Site</th>
+                        <th>Last Checked</th>
+                        <th>Fail Count</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for feed in feeds %}
+                    <tr class="{% if feed.fail_count >= 3 %}feed-row--warn{% endif %}">
+                        <td>{{ feed.title }}</td>
+                        <td><a href="{{ feed.feed_url }}" target="_blank" rel="noopener">{{ feed.feed_url }}</a></td>
+                        <td>
+                            {% if feed.site_url %}
+                                <a href="{{ feed.site_url }}" target="_blank" rel="noopener">Visit site ↗</a>
+                            {% else %}
+                                –
+                            {% endif %}
+                        </td>
+                        <td>{{ feed.last_checked_at ?: '–' }}</td>
+                        <td>{{ feed.fail_count }}</td>
+                        <td>{{ feed.active ? 'Active' : 'Inactive' }}</td>
+                        <td class="table-actions">
+                            <a class="btn btn-secondary btn-inline" href="/admin/feeds?edit={{ feed.id }}{% if page > 1 %}&page={{ page }}{% endif %}">Edit</a>
+                            <form method="post" action="/admin/feeds/{{ feed.id }}/delete" class="inline-form" onsubmit="return confirm('Remove this feed?');">
+                                <button type="submit" class="btn btn-danger btn-inline">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
         {% if total_pages is defined and total_pages > 1 %}
             <nav class="pagination">
                 {% if page > 1 %}
