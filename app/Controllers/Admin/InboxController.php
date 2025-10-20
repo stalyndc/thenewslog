@@ -26,6 +26,22 @@ class InboxController extends AdminController
     {
         $context = $this->buildContext($request);
 
+        $flash = $request->query('flash');
+        if ($flash) {
+            $context['message'] = match ($flash) {
+                'fetched' => 'Feeds refreshed. Check the inbox for new items.',
+                default => null,
+            };
+        }
+
+        $error = $request->query('error');
+        if ($error) {
+            $context['error'] = match ($error) {
+                'fetch_failed' => 'Unable to refresh feeds right now. Please try again.',
+                default => null,
+            };
+        }
+
         return $this->render('admin/inbox.twig', $this->withAdminMetrics($context));
     }
 

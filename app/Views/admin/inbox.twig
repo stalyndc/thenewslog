@@ -6,7 +6,16 @@
 <section class="card">
     <div class="badge">Editor Inbox</div>
     <h2>New Items</h2>
+    {% if message %}
+        <div class="alert alert--success">{{ message }}</div>
+    {% endif %}
+    {% if error %}
+        <div class="alert alert--error">{{ error }}</div>
+    {% endif %}
     <div class="admin-toolbar">
+        <form method="post" action="/admin/feeds/refresh" class="admin-toolbar__form">
+            <button type="submit" class="btn btn-primary">Fetch Latest</button>
+        </form>
         <a class="btn btn-secondary" href="/admin/feeds">Manage Feeds</a>
     </div>
     <form method="get" class="form-inline inbox-filter"

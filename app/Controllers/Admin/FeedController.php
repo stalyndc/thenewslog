@@ -7,16 +7,20 @@ use App\Http\Response;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Auth;
+use App\Services\FeedFetcher;
 use Twig\Environment;
 
 class FeedController extends AdminController
 {
     private FeedRepository $feeds;
 
-    public function __construct(Environment $view, Auth $auth, FeedRepository $feeds, ItemRepository $items)
+    private FeedFetcher $fetcher;
+
+    public function __construct(Environment $view, Auth $auth, FeedRepository $feeds, ItemRepository $items, FeedFetcher $fetcher)
     {
         parent::__construct($view, $auth, $items, $feeds);
         $this->feeds = $feeds;
+        $this->fetcher = $fetcher;
     }
 
     public function index(Request $request): Response
@@ -133,6 +137,17 @@ class FeedController extends AdminController
         $this->feeds->delete($id);
 
         return Response::redirect('/admin/feeds?flash=deleted');
+    }
+
+    public function refresh(): Response
+    {
+        try {
+            $this->fetcher->fetch();
+
+            return Response::redirect('/admin/inbox?flash=fetched');
+        } catch (\Throwable $exception) {
+            return Response::redirect('/admin/inbox?error=fetch_failed');
+        }
     }
 
     private function buildContext(Request $request, array $overrides = []): array
