@@ -121,9 +121,9 @@ class CurateController extends AdminController
 
         if ($curated !== null) {
             $this->curatedLinks->delete((int) $curated['id']);
-        } else {
-            $this->items->delete($item['id']);
         }
+
+        $this->items->delete($item['id']);
 
         return Response::redirect('/admin/inbox?flash=deleted');
     }

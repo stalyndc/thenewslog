@@ -268,6 +268,8 @@ SQL;
 
     public function delete(int $id): bool
     {
+        $this->detachFromEditions($id);
+
         return $this->execute('DELETE FROM curated_links WHERE id = :id', ['id' => $id]);
     }
 }
