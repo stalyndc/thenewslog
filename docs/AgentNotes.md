@@ -17,6 +17,14 @@
 - Public edition archive: `/editions` (paginated list) and `/editions/{date}` (full edition view) reuse linking/tag display.
 - Sitemap generator (`scripts/generate_sitemap.php`) now outputs `/sitemap.xml` covering editions, tags, and key routes.
 - Admin header now surfaces inbox count + last fetch status when authenticated.
+- `/admin/feeds` now includes full CRUD UI with inline flash messaging and quick navigation to/from the inbox.
+- Admin toolbar refreshed with fetch, manage feeds, and logout shortcuts—including accent styling and section dividers.
+- Inbox quick actions: curate shortcut, ignore (status change via htmx), and delete buttons; edition reorder offers drag-and-drop feedback.
+- Admin alerts auto-dismiss after 10 seconds with fade-out animation.
+- Added Heroicons-based edit/delete controls on public curated lists for admins.
+- Default timezone set to `America/New_York` (overridable via `APP_TIMEZONE`).
+- Embedded Google Analytics gtag snippet globally.
+- Trimmed footer links pending redesigned About/section rollout.
 - TODO (future): add email subscriber service integration once live (MailerSend/Mailgun or CSV export) to power footer subscribe form.
 - TypeScript build scaffold added (`resources/ts/`, Vite config); bundle served as `/assets/app.js` (sticky masthead, reorder helper, timeago updates).
 
