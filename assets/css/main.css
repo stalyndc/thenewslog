@@ -507,6 +507,24 @@ a:hover {
     margin-left: 0.75rem;
 }
 
+.btn-secondary--accent {
+    background: linear-gradient(135deg, rgba(228, 173, 98, 0.18) 0%, rgba(228, 173, 98, 0.32) 100%);
+    color: #e4ad62;
+    border: 1px solid rgba(228, 173, 98, 0.45);
+    box-shadow: 0 8px 20px rgba(228, 173, 98, 0.22);
+}
+
+.btn-secondary--accent:hover {
+    box-shadow: 0 10px 24px rgba(228, 173, 98, 0.3);
+}
+
+.section-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0, 173, 181, 0.05) 0%, rgba(0, 173, 181, 0.35) 50%, rgba(0, 173, 181, 0.05) 100%);
+    margin: 1rem 0 1.25rem;
+}
+
 .admin-toolbar form,
 .admin-toolbar__form {
     margin: 0;
