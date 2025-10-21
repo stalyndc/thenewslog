@@ -73,6 +73,12 @@ class App
         if (is_file($localEnv)) {
             $dotenv->usePutenv()->load($localEnv);
         }
+
+        $timezone = getenv('APP_TIMEZONE') ?: 'America/New_York';
+
+        if (@date_default_timezone_set($timezone) === false) {
+            date_default_timezone_set('America/New_York');
+        }
     }
 
     private function registerBindings(): void
