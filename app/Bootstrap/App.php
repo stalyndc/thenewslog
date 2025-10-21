@@ -9,17 +9,22 @@ use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Repositories\TagRepository;
 use App\Services\Auth;
+use App\Services\Csrf;
 use App\Services\Curator;
+use App\Services\Feed\ConditionalClient;
 use App\Services\FeedFetcher;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Dotenv\Dotenv;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use Twig\Markup;
+use Twig\TwigFunction;
 use PDO;
 use PDOException;
-use FeedIo\Factory as FeedIoFactory;
 use FeedIo\FeedIo;
+use GuzzleHttp\Client as GuzzleClient;
+use Psr\Log\LoggerInterface;
 
 class App
 {
@@ -86,11 +91,41 @@ class App
         $this->container->instance(Container::class, $this->container);
 
         $viewsPath = dirname(__DIR__) . '/Views';
+        $logPath = dirname(__DIR__, 2) . '/storage/logs/app.log';
+        $logDirectory = dirname($logPath);
 
-        $this->container->singleton(Environment::class, static function () use ($viewsPath): Environment {
+        if (!is_dir($logDirectory)) {
+            mkdir($logDirectory, 0775, true);
+        }
+
+        $this->container->singleton(Logger::class, static function () use ($logPath): Logger {
+            $logger = new Logger('app');
+            $logger->pushHandler(new StreamHandler($logPath));
+
+            return $logger;
+        });
+
+        $this->container->singleton(LoggerInterface::class, static function (Container $container): LoggerInterface {
+            return $container->get(Logger::class);
+        });
+
+        $this->container->singleton(Csrf::class, static fn (): Csrf => new Csrf());
+
+        $this->container->singleton(Environment::class, static function (Container $container) use ($viewsPath): Environment {
             $loader = new FilesystemLoader($viewsPath);
 
-            return new Environment($loader);
+            $environment = new Environment($loader, [
+                'autoescape' => 'html',
+            ]);
+
+            $environment->addGlobal('csrf_token', $container->get(Csrf::class)->token());
+            $environment->addFunction(new TwigFunction('csrf_field', static function () use ($container): Markup {
+                $token = htmlspecialchars($container->get(Csrf::class)->token(), ENT_QUOTES, 'UTF-8');
+
+                return new Markup('<input type="hidden" name="_token" value="' . $token . '">', 'UTF-8');
+            }));
+
+            return $environment;
         });
 
         $this->container->singleton(Request::class, static fn (): Request => Request::fromGlobals());
@@ -117,27 +152,18 @@ class App
             $container->get(EditionRepository::class),
             $container->get(TagRepository::class)
         ));
-        $this->container->singleton(FeedIo::class, static fn (): FeedIo => FeedIoFactory::create()->getFeedIo());
+        $this->container->singleton(ConditionalClient::class, static fn (): ConditionalClient => new ConditionalClient(new GuzzleClient()));
+        $this->container->singleton(FeedIo::class, static fn (Container $container): FeedIo => new FeedIo(
+            $container->get(ConditionalClient::class),
+            $container->get(LoggerInterface::class)
+        ));
         $this->container->singleton(FeedFetcher::class, static fn (Container $container): FeedFetcher => new FeedFetcher(
             $container->get(FeedRepository::class),
             $container->get(ItemRepository::class),
             $container->get(FeedIo::class),
-            $container->get(Logger::class)
+            $container->get(LoggerInterface::class),
+            $container->get(ConditionalClient::class)
         ));
-
-        $logPath = dirname(__DIR__, 2) . '/storage/logs/app.log';
-        $logDirectory = dirname($logPath);
-
-        if (!is_dir($logDirectory)) {
-            mkdir($logDirectory, 0775, true);
-        }
-
-        $this->container->singleton(Logger::class, static function () use ($logPath): Logger {
-            $logger = new Logger('app');
-            $logger->pushHandler(new StreamHandler($logPath));
-
-            return $logger;
-        });
     }
 
     /**

@@ -22,6 +22,7 @@
 
     {% if links is defined and links|length > 0 %}
         <form method="post" class="form">
+            {{ csrf_field() }}
             <input type="hidden" name="action" value="reorder">
             <div class="order-list" data-reorder-list>
                 {% for link in links %}
@@ -43,6 +44,7 @@
         </form>
 
         <form method="post" class="form form-inline">
+            {{ csrf_field() }}
             <input type="hidden" name="action" value="status">
             {% if edition.status == 'published' %}
                 <input type="hidden" name="status" value="draft">

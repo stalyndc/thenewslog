@@ -2,11 +2,13 @@
 
 namespace App\Controllers\Admin;
 
+use App\Helpers\Url;
 use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Auth;
+use App\Services\Csrf;
 use App\Services\FeedFetcher;
 use Twig\Environment;
 
@@ -16,9 +18,9 @@ class FeedController extends AdminController
 
     private FeedFetcher $fetcher;
 
-    public function __construct(Environment $view, Auth $auth, FeedRepository $feeds, ItemRepository $items, FeedFetcher $fetcher)
+    public function __construct(Environment $view, Auth $auth, Csrf $csrf, FeedRepository $feeds, ItemRepository $items, FeedFetcher $fetcher)
     {
-        parent::__construct($view, $auth, $items, $feeds);
+        parent::__construct($view, $auth, $csrf, $items, $feeds);
         $this->feeds = $feeds;
         $this->fetcher = $fetcher;
     }
@@ -51,6 +53,12 @@ class FeedController extends AdminController
 
     public function store(Request $request): Response
     {
+        $guard = $this->guardCsrf($request);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
         $title = trim((string) $request->input('title'));
         $feedUrl = trim((string) $request->input('feed_url'));
         $siteUrl = trim((string) $request->input('site_url'));
@@ -70,14 +78,41 @@ class FeedController extends AdminController
             return $this->render('admin/feeds.twig', $this->withAdminMetrics($context), 422);
         }
 
-        if ($siteUrl === '') {
-            $siteUrl = $feedUrl;
+        if (!Url::isValid($feedUrl)) {
+            $context = $this->buildContext($request, [
+                'error' => 'Enter a valid feed URL using http or https.',
+                'create_values' => [
+                    'title' => $title,
+                    'feed_url' => $feedUrl,
+                    'site_url' => $siteUrl,
+                    'active' => $active ? 1 : 0,
+                ],
+            ]);
+
+            return $this->render('admin/feeds.twig', $this->withAdminMetrics($context), 422);
         }
+
+        if ($siteUrl !== '' && !Url::isValid($siteUrl)) {
+            $context = $this->buildContext($request, [
+                'error' => 'Enter a valid site URL using http or https.',
+                'create_values' => [
+                    'title' => $title,
+                    'feed_url' => $feedUrl,
+                    'site_url' => $siteUrl,
+                    'active' => $active ? 1 : 0,
+                ],
+            ]);
+
+            return $this->render('admin/feeds.twig', $this->withAdminMetrics($context), 422);
+        }
+
+        $normalizedFeedUrl = Url::normalize($feedUrl);
+        $normalizedSiteUrl = $siteUrl === '' ? $normalizedFeedUrl : Url::normalize($siteUrl);
 
         $this->feeds->ensure([
             'title' => $title,
-            'feed_url' => $feedUrl,
-            'site_url' => $siteUrl,
+            'feed_url' => $normalizedFeedUrl,
+            'site_url' => $normalizedSiteUrl,
             'active' => $active ? 1 : 0,
         ]);
 
@@ -86,6 +121,12 @@ class FeedController extends AdminController
 
     public function update(Request $request, int $id): Response
     {
+        $guard = $this->guardCsrf($request);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
         $feed = $this->feeds->find($id);
 
         if ($feed === null) {
@@ -112,22 +153,57 @@ class FeedController extends AdminController
             return $this->render('admin/feeds.twig', $this->withAdminMetrics($context), 422);
         }
 
-        if ($siteUrl === '') {
-            $siteUrl = $feedUrl;
+        if (!Url::isValid($feedUrl)) {
+            $context = $this->buildContext($request, [
+                'error' => 'Enter a valid feed URL using http or https.',
+                'edit_feed' => [
+                    'id' => $id,
+                    'title' => $title,
+                    'feed_url' => $feedUrl,
+                    'site_url' => $siteUrl,
+                    'active' => $active ? 1 : 0,
+                ],
+            ]);
+
+            return $this->render('admin/feeds.twig', $this->withAdminMetrics($context), 422);
         }
+
+        if ($siteUrl !== '' && !Url::isValid($siteUrl)) {
+            $context = $this->buildContext($request, [
+                'error' => 'Enter a valid site URL using http or https.',
+                'edit_feed' => [
+                    'id' => $id,
+                    'title' => $title,
+                    'feed_url' => $feedUrl,
+                    'site_url' => $siteUrl,
+                    'active' => $active ? 1 : 0,
+                ],
+            ]);
+
+            return $this->render('admin/feeds.twig', $this->withAdminMetrics($context), 422);
+        }
+
+        $normalizedFeedUrl = Url::normalize($feedUrl);
+        $normalizedSiteUrl = $siteUrl === '' ? $normalizedFeedUrl : Url::normalize($siteUrl);
 
         $this->feeds->update($id, [
             'title' => $title,
-            'feed_url' => $feedUrl,
-            'site_url' => $siteUrl,
+            'feed_url' => $normalizedFeedUrl,
+            'site_url' => $normalizedSiteUrl,
             'active' => $active ? 1 : 0,
         ]);
 
         return Response::redirect('/admin/feeds?flash=updated');
     }
 
-    public function destroy(int $id): Response
+    public function destroy(Request $request, int $id): Response
     {
+        $guard = $this->guardCsrf($request);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
         $feed = $this->feeds->find($id);
 
         if ($feed === null) {
@@ -139,8 +215,14 @@ class FeedController extends AdminController
         return Response::redirect('/admin/feeds?flash=deleted');
     }
 
-    public function refresh(): Response
+    public function refresh(Request $request): Response
     {
+        $guard = $this->guardCsrf($request);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
         try {
             $this->fetcher->fetch();
 

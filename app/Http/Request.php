@@ -93,4 +93,11 @@ class Request
     {
         return $this->server[$key] ?? $default;
     }
+
+    public function header(string $name, mixed $default = null): mixed
+    {
+        $normalized = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
+
+        return $this->server[$normalized] ?? $default;
+    }
 }

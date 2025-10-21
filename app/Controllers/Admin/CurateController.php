@@ -10,7 +10,9 @@ use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Repositories\TagRepository;
 use App\Services\Auth;
+use App\Services\Csrf;
 use App\Services\Curator;
+use Psr\Log\LoggerInterface;
 use Twig\Environment;
 
 class CurateController extends AdminController
@@ -25,22 +27,27 @@ class CurateController extends AdminController
 
     private TagRepository $tags;
 
+    private LoggerInterface $logger;
+
     public function __construct(
         Environment $view,
         Auth $auth,
+        Csrf $csrf,
         ItemRepository $items,
         CuratedLinkRepository $curatedLinks,
         EditionRepository $editions,
         Curator $curator,
         TagRepository $tags,
-        FeedRepository $feeds
+        FeedRepository $feeds,
+        LoggerInterface $logger
     ) {
-        parent::__construct($view, $auth, $items, $feeds);
+        parent::__construct($view, $auth, $csrf, $items, $feeds);
         $this->items = $items;
         $this->curatedLinks = $curatedLinks;
         $this->editions = $editions;
         $this->curator = $curator;
         $this->tags = $tags;
+        $this->logger = $logger;
     }
 
     public function show(int $id): Response
@@ -66,6 +73,12 @@ class CurateController extends AdminController
 
     public function store(Request $request, int $id): Response
     {
+        $guard = $this->guardCsrf($request);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
         $payload = [
             'title' => $this->trimOrNull($request->input('title')),
             'blurb' => $this->trimOrNull($request->input('blurb')),
@@ -85,8 +98,11 @@ class CurateController extends AdminController
         } catch (\InvalidArgumentException $exception) {
             $error = $exception->getMessage();
         } catch (\Throwable $exception) {
-            error_log(sprintf('CurateController::store error: %s in %s:%d', $exception->getMessage(), $exception->getFile(), $exception->getLine()));
-            $error = 'Something went wrong while saving the curated link: ' . $exception->getMessage();
+            $this->logger->error('CurateController::store failed', [
+                'error' => $exception->getMessage(),
+                'item_id' => $id,
+            ]);
+            $error = 'Something went wrong while saving the curated link. Please try again.';
         }
 
         $item = $result['item'] ?? $this->safeFindItem($id);
@@ -112,6 +128,12 @@ class CurateController extends AdminController
 
     public function destroy(Request $request, int $id): Response
     {
+        $guard = $this->guardCsrf($request);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
         $item = $this->safeFindItem($id);
 
         if ($item === null) {

@@ -100,9 +100,16 @@ SQL;
         return $this->find($id) ?? $payload;
     }
 
-    public function touchChecked(int $id): bool
+    public function touchChecked(int $id, ?string $etag = null, ?string $lastModified = null): bool
     {
-        return $this->execute('UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP, fail_count = 0 WHERE id = :id', ['id' => $id]);
+        return $this->execute(
+            'UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP, fail_count = 0, http_etag = :etag, last_modified = :last_modified WHERE id = :id',
+            [
+                'id' => $id,
+                'etag' => $etag,
+                'last_modified' => $lastModified,
+            ]
+        );
     }
 
     public function incrementFailCount(int $id): void

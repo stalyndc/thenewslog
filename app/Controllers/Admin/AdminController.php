@@ -3,23 +3,29 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Http\Request;
+use App\Http\Response;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Auth;
+use App\Services\Csrf;
 use Twig\Environment;
 
 abstract class AdminController extends BaseController
 {
     protected Auth $auth;
 
+    protected Csrf $csrf;
+
     private ?ItemRepository $items;
 
     private ?FeedRepository $feeds;
 
-    public function __construct(Environment $view, Auth $auth, ?ItemRepository $items = null, ?FeedRepository $feeds = null)
+    public function __construct(Environment $view, Auth $auth, Csrf $csrf, ?ItemRepository $items = null, ?FeedRepository $feeds = null)
     {
         parent::__construct($view);
         $this->auth = $auth;
+        $this->csrf = $csrf;
         $this->items = $items;
         $this->feeds = $feeds;
 
@@ -81,5 +87,16 @@ abstract class AdminController extends BaseController
         $days = (int) floor($hours / 24);
 
         return sprintf('%d day%s ago', $days, $days === 1 ? '' : 's');
+    }
+
+    protected function guardCsrf(Request $request): ?Response
+    {
+        $token = $this->csrf->extractToken($request);
+
+        if ($this->csrf->validate($token)) {
+            return null;
+        }
+
+        return new Response('', 419);
     }
 }

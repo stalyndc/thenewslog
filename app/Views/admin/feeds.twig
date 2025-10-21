@@ -21,6 +21,7 @@
     <section class="form-section">
         <h3>Add a Feed</h3>
         <form method="post" action="/admin/feeds" class="form">
+            {{ csrf_field() }}
             <div class="form-group">
                 <label for="create-title">Title</label>
                 <input id="create-title" name="title" type="text" class="input-control" value="{{ create_values.title|default('') }}" required>
@@ -53,6 +54,7 @@
         <section class="form-section">
             <h3>Edit Feed: {{ edit_feed.title }}</h3>
             <form method="post" action="/admin/feeds/{{ edit_feed.id }}" class="form">
+                {{ csrf_field() }}
                 <div class="form-group">
                     <label for="edit-title">Title</label>
                     <input id="edit-title" name="title" type="text" class="input-control" value="{{ edit_feed.title }}" required>
@@ -116,6 +118,7 @@
                         <td class="table-actions">
                             <a class="btn btn-secondary btn-inline" href="/admin/feeds?edit={{ feed.id }}{% if page > 1 %}&page={{ page }}{% endif %}">Edit</a>
                             <form method="post" action="/admin/feeds/{{ feed.id }}/delete" class="inline-form" onsubmit="return confirm('Remove this feed?');">
+                                {{ csrf_field() }}
                                 <button type="submit" class="btn btn-danger btn-inline">Delete</button>
                             </form>
                         </td>

@@ -59,6 +59,7 @@
         {% endif %}
 
         <form method="post" class="form">
+            {{ csrf_field() }}
             <div class="form-group">
                 <label for="title">Curated Title</label>
                 <input id="title" name="title" type="text" class="input-control" value="{{ form.title|default('') }}" required>
@@ -96,6 +97,7 @@
         </form>
 
         <form method="post" action="/admin/curate/{{ item.id }}/delete" class="form-inline" onsubmit="return confirm('Delete this item?');">
+            {{ csrf_field() }}
             <button type="submit" class="btn btn-secondary">Delete Item</button>
         </form>
     {% else %}

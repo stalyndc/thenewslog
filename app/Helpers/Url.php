@@ -57,4 +57,43 @@ class Url
 
         return $normalized;
     }
+
+    public static function isValid(string $url): bool
+    {
+        $trimmed = trim($url);
+
+        if ($trimmed === '') {
+            return false;
+        }
+
+        $originalParts = parse_url($trimmed);
+
+        if ($originalParts !== false && isset($originalParts['scheme'])) {
+            $scheme = strtolower((string) $originalParts['scheme']);
+
+            if (!in_array($scheme, ['http', 'https'], true)) {
+                return false;
+            }
+        }
+
+        $normalized = self::normalize($trimmed);
+        $parts = parse_url($normalized);
+
+        if ($parts === false) {
+            return false;
+        }
+
+        $scheme = strtolower($parts['scheme'] ?? '');
+        $host = $parts['host'] ?? '';
+
+        if ($scheme === '' || $host === '') {
+            return false;
+        }
+
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            return false;
+        }
+
+        return filter_var($normalized, FILTER_VALIDATE_URL) !== false;
+    }
 }

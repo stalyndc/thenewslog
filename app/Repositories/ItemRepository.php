@@ -76,7 +76,7 @@ SQL;
 
     public function updateStatus(int $id, string $status): bool
     {
-        $allowed = ['new', 'ignored', 'curated'];
+        $allowed = ['new', 'discarded', 'curated'];
 
         if (!in_array($status, $allowed, true)) {
             throw new \InvalidArgumentException(sprintf('Invalid status "%s"', $status));

@@ -7,6 +7,7 @@ use App\Http\Response;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Auth;
+use App\Services\Csrf;
 use Twig\Environment;
 
 class InboxController extends AdminController
@@ -15,9 +16,9 @@ class InboxController extends AdminController
 
     private FeedRepository $feeds;
 
-    public function __construct(Environment $view, Auth $auth, ItemRepository $items, FeedRepository $feeds)
+    public function __construct(Environment $view, Auth $auth, Csrf $csrf, ItemRepository $items, FeedRepository $feeds)
     {
-        parent::__construct($view, $auth, $items, $feeds);
+        parent::__construct($view, $auth, $csrf, $items, $feeds);
         $this->items = $items;
         $this->feeds = $feeds;
     }
@@ -54,6 +55,12 @@ class InboxController extends AdminController
 
     public function delete(Request $request): Response
     {
+        $guard = $this->guardCsrf($request);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
         $id = (int) $request->input('id', 0);
 
         if ($id > 0) {
@@ -65,11 +72,17 @@ class InboxController extends AdminController
 
     public function ignore(Request $request): Response
     {
+        $guard = $this->guardCsrf($request);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
         $id = (int) $request->input('id', 0);
 
         if ($id > 0) {
             try {
-                $this->items->updateStatus($id, 'ignored');
+                $this->items->updateStatus($id, 'discarded');
             } catch (\Throwable $exception) {
                 return new Response('', 204);
             }

@@ -62,6 +62,11 @@
     </footer>
 </div>
 <script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script>
+    document.addEventListener('htmx:configRequest', function (event) {
+        event.detail.headers['X-CSRF-TOKEN'] = "{{ csrf_token|e('js') }}";
+    });
+</script>
 <link rel="preload" href="/assets/app.js" as="script">
 <script defer src="/assets/app.js"></script>
 </body>

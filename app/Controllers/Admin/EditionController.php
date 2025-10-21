@@ -9,6 +9,7 @@ use App\Repositories\EditionRepository;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Auth;
+use App\Services\Csrf;
 use Twig\Environment;
 
 class EditionController extends AdminController
@@ -17,15 +18,23 @@ class EditionController extends AdminController
 
     private EditionRepository $editions;
 
-    public function __construct(Environment $view, Auth $auth, CuratedLinkRepository $curatedLinks, EditionRepository $editions, ItemRepository $items, FeedRepository $feeds)
+    public function __construct(Environment $view, Auth $auth, Csrf $csrf, CuratedLinkRepository $curatedLinks, EditionRepository $editions, ItemRepository $items, FeedRepository $feeds)
     {
-        parent::__construct($view, $auth, $items, $feeds);
+        parent::__construct($view, $auth, $csrf, $items, $feeds);
         $this->curatedLinks = $curatedLinks;
         $this->editions = $editions;
     }
 
     public function show(Request $request, string $date): Response
     {
+        if ($request->method() === 'POST') {
+            $guard = $this->guardCsrf($request);
+
+            if ($guard !== null) {
+                return $guard;
+            }
+        }
+
         $edition = $this->editions->ensureForDate($date);
 
         if ($request->method() === 'POST') {

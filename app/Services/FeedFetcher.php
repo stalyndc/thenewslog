@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Helpers\Url;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
+use App\Services\Feed\ConditionalClient;
 use FeedIo\FeedIo;
 use FeedIo\Feed\ItemInterface;
 use FeedIo\Reader\ReadErrorException;
@@ -23,16 +24,20 @@ class FeedFetcher
 
     private LoggerInterface $logger;
 
+    private ConditionalClient $client;
+
     public function __construct(
         FeedRepository $feeds,
         ItemRepository $items,
         FeedIo $feedIo,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ConditionalClient $client
     ) {
         $this->feeds = $feeds;
         $this->items = $items;
         $this->feedIo = $feedIo;
         $this->logger = $logger;
+        $this->client = $client;
     }
 
     public function fetch(): void
@@ -48,13 +53,34 @@ class FeedFetcher
     private function fetchFeed(array $feed): void
     {
         try {
-            $result = $this->feedIo->read($feed['feed_url']);
+            $modifiedSince = $this->resolveModifiedSince($feed['last_modified'] ?? null);
+            $this->client->setConditionalHeaders($feed['http_etag'] ?? null);
+
+            $result = $this->feedIo->read($feed['feed_url'], null, $modifiedSince);
+
+            if (!$result->getResponse()->isModified()) {
+                $metadata = $this->extractMetadata($feed, $result);
+                $this->feeds->touchChecked((int) $feed['id'], $metadata['etag'], $metadata['last_modified']);
+
+                $this->logger->info('Feed not modified', [
+                    'feed' => $feed['feed_url'],
+                    'etag' => $metadata['etag'],
+                    'last_modified' => $metadata['last_modified'],
+                ]);
+
+                return;
+            }
+
             $inserted = $this->processFeedResult($feed, $result);
-            $this->feeds->touchChecked((int) $feed['id']);
+
+            $metadata = $this->extractMetadata($feed, $result);
+            $this->feeds->touchChecked((int) $feed['id'], $metadata['etag'], $metadata['last_modified']);
 
             $this->logger->info('Feed processed', [
                 'feed' => $feed['feed_url'],
                 'inserted' => $inserted,
+                'etag' => $metadata['etag'],
+                'last_modified' => $metadata['last_modified'],
             ]);
         } catch (ReadErrorException $exception) {
             $this->feeds->incrementFailCount((int) $feed['id']);
@@ -109,5 +135,66 @@ class FeedFetcher
         }
 
         return $inserted;
+    }
+
+    private function resolveModifiedSince(?string $value): ?\DateTime
+    {
+        if ($value === null || trim($value) === '') {
+            return null;
+        }
+
+        try {
+            return new \DateTime($value);
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $feed
+     *
+     * @return array{etag: string|null, last_modified: string|null}
+     */
+    private function extractMetadata(array $feed, Result $result): array
+    {
+        $response = $result->getResponse();
+
+        $etag = $this->firstHeader($response->getHeader('ETag'));
+        $lastModified = null;
+
+        $responseModified = $response->getLastModified();
+
+        if ($responseModified instanceof \DateTimeInterface) {
+            $lastModified = $responseModified->format(\DateTimeInterface::RFC2822);
+        } else {
+            $lastModified = $this->firstHeader($response->getHeader('Last-Modified'));
+        }
+
+        if ($etag === null) {
+            $etag = $feed['http_etag'] ?? null;
+        }
+
+        if ($lastModified === null) {
+            $lastModified = $feed['last_modified'] ?? null;
+        }
+
+        return [
+            'etag' => $etag,
+            'last_modified' => $lastModified,
+        ];
+    }
+
+    /**
+     * @param iterable<int, string> $values
+     */
+    private function firstHeader(iterable $values): ?string
+    {
+        foreach ($values as $value) {
+            if (is_string($value) && $value !== '') {
+                return $value;
+            }
+        }
+
+        return null;
     }
 }
