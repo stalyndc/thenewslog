@@ -554,6 +554,10 @@ a:hover {
     flex-wrap: wrap;
 }
 
+.table-actions .btn-inline:first-child {
+    margin-left: 0;
+}
+
 .inline-form {
     display: inline;
     margin: 0;
@@ -625,6 +629,11 @@ a:hover {
     border-radius: 12px;
     background-color: rgba(34, 40, 49, 0.8);
     border: 1px solid rgba(238, 238, 238, 0.08);
+}
+
+.order-row.is-dragging {
+    opacity: 0.6;
+    border-style: dashed;
 }
 
 .input-order {

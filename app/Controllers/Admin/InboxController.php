@@ -63,6 +63,21 @@ class InboxController extends AdminController
         return new Response('', 204);
     }
 
+    public function ignore(Request $request): Response
+    {
+        $id = (int) $request->input('id', 0);
+
+        if ($id > 0) {
+            try {
+                $this->items->updateStatus($id, 'ignored');
+            } catch (\Throwable $exception) {
+                return new Response('', 204);
+            }
+        }
+
+        return new Response('', 204);
+    }
+
     private function buildContext(Request $request): array
     {
         $page = max(1, (int) $request->query('page', 1));
