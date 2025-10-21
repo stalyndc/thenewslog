@@ -7,6 +7,7 @@
 - Replaced raw exception messages in the curator workflow with Monolog logging to prevent information leakage.
 - Converted the admin logout endpoint into a CSRF-protected POST workflow and updated the UI to submit tokenized forms.
 - Ensured HTMX-based inbox actions send CSRF headers so ignore/delete operations continue functioning after the security hardening.
+- Added HTMX redirect handling so inbox actions automatically refresh, preventing stale rows after deletion or ignore.
 
 ## Feed Ingestion Enhancements
 - Implemented conditional fetching by persisting `ETag` and `Last-Modified` headers on feeds and reusing them for future requests.

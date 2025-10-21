@@ -52,7 +52,7 @@ class Csrf
             return $input;
         }
 
-        $header = $request->header('X-CSRF-TOKEN');
+        $header = $request->header('HX-CSRF-TOKEN');
 
         return is_string($header) && $header !== '' ? $header : null;
     }

@@ -67,7 +67,10 @@ class InboxController extends AdminController
             $this->items->delete($id);
         }
 
-        return new Response('', 204);
+        $response = new Response('', 204);
+        $response->setHeader('HX-Redirect', '/admin/inbox');
+
+        return $response;
     }
 
     public function ignore(Request $request): Response
@@ -88,7 +91,10 @@ class InboxController extends AdminController
             }
         }
 
-        return new Response('', 204);
+        $response = new Response('', 204);
+        $response->setHeader('HX-Redirect', '/admin/inbox');
+
+        return $response;
     }
 
     private function buildContext(Request $request): array
