@@ -67,8 +67,8 @@ class InboxController extends AdminController
             $this->items->delete($id);
         }
 
-        $response = new Response('', 204);
-        $response->setHeader('HX-Redirect', '/admin/inbox');
+        $response = new Response('', 200);
+        $response->setHeader('HX-Refresh', 'true');
 
         return $response;
     }
@@ -87,12 +87,15 @@ class InboxController extends AdminController
             try {
                 $this->items->updateStatus($id, 'discarded');
             } catch (\Throwable $exception) {
-                return new Response('', 204);
+                $response = new Response('', 200);
+                $response->setHeader('HX-Refresh', 'true');
+
+                return $response;
             }
         }
 
-        $response = new Response('', 204);
-        $response->setHeader('HX-Redirect', '/admin/inbox');
+        $response = new Response('', 200);
+        $response->setHeader('HX-Refresh', 'true');
 
         return $response;
     }

@@ -26,14 +26,12 @@
                                 class="btn btn-secondary btn-inline"
                                 hx-post="/admin/inbox/ignore"
                                 hx-vals='{"id":"{{ item.id }}"}'
-                                hx-headers='{"X-CSRF-TOKEN":"{{ csrf_token }}"}'
                                 hx-target="#row-{{ item.id }}"
                                 hx-swap="outerHTML">Ignore</button>
                         <button type="button"
                                 class="btn btn-danger btn-inline"
                                 hx-post="/admin/inbox/delete"
                                 hx-vals='{"id":"{{ item.id }}"}'
-                                hx-headers='{"X-CSRF-TOKEN":"{{ csrf_token }}"}'
                                 hx-target="#row-{{ item.id }}"
                                 hx-swap="outerHTML"
                                 onclick="return confirm('Delete this item?');">Delete</button>

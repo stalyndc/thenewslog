@@ -18,8 +18,10 @@
 - Resolved the inbox status bug by aligning item dismissal with the existing `discarded` enum value.
 - Added validation and normalization for feed URLs before persistence to prevent malformed sources.
 - Injected CSRF tokens into all admin templates (login, inbox actions, curation, edition management, and feed CRUD).
+- Wired CSRF-protected inbox actions to trigger automatic HTMX refreshes so lists update immediately after ignore/delete.
 
 ## Supporting Infrastructure
 - Bootstrapped container bindings for the new services (CSRF, custom FeedIo client, PSR logger interface) and ensured Twig receives the shared token.
 - Exposed convenient Twig globals/functions for templates and HTMX to consume.
 - Added an idempotent upgrade script (`scripts/upgrade_20241021_add_feed_headers.sql`) and a legacy-safe fallback path for feeds missing the new header columns.
+- Harmonized front-end relative time handling so the stream badge now shows hours/days when appropriate.

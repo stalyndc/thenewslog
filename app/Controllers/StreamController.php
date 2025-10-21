@@ -70,10 +70,15 @@ class StreamController extends BaseController
         }
 
         $latest = max($timestamps);
-        $diffMinutes = max(0, (int) floor((time() - $latest) / 60));
+        $diffSeconds = max(0, time() - $latest);
         $iso = gmdate('c', $latest);
 
-        $relative = $diffMinutes === 0 ? 'Just now' : sprintf('%d min ago', $diffMinutes);
+        $relative = match (true) {
+            $diffSeconds < 60 => 'Just now',
+            $diffSeconds < 3600 => sprintf('%d min ago', (int) floor($diffSeconds / 60)),
+            $diffSeconds < 86400 => sprintf('%d hr%s ago', (int) floor($diffSeconds / 3600), ((int) floor($diffSeconds / 3600)) === 1 ? '' : 's'),
+            default => sprintf('%d day%s ago', (int) floor($diffSeconds / 86400), ((int) floor($diffSeconds / 86400)) === 1 ? '' : 's'),
+        };
 
         return [
             'relative' => $relative,

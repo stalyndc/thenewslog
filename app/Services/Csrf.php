@@ -52,8 +52,16 @@ class Csrf
             return $input;
         }
 
-        $header = $request->header('HX-CSRF-TOKEN');
+        $headerNames = ['HX-CSRF-TOKEN', 'X-CSRF-TOKEN'];
 
-        return is_string($header) && $header !== '' ? $header : null;
+        foreach ($headerNames as $name) {
+            $header = $request->header($name);
+
+            if (is_string($header) && $header !== '') {
+                return $header;
+            }
+        }
+
+        return null;
     }
 }
