@@ -693,6 +693,7 @@ a:hover {
     margin-bottom: 1.2rem;
     font-size: 0.95rem;
     border-left: 4px solid transparent;
+    transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .alert--success {
@@ -705,6 +706,12 @@ a:hover {
     background-color: rgba(255, 107, 107, 0.12);
     border-color: var(--color-error);
     color: #ffdada;
+}
+
+.alert.is-hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
 }
 
 table {

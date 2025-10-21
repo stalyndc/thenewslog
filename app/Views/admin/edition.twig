@@ -13,11 +13,11 @@
     </header>
 
     {% if error %}
-        <div class="alert alert--error">{{ error }}</div>
+        <div class="alert alert--error" data-auto-dismiss="10000">{{ error }}</div>
     {% endif %}
 
     {% if message %}
-        <div class="alert alert--success">{{ message }}</div>
+        <div class="alert alert--success" data-auto-dismiss="10000">{{ message }}</div>
     {% endif %}
 
     {% if links is defined and links|length > 0 %}

@@ -7,10 +7,10 @@
     <div class="badge">Editor Inbox</div>
     <h2>New Items</h2>
     {% if message %}
-        <div class="alert alert--success">{{ message }}</div>
+        <div class="alert alert--success" data-auto-dismiss="10000">{{ message }}</div>
     {% endif %}
     {% if error %}
-        <div class="alert alert--error">{{ error }}</div>
+        <div class="alert alert--error" data-auto-dismiss="10000">{{ error }}</div>
     {% endif %}
     <div class="admin-toolbar">
         <form method="post" action="/admin/feeds/refresh" class="admin-toolbar__form">

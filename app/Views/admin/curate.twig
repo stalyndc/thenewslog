@@ -8,11 +8,11 @@
     <h2>Curate Item</h2>
 
     {% if error %}
-        <div class="alert alert--error">{{ error }}</div>
+        <div class="alert alert--error" data-auto-dismiss="10000">{{ error }}</div>
     {% endif %}
 
     {% if message %}
-        <div class="alert alert--success">{{ message }}</div>
+        <div class="alert alert--success" data-auto-dismiss="10000">{{ message }}</div>
     {% endif %}
 
     {% if item %}
