@@ -5,6 +5,7 @@
 - Added a dedicated `Csrf` service plus controller guard helpers to validate tokens server-side.
 - Strengthened the `Auth` service with session regeneration, idle timeout enforcement, and cleaner logout handling.
 - Replaced raw exception messages in the curator workflow with Monolog logging to prevent information leakage.
+- Converted the admin logout endpoint into a CSRF-protected POST workflow and updated the UI to submit tokenized forms.
 
 ## Feed Ingestion Enhancements
 - Implemented conditional fetching by persisting `ETag` and `Last-Modified` headers on feeds and reusing them for future requests.
@@ -19,3 +20,4 @@
 ## Supporting Infrastructure
 - Bootstrapped container bindings for the new services (CSRF, custom FeedIo client, PSR logger interface) and ensured Twig receives the shared token.
 - Exposed convenient Twig globals/functions for templates and HTMX to consume.
+- Added an idempotent upgrade script (`scripts/upgrade_20241021_add_feed_headers.sql`) and a legacy-safe fallback path for feeds missing the new header columns.

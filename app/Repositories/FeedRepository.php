@@ -102,14 +102,32 @@ SQL;
 
     public function touchChecked(int $id, ?string $etag = null, ?string $lastModified = null): bool
     {
-        return $this->execute(
-            'UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP, fail_count = 0, http_etag = :etag, last_modified = :last_modified WHERE id = :id',
-            [
-                'id' => $id,
-                'etag' => $etag,
-                'last_modified' => $lastModified,
-            ]
-        );
+        try {
+            return $this->execute(
+                'UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP, fail_count = 0, http_etag = :etag, last_modified = :last_modified WHERE id = :id',
+                [
+                    'id' => $id,
+                    'etag' => $etag,
+                    'last_modified' => $lastModified,
+                ]
+            );
+        } catch (\PDOException $exception) {
+            if ($this->isMissingHeaderColumns($exception)) {
+                return $this->execute(
+                    'UPDATE feeds SET last_checked_at = CURRENT_TIMESTAMP, fail_count = 0 WHERE id = :id',
+                    ['id' => $id]
+                );
+            }
+
+            throw $exception;
+        }
+    }
+
+    private function isMissingHeaderColumns(\PDOException $exception): bool
+    {
+        $message = $exception->getMessage();
+
+        return str_contains($message, 'http_etag') || str_contains($message, 'last_modified');
     }
 
     public function incrementFailCount(int $id): void

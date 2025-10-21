@@ -218,7 +218,7 @@ class App
         $this->router->post('/admin/feeds/{id}/delete', 'App\Controllers\Admin\FeedController@destroy');
         $this->router->post('/admin/inbox/delete', 'App\Controllers\Admin\InboxController@delete');
         $this->router->post('/admin/inbox/ignore', 'App\Controllers\Admin\InboxController@ignore');
-        $this->router->get('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
+        $this->router->post('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
         $this->router->get('/stream', 'App\Controllers\StreamController@__invoke');
         $this->router->get('/tags', 'App\Controllers\TagController@index');
         $this->router->get('/tags/{slug}', 'App\Controllers\TagController@show');

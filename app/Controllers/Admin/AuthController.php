@@ -57,8 +57,18 @@ class AuthController extends BaseController
         ]);
     }
 
-    public function logout(): Response
+    public function logout(Request $request): Response
     {
+        if (!$request->isPost()) {
+            return Response::redirect('/admin');
+        }
+
+        $token = $this->csrf->extractToken($request);
+
+        if (!$this->csrf->validate($token)) {
+            return Response::redirect('/admin');
+        }
+
         $this->auth->logout();
 
         return Response::redirect('/admin');
