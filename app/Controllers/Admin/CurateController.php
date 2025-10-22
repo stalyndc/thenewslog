@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Helpers\Encoding;
 use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
@@ -66,14 +67,14 @@ class CurateController extends AdminController
 
             if ($curated) {
                 try {
-                    $edition = $this->editions->findByCuratedLink((int) $curated['id']);
+                    $edition = $this->sanitizeEdition($this->editions->findByCuratedLink((int) $curated['id']));
                 } catch (\Throwable $e) {
                     $this->log('error', 'Failed to fetch edition for curated link', ['curated_id' => $curated['id'], 'error' => $e->getMessage()]);
                 }
 
                 try {
                     $tagMap = $this->tags->tagsForCuratedLinks([(int) $curated['id']]);
-                    $existingTags = $tagMap[(int) $curated['id']] ?? [];
+                    $existingTags = $this->sanitizeTags($tagMap[(int) $curated['id']] ?? []);
                 } catch (\Throwable $e) {
                     $this->log('error', 'Failed to fetch tags for curated link', ['curated_id' => $curated['id'], 'error' => $e->getMessage()]);
                 }
@@ -127,13 +128,13 @@ class CurateController extends AdminController
             $error = 'Something went wrong while saving the curated link. Please try again.';
         }
 
-        $item = $result['item'] ?? $this->safeFindItem($id);
-        $curated = $result['curated'] ?? $this->resolveCuratedFromItem($item);
-        $edition = $result['edition'] ?? ($curated ? $this->editions->findByCuratedLink((int) $curated['id']) : null);
+        $item = $this->sanitizeItem($result['item'] ?? $this->safeFindItem($id));
+        $curated = $this->sanitizeCurated($result['curated'] ?? $this->resolveCuratedFromItem($item));
+        $edition = $this->sanitizeEdition($result['edition'] ?? ($curated ? $this->editions->findByCuratedLink((int) $curated['id']) : null));
         $existingTags = [];
         if ($curated) {
             $tagMap = $this->tags->tagsForCuratedLinks([(int) $curated['id']]);
-            $existingTags = $tagMap[(int) $curated['id']] ?? [];
+            $existingTags = $this->sanitizeTags($tagMap[(int) $curated['id']] ?? []);
         }
 
         $form = $this->buildFormState($item, $curated, $payload, $existingTags);
@@ -180,7 +181,7 @@ class CurateController extends AdminController
         }
 
         try {
-            return $this->curatedLinks->findByItem($item['id']);
+            return $this->sanitizeCurated($this->curatedLinks->findByItem($item['id']));
         } catch (\Throwable $exception) {
             return null;
         }
@@ -192,24 +193,36 @@ class CurateController extends AdminController
         $defaultDate = date('Y-m-d');
 
         if ($curated) {
-            $existingEdition = $this->editions->findByCuratedLink((int) $curated['id']);
+            $existingEdition = $this->sanitizeEdition($this->editions->findByCuratedLink((int) $curated['id']));
             $defaultDate = $existingEdition['edition_date'] ?? $defaultDate;
         }
 
+        $titleSource = $payload['title'] ?? ($curated['title'] ?? ($item['title'] ?? ''));
+        $blurbSource = $payload['blurb'] ?? ($curated['blurb'] ?? '');
+        $editionDateSource = $payload['edition_date'] ?? $defaultDate;
+
+        $title = Encoding::ensureUtf8(is_string($titleSource) ? $titleSource : (string) $titleSource) ?? '';
+        $blurb = Encoding::ensureUtf8(is_string($blurbSource) ? $blurbSource : (string) $blurbSource) ?? '';
+        $editionDate = Encoding::ensureUtf8(is_string($editionDateSource) ? $editionDateSource : (string) $editionDateSource) ?? '';
+
+        if ($editionDate === '') {
+            $editionDate = $defaultDate;
+        }
+
         return [
-            'title' => $payload['title'] ?? ($curated['title'] ?? ($item['title'] ?? '')),
-            'blurb' => $payload['blurb'] ?? ($curated['blurb'] ?? ''),
-            'edition_date' => $payload['edition_date'] ?? $defaultDate,
+            'title' => $title,
+            'blurb' => $blurb,
+            'edition_date' => $editionDate,
             'is_pinned' => (bool) ($payload['is_pinned'] ?? (((int) ($curated['is_pinned'] ?? 0)) === 1)),
             'publish_now' => (bool) ($payload['publish_now'] ?? false),
-            'tags' => $this->tagsToString($payload['tags'] ?? null, $existingTags),
+            'tags' => Encoding::ensureUtf8($this->tagsToString($payload['tags'] ?? null, $existingTags)) ?? '',
         ];
     }
 
     private function safeFindItem(int $id): ?array
     {
         try {
-            return $this->items->find($id);
+            return $this->sanitizeItem($this->items->find($id));
         } catch (\Throwable $exception) {
             return null;
         }
@@ -229,17 +242,119 @@ class CurateController extends AdminController
     private function tagsToString(null|string|array $payloadTags, array $existingTags): string
     {
         if (is_string($payloadTags)) {
-            return $payloadTags;
+            return Encoding::ensureUtf8($payloadTags) ?? '';
         }
 
         if (is_array($payloadTags)) {
-            return implode(', ', $payloadTags);
+            $sanitized = [];
+
+            foreach ($payloadTags as $tag) {
+                if (!is_string($tag) && !is_int($tag)) {
+                    continue;
+                }
+
+                $clean = Encoding::ensureUtf8((string) $tag) ?? '';
+
+                if ($clean !== '') {
+                    $sanitized[] = $clean;
+                }
+            }
+
+            return implode(', ', $sanitized);
         }
 
         if (!empty($existingTags)) {
-            return implode(', ', array_map(static fn ($tag) => $tag['name'], $existingTags));
+            $names = [];
+
+            foreach ($existingTags as $tag) {
+                if (!is_array($tag) || !isset($tag['name']) || !is_string($tag['name'])) {
+                    continue;
+                }
+
+                $clean = Encoding::ensureUtf8($tag['name']) ?? '';
+
+                if ($clean !== '') {
+                    $names[] = $clean;
+                }
+            }
+
+            return implode(', ', $names);
         }
 
         return '';
+    }
+
+    private function sanitizeItem(?array $item): ?array
+    {
+        if ($item === null) {
+            return null;
+        }
+
+        foreach (['title', 'feed_title', 'source_name', 'summary_raw', 'author'] as $field) {
+            if (isset($item[$field]) && is_string($item[$field])) {
+                $item[$field] = Encoding::ensureUtf8($item[$field]) ?? '';
+            }
+        }
+
+        if (isset($item['url']) && is_string($item['url'])) {
+            $item['url'] = Encoding::ensureUtf8($item['url']) ?? '';
+        }
+
+        return $item;
+    }
+
+    private function sanitizeCurated(?array $curated): ?array
+    {
+        if ($curated === null) {
+            return null;
+        }
+
+        foreach (['title', 'blurb', 'source_name', 'source_url', 'curator_notes', 'tags_csv'] as $field) {
+            if (isset($curated[$field]) && is_string($curated[$field])) {
+                $curated[$field] = Encoding::ensureUtf8($curated[$field]) ?? '';
+            }
+        }
+
+        return $curated;
+    }
+
+    private function sanitizeEdition(?array $edition): ?array
+    {
+        if ($edition === null) {
+            return null;
+        }
+
+        foreach (['edition_date', 'status', 'title', 'intro'] as $field) {
+            if (isset($edition[$field]) && is_string($edition[$field])) {
+                $edition[$field] = Encoding::ensureUtf8($edition[$field]) ?? '';
+            }
+        }
+
+        return $edition;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $tags
+     * @return array<int, array<string, mixed>>
+     */
+    private function sanitizeTags(array $tags): array
+    {
+        foreach ($tags as &$tag) {
+            if (!is_array($tag)) {
+                continue;
+            }
+
+            if (isset($tag['name']) && is_string($tag['name'])) {
+                $tag['name'] = Encoding::ensureUtf8($tag['name']) ?? '';
+            }
+
+            if (isset($tag['slug']) && is_string($tag['slug'])) {
+                $tag['slug'] = Encoding::ensureUtf8($tag['slug']) ?? '';
+            }
+        }
+
+        unset($tag);
+
+        return $tags;
     }
 }
