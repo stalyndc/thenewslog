@@ -14,6 +14,7 @@ use App\Services\Curator;
 use App\Services\Feed\ConditionalClient;
 use App\Services\FeedFetcher;
 use App\Services\RateLimiter;
+use App\Services\Validator;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Dotenv\Dotenv;
@@ -36,6 +37,7 @@ class App
     public function __construct()
     {
         $this->bootstrapEnvironment();
+        $this->validateDependencies();
 
         $this->container = new Container();
         $this->registerBindings();
@@ -84,6 +86,27 @@ class App
 
         if (@date_default_timezone_set($timezone) === false) {
             date_default_timezone_set('America/New_York');
+        }
+    }
+
+    private function validateDependencies(): void
+    {
+        $required = ['BASE_URL', 'DB_HOST', 'DB_NAME', 'DB_USER'];
+        $missing = [];
+
+        foreach ($required as $key) {
+            $value = getenv($key);
+
+            if ($value === false || $value === '') {
+                $missing[] = $key;
+            }
+        }
+
+        if (!empty($missing)) {
+            throw new \RuntimeException(sprintf(
+                'Missing required environment variables: %s',
+                implode(', ', $missing)
+            ));
         }
     }
 
@@ -143,6 +166,7 @@ class App
 
         $this->container->singleton(Auth::class, static fn (): Auth => new Auth());
         $this->container->singleton(RateLimiter::class, static fn (): RateLimiter => new RateLimiter());
+        $this->container->singleton(Validator::class, static fn (): Validator => new Validator());
         $this->container->singleton(FeedRepository::class, static fn (Container $container): FeedRepository => new FeedRepository($container->get(PDO::class)));
         $this->container->singleton(ItemRepository::class, static fn (Container $container): ItemRepository => new ItemRepository($container->get(PDO::class)));
         $this->container->singleton(CuratedLinkRepository::class, static fn (Container $container): CuratedLinkRepository => new CuratedLinkRepository($container->get(PDO::class)));
