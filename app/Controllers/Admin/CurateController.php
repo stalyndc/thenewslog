@@ -52,29 +52,45 @@ class CurateController extends AdminController
 
     public function show(int $id): Response
     {
-        $item = $this->safeFindItem($id);
+        try {
+            $item = $this->safeFindItem($id);
 
-        if ($item === null) {
-            $this->log('warning', 'Curate page requested for non-existent item', ['item_id' => $id]);
-            return Response::redirect('/admin/inbox?flash=missing');
+            if ($item === null) {
+                $this->log('warning', 'Curate page requested for non-existent item', ['item_id' => $id]);
+                return Response::redirect('/admin/inbox?flash=missing');
+            }
+
+            $curated = $this->resolveCuratedFromItem($item);
+            $edition = null;
+            $existingTags = [];
+
+            if ($curated) {
+                try {
+                    $edition = $this->editions->findByCuratedLink((int) $curated['id']);
+                } catch (\Throwable $e) {
+                    $this->log('error', 'Failed to fetch edition for curated link', ['curated_id' => $curated['id'], 'error' => $e->getMessage()]);
+                }
+
+                try {
+                    $tagMap = $this->tags->tagsForCuratedLinks([(int) $curated['id']]);
+                    $existingTags = $tagMap[(int) $curated['id']] ?? [];
+                } catch (\Throwable $e) {
+                    $this->log('error', 'Failed to fetch tags for curated link', ['curated_id' => $curated['id'], 'error' => $e->getMessage()]);
+                }
+            }
+
+            $form = $this->buildFormState($item, $curated, null, $existingTags);
+
+            return $this->render('admin/curate.twig', $this->withAdminMetrics([
+                'item' => $item,
+                'curated' => $curated,
+                'edition' => $edition,
+                'form' => $form,
+            ]));
+        } catch (\Throwable $e) {
+            $this->log('error', 'CurateController::show() failed', ['item_id' => $id, 'error' => $e->getMessage()]);
+            return Response::redirect('/admin/inbox?flash=error');
         }
-
-        $curated = $this->resolveCuratedFromItem($item);
-        $edition = $curated ? $this->editions->findByCuratedLink((int) $curated['id']) : null;
-        $existingTags = [];
-        if ($curated) {
-            $tagMap = $this->tags->tagsForCuratedLinks([(int) $curated['id']]);
-            $existingTags = $tagMap[(int) $curated['id']] ?? [];
-        }
-
-        $form = $this->buildFormState($item, $curated, null, $existingTags);
-
-        return $this->render('admin/curate.twig', $this->withAdminMetrics([
-            'item' => $item,
-            'curated' => $curated,
-            'edition' => $edition,
-            'form' => $form,
-        ]));
     }
 
     public function store(Request $request, int $id): Response
