@@ -12,9 +12,17 @@ $failures = [];
 $invalid = "Hello\xB1World";
 $sanitized = Encoding::ensureUtf8($invalid);
 
+$isUtf8 = function (string $value): bool {
+    if (function_exists('mb_check_encoding')) {
+        return mb_check_encoding($value, 'UTF-8');
+    }
+
+    return @preg_match('//u', $value) === 1;
+};
+
 if (!is_string($sanitized)) {
     $failures[] = 'Sanitized value should be a string.';
-} elseif (!mb_check_encoding($sanitized, 'UTF-8')) {
+} elseif (!$isUtf8($sanitized)) {
     $failures[] = 'Sanitized value should be valid UTF-8.';
 } elseif (strpos($sanitized, "\xB1") !== false) {
     $failures[] = 'Sanitized value should not contain original invalid byte.';
