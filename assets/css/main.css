@@ -7,7 +7,7 @@
     --color-text: #eeeeee;
     --color-muted: rgba(238, 238, 238, 0.65);
     --color-accent: #00adb5;
-    --color-pin: #f2b56b;
+    --color-pin: #E84545;
     --color-border: rgba(238, 238, 238, 0.1);
     --color-error: #ff6b6b;
     --max-width: 960px;
@@ -236,8 +236,8 @@ a:hover {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(242, 181, 107, 0.18);
-    border: 1px solid rgba(242, 181, 107, 0.55);
+    background: rgba(232, 69, 69, 0.18);
+    border: 1px solid rgba(232, 69, 69, 0.55);
     color: var(--color-pin);
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
     pointer-events: none;
@@ -676,6 +676,27 @@ a:hover {
 
 .order-row__body {
     flex: 1;
+}
+
+.order-row__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+
+.order-pin {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.6rem;
+    margin-right: 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background-color: rgba(232, 69, 69, 0.18);
+    color: var(--color-pin);
 }
 
 .order-title {

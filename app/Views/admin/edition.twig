@@ -23,23 +23,32 @@
     {% if links is defined and links|length > 0 %}
         <form method="post" class="form">
             {{ csrf_field() }}
-            <input type="hidden" name="action" value="reorder">
             <div class="order-list" data-reorder-list>
                 {% for link in links %}
                     <div class="order-row" data-id="{{ link.id }}">
                         <input type="number" name="positions[{{ link.id }}]" value="{{ link.position|default(loop.index) }}" min="1" class="input-order" data-order-input>
                         <div class="order-row__body">
-                            <p class="order-title">{{ link.title }}</p>
+                            <p class="order-title">
+                                {% if link.is_pinned %}
+                                    <span class="order-pin">Pinned</span>
+                                {% endif %}
+                                {{ link.title }}
+                            </p>
                             {% if link.blurb %}
                                 <p class="order-blurb">{{ link.blurb }}</p>
                             {% endif %}
                         </div>
-                        <a class="order-link" href="/admin/curate/{{ link.item_id }}">Edit</a>
+                        <div class="order-row__actions">
+                            <button type="submit" name="action" value="pin:{{ link.id }}:{% if link.is_pinned %}0{% else %}1{% endif %}" class="btn btn-secondary btn-inline">
+                                {% if link.is_pinned %}Unpin{% else %}Pin{% endif %}
+                            </button>
+                            <a class="order-link" href="/admin/curate/{{ link.item_id }}">Edit</a>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Save Order</button>
+                <button type="submit" name="action" value="reorder" class="btn btn-primary">Save Order</button>
             </div>
         </form>
 

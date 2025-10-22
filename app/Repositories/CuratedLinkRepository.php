@@ -17,7 +17,7 @@ FROM curated_links cl
 LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id
 LEFT JOIN editions e ON e.id = ecl.edition_id
 WHERE cl.published_at IS NOT NULL
-ORDER BY cl.published_at DESC, cl.id DESC
+ORDER BY cl.is_pinned DESC, cl.published_at DESC, cl.id DESC
 LIMIT %d
 SQL;
 
@@ -68,7 +68,7 @@ JOIN edition_curated_link ecl ON ecl.edition_id = e.id
 JOIN curated_links cl ON cl.id = ecl.curated_link_id
 WHERE e.edition_date = :edition_date
   AND cl.published_at IS NOT NULL
-ORDER BY ecl.position ASC, cl.published_at DESC
+ORDER BY cl.is_pinned DESC, ecl.position ASC, cl.published_at DESC
 LIMIT :limit
 SQL;
 
@@ -203,13 +203,181 @@ SQL;
         return (int) ($result['next'] ?? 1);
     }
 
+    public function pivotForCuratedLink(int $curatedLinkId): ?array
+    {
+        return $this->fetch(
+            'SELECT edition_id, position FROM edition_curated_link WHERE curated_link_id = :curated_link_id LIMIT 1',
+            ['curated_link_id' => $curatedLinkId]
+        );
+    }
+
+    public function detachFromEdition(int $editionId, int $curatedLinkId): void
+    {
+        $pivot = $this->fetch(
+            'SELECT position FROM edition_curated_link WHERE edition_id = :edition_id AND curated_link_id = :curated_link_id',
+            [
+                'edition_id' => $editionId,
+                'curated_link_id' => $curatedLinkId,
+            ]
+        );
+
+        if ($pivot === null) {
+            return;
+        }
+
+        $position = (int) $pivot['position'];
+
+        $this->connection->beginTransaction();
+
+        try {
+            $this->execute(
+                'DELETE FROM edition_curated_link WHERE edition_id = :edition_id AND curated_link_id = :curated_link_id',
+                [
+                    'edition_id' => $editionId,
+                    'curated_link_id' => $curatedLinkId,
+                ]
+            );
+
+            $this->execute(
+                'UPDATE edition_curated_link SET position = position - 1 WHERE edition_id = :edition_id AND position > :position',
+                [
+                    'edition_id' => $editionId,
+                    'position' => $position,
+                ]
+            );
+
+            $this->connection->commit();
+        } catch (\Throwable $exception) {
+            $this->connection->rollBack();
+            throw $exception;
+        }
+    }
+
+    public function positionAfterPinned(int $editionId): int
+    {
+        $result = $this->fetch(
+            'SELECT COUNT(*) AS pinned_count FROM edition_curated_link ecl JOIN curated_links cl ON cl.id = ecl.curated_link_id WHERE ecl.edition_id = :edition_id AND cl.is_pinned = 1',
+            ['edition_id' => $editionId]
+        );
+
+        $count = (int) ($result['pinned_count'] ?? 0);
+
+        return max(1, $count + 1);
+    }
+
+    public function attachToEditionAtPosition(int $curatedLinkId, int $editionId, int $position): void
+    {
+        $position = max(1, $position);
+
+        $this->connection->beginTransaction();
+
+        try {
+            $this->execute(
+                'UPDATE edition_curated_link SET position = position + 1 WHERE edition_id = :edition_id AND position >= :position',
+                [
+                    'edition_id' => $editionId,
+                    'position' => $position,
+                ]
+            );
+
+            $this->execute(
+                'INSERT INTO edition_curated_link (edition_id, curated_link_id, position) VALUES (:edition_id, :curated_link_id, :position)',
+                [
+                    'edition_id' => $editionId,
+                    'curated_link_id' => $curatedLinkId,
+                    'position' => $position,
+                ]
+            );
+
+            $this->connection->commit();
+        } catch (\Throwable $exception) {
+            $this->connection->rollBack();
+            throw $exception;
+        }
+    }
+
+    public function attachToEditionAtTop(int $curatedLinkId, int $editionId): void
+    {
+        $this->attachToEditionAtPosition($curatedLinkId, $editionId, 1);
+    }
+
+    public function moveToTopOfEdition(int $curatedLinkId, int $editionId): void
+    {
+        $pivot = $this->fetch(
+            'SELECT position FROM edition_curated_link WHERE edition_id = :edition_id AND curated_link_id = :curated_link_id',
+            [
+                'edition_id' => $editionId,
+                'curated_link_id' => $curatedLinkId,
+            ]
+        );
+
+        if ($pivot === null) {
+            $this->attachToEditionAtTop($curatedLinkId, $editionId);
+
+            return;
+        }
+
+        $position = (int) $pivot['position'];
+
+        $this->connection->beginTransaction();
+
+        try {
+            $this->execute(
+                'DELETE FROM edition_curated_link WHERE edition_id = :edition_id AND curated_link_id = :curated_link_id',
+                [
+                    'edition_id' => $editionId,
+                    'curated_link_id' => $curatedLinkId,
+                ]
+            );
+
+            $this->execute(
+                'UPDATE edition_curated_link SET position = position - 1 WHERE edition_id = :edition_id AND position > :position',
+                [
+                    'edition_id' => $editionId,
+                    'position' => $position,
+                ]
+            );
+
+            $this->execute(
+                'UPDATE edition_curated_link SET position = position + 1 WHERE edition_id = :edition_id',
+                [
+                    'edition_id' => $editionId,
+                ]
+            );
+
+            $this->execute(
+                'INSERT INTO edition_curated_link (edition_id, curated_link_id, position) VALUES (:edition_id, :curated_link_id, 1)',
+                [
+                    'edition_id' => $editionId,
+                    'curated_link_id' => $curatedLinkId,
+                ]
+            );
+
+            $this->connection->commit();
+        } catch (\Throwable $exception) {
+            $this->connection->rollBack();
+            throw $exception;
+        }
+    }
+
+    public function setPinned(int $curatedLinkId, bool $isPinned): bool
+    {
+        return $this->execute(
+            'UPDATE curated_links SET is_pinned = :is_pinned, updated_at = CURRENT_TIMESTAMP WHERE id = :id',
+            [
+                'id' => $curatedLinkId,
+                'is_pinned' => $isPinned ? 1 : 0,
+            ]
+        );
+    }
+
     public function stream(int $page = 1, int $perPage = 20): array
     {
         $perPage = max(1, min(100, $perPage));
         $page = max(1, $page);
         $offset = ($page - 1) * $perPage;
 
-        $sql = 'SELECT cl.*, e.edition_date FROM curated_links cl LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id LEFT JOIN editions e ON e.id = ecl.edition_id WHERE cl.published_at IS NOT NULL ORDER BY cl.published_at DESC, cl.created_at DESC LIMIT :limit OFFSET :offset';
+        $sql = 'SELECT cl.*, e.edition_date FROM curated_links cl LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id LEFT JOIN editions e ON e.id = ecl.edition_id WHERE cl.published_at IS NOT NULL ORDER BY cl.is_pinned DESC, cl.published_at DESC, cl.created_at DESC LIMIT :limit OFFSET :offset';
 
         $statement = $this->connection->prepare($sql);
         $statement->bindValue(':limit', $perPage, \PDO::PARAM_INT);
@@ -253,7 +421,7 @@ LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id
 LEFT JOIN editions e ON e.id = ecl.edition_id
 WHERE clt.tag_id = :tag_id
   AND cl.published_at IS NOT NULL
-ORDER BY cl.published_at DESC, cl.created_at DESC
+ORDER BY cl.is_pinned DESC, cl.published_at DESC, cl.created_at DESC
 LIMIT :limit OFFSET :offset
 SQL;
 

@@ -50,6 +50,22 @@ class EditionController extends AdminController
                     return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=order');
                 }
 
+                if (is_string($action) && str_starts_with($action, 'pin:')) {
+                    [$pinKeyword, $linkPart, $statePart] = array_pad(explode(':', $action, 3), 3, null);
+                    $linkId = (int) ($linkPart ?? 0);
+                    $shouldPin = ($statePart ?? '1') === '1';
+
+                    if ($linkId > 0) {
+                        $this->curatedLinks->setPinned($linkId, $shouldPin);
+
+                        if ($shouldPin) {
+                            $this->curatedLinks->moveToTopOfEdition($linkId, (int) $edition['id']);
+                        }
+                    }
+
+                    return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=' . ($shouldPin ? 'pinned' : 'unpinned'));
+                }
+
                 if ($action === 'status') {
                     $status = $request->input('status', 'draft');
                     $this->editions->updateStatus((int) $edition['id'], $status === 'published' ? 'published' : 'draft');
@@ -72,6 +88,8 @@ class EditionController extends AdminController
             'order' => 'Edition order updated.',
             'published' => 'Edition marked as published.',
             'draft' => 'Edition reverted to draft.',
+            'pinned' => 'Link pinned and promoted to the top.',
+            'unpinned' => 'Link unpinned.',
             default => null,
         };
 

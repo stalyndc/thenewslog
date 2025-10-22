@@ -68,17 +68,32 @@ class Curator
             'published_at' => $publishedAt,
         ];
 
+        $edition = $this->editions->ensureForDate($editionDate);
+        $editionId = (int) $edition['id'];
+
         if ($existing !== null) {
-            $this->curatedLinks->update((int) $existing['id'], $attributes);
             $curatedId = (int) $existing['id'];
+            $previousPivot = $this->curatedLinks->pivotForCuratedLink($curatedId);
+
+            $this->curatedLinks->update($curatedId, $attributes);
+
+            $previousEditionId = $previousPivot['edition_id'] ?? null;
+
+            if ($previousEditionId === null || (int) $previousEditionId !== $editionId) {
+                if ($previousEditionId !== null) {
+                    $this->curatedLinks->detachFromEdition((int) $previousEditionId, $curatedId);
+                }
+
+                $position = $isPinned ? 1 : $this->curatedLinks->positionAfterPinned($editionId);
+                $this->curatedLinks->attachToEditionAtPosition($curatedId, $editionId, $position);
+            } elseif ($isPinned) {
+                $this->curatedLinks->moveToTopOfEdition($curatedId, $editionId);
+            }
         } else {
             $curatedId = $this->curatedLinks->create($attributes);
+            $position = $isPinned ? 1 : $this->curatedLinks->positionAfterPinned($editionId);
+            $this->curatedLinks->attachToEditionAtPosition($curatedId, $editionId, $position);
         }
-
-        $edition = $this->editions->ensureForDate($editionDate);
-        $this->curatedLinks->detachFromEditions($curatedId);
-        $position = $this->curatedLinks->nextPositionForEdition((int) $edition['id']);
-        $this->curatedLinks->attachToEdition($curatedId, (int) $edition['id'], $position);
 
         $tags = isset($input['tags']) ? $this->splitTags($input['tags']) : [];
         $this->tags->syncForCuratedLink($curatedId, $tags);
