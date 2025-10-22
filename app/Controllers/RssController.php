@@ -65,10 +65,21 @@ class RssController
         $itemsXml = [];
 
         foreach ($links as $linkRow) {
+            if (!is_array($linkRow)) {
+                continue;
+            }
+
+            $id = $linkRow['id'] ?? null;
+            $itemTitle = $linkRow['title'] ?? '';
             $itemLink = $linkRow['source_url'] ?? $linkRow['url'] ?? $link;
-            $guid = $linkRow['url'] ?? ($this->baseUrl() . '/curated/' . $linkRow['id']);
+            $blurb = $linkRow['blurb'] ?? '';
+
+            if ($id === null || $itemTitle === '' || $itemLink === '') {
+                continue;
+            }
+
+            $guid = $linkRow['url'] ?? ($this->baseUrl() . '/curated/' . $id);
             $pubDate = $this->formatRssDate($linkRow['published_at'] ?? $linkRow['updated_at'] ?? null);
-            $descriptionContent = $linkRow['blurb'] ?? '';
 
             $itemsXml[] = sprintf(
                 "    <item>\n" .
@@ -78,10 +89,10 @@ class RssController
                 "      <description><![CDATA[%s]]></description>\n" .
                 "%s" .
                 "    </item>",
-                htmlspecialchars($linkRow['title'] ?? '', ENT_XML1 | ENT_COMPAT, 'UTF-8'),
+                htmlspecialchars($itemTitle, ENT_XML1 | ENT_COMPAT, 'UTF-8'),
                 htmlspecialchars($itemLink, ENT_XML1 | ENT_COMPAT, 'UTF-8'),
                 htmlspecialchars($guid, ENT_XML1 | ENT_COMPAT, 'UTF-8'),
-                $descriptionContent,
+                htmlspecialchars($blurb, ENT_XML1 | ENT_COMPAT, 'UTF-8'),
                 $pubDate ? "      <pubDate>{$pubDate}</pubDate>\n" : ''
             );
         }

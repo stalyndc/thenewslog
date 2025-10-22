@@ -19,6 +19,27 @@ abstract class BaseRepository
         $this->connection = $connection;
     }
 
+    public function beginTransaction(): void
+    {
+        if (!$this->connection->inTransaction()) {
+            $this->connection->beginTransaction();
+        }
+    }
+
+    public function commit(): void
+    {
+        if ($this->connection->inTransaction()) {
+            $this->connection->commit();
+        }
+    }
+
+    public function rollback(): void
+    {
+        if ($this->connection->inTransaction()) {
+            $this->connection->rollBack();
+        }
+    }
+
     /**
      * @param array<string, mixed> $parameters
      *

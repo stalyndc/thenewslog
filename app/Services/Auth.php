@@ -72,11 +72,10 @@ class Auth
             return false;
         }
 
-        if (strcasecmp(trim($email), $configuredEmail) !== 0) {
-            return false;
-        }
+        $emailMatches = strcasecmp(trim($email), $configuredEmail) === 0;
+        $passwordVerified = password_verify($password, $configuredHash);
 
-        return password_verify($password, $configuredHash);
+        return $emailMatches && $passwordVerified;
     }
 
     private function sessionTimeout(): int

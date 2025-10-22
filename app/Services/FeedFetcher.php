@@ -102,36 +102,45 @@ class FeedFetcher
         $resource = $result->getFeed();
         $inserted = 0;
 
-        /** @var ItemInterface $item */
-        foreach ($resource as $item) {
-            $link = $item->getLink();
+        $this->items->beginTransaction();
 
-            if ($link === null) {
-                continue;
+        try {
+            /** @var ItemInterface $item */
+            foreach ($resource as $item) {
+                $link = $item->getLink();
+
+                if ($link === null) {
+                    continue;
+                }
+
+                $normalizedUrl = Url::normalize($link);
+                $hash = sha1($normalizedUrl);
+
+                if ($this->items->findByHash($hash) !== null) {
+                    continue;
+                }
+
+                $publishedAt = $item->getLastModified() ?: $item->getPublishedDate();
+
+                $this->items->create([
+                    'feed_id' => (int) $feed['id'],
+                    'title' => $item->getTitle() ?: $link,
+                    'url' => $normalizedUrl,
+                    'url_hash' => $hash,
+                    'summary_raw' => $item->getContent() ?: null,
+                    'author' => $item->getAuthor()?->getName(),
+                    'published_at' => $publishedAt ? $publishedAt->format('Y-m-d H:i:s') : null,
+                    'source_name' => $resource->getTitle() ?: $feed['title'],
+                    'status' => 'new',
+                ]);
+
+                $inserted++;
             }
 
-            $normalizedUrl = Url::normalize($link);
-            $hash = sha1($normalizedUrl);
-
-            if ($this->items->findByHash($hash) !== null) {
-                continue;
-            }
-
-            $publishedAt = $item->getLastModified() ?: $item->getPublishedDate();
-
-            $this->items->create([
-                'feed_id' => (int) $feed['id'],
-                'title' => $item->getTitle() ?: $link,
-                'url' => $normalizedUrl,
-                'url_hash' => $hash,
-                'summary_raw' => $item->getContent() ?: null,
-                'author' => $item->getAuthor()?->getName(),
-                'published_at' => $publishedAt ? $publishedAt->format('Y-m-d H:i:s') : null,
-                'source_name' => $resource->getTitle() ?: $feed['title'],
-                'status' => 'new',
-            ]);
-
-            $inserted++;
+            $this->items->commit();
+        } catch (\Throwable $exception) {
+            $this->items->rollback();
+            throw $exception;
         }
 
         return $inserted;

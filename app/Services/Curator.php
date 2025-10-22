@@ -114,12 +114,38 @@ class Curator
         }
 
         if (is_array($value)) {
-            return $value;
+            return $this->validateTags($value);
         }
 
         $parts = array_map('trim', explode(',', $value));
+        $filtered = array_filter($parts, static fn (string $tag): bool => $tag !== '');
 
-        return array_filter($parts, static fn (string $tag): bool => $tag !== '');
+        return $this->validateTags($filtered);
+    }
+
+    /**
+     * @param array<int|string, mixed> $tags
+     * @return array<int, string>
+     */
+    private function validateTags(array $tags): array
+    {
+        $validated = [];
+
+        foreach ($tags as $tag) {
+            if (!is_string($tag) && !is_int($tag)) {
+                continue;
+            }
+
+            $tagStr = trim((string) $tag);
+
+            if ($tagStr === '' || strlen($tagStr) > 100) {
+                continue;
+            }
+
+            $validated[] = $tagStr;
+        }
+
+        return array_unique($validated);
     }
 
     private function resolveEditionDate(?string $date): string
@@ -128,7 +154,13 @@ class Curator
             return date('Y-m-d');
         }
 
-        $timestamp = strtotime($date);
+        $trimmed = trim($date);
+
+        if (strlen($trimmed) > 10) {
+            return date('Y-m-d');
+        }
+
+        $timestamp = strtotime($trimmed);
 
         if ($timestamp === false) {
             return date('Y-m-d');
