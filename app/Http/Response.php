@@ -48,6 +48,7 @@ class Response
 
     public function send(): void
     {
+        $this->applySecurityHeaders();
         http_response_code($this->status);
 
         foreach ($this->headers as $name => $value) {
@@ -55,6 +56,31 @@ class Response
         }
 
         echo $this->content;
+    }
+
+    private function applySecurityHeaders(): void
+    {
+        if (!isset($this->headers['X-Content-Type-Options'])) {
+            $this->headers['X-Content-Type-Options'] = 'nosniff';
+        }
+
+        if (!isset($this->headers['X-Frame-Options'])) {
+            $this->headers['X-Frame-Options'] = 'DENY';
+        }
+
+        if (!isset($this->headers['X-XSS-Protection'])) {
+            $this->headers['X-XSS-Protection'] = '1; mode=block';
+        }
+
+        if (!isset($this->headers['Referrer-Policy'])) {
+            $this->headers['Referrer-Policy'] = 'strict-origin-when-cross-origin';
+        }
+
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+            if (!isset($this->headers['Strict-Transport-Security'])) {
+                $this->headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains';
+            }
+        }
     }
 
     public static function json(mixed $data, int $status = 200): self

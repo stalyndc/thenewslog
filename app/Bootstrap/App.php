@@ -189,16 +189,31 @@ class App
 
         $username = $config['user'] ?? 'root';
         $password = $config['password'] ?? '';
+        $maxRetries = 3;
+        $lastException = null;
 
-        try {
-            return new PDO($dsn, $username, $password, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ]);
-        } catch (PDOException $exception) {
-            throw new \RuntimeException('Database connection failed: ' . $exception->getMessage(), 0, $exception);
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                return new PDO($dsn, $username, $password, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ]);
+            } catch (PDOException $exception) {
+                $lastException = $exception;
+
+                if ($attempt < $maxRetries) {
+                    sleep(1);
+                    continue;
+                }
+            }
         }
+
+        throw new \RuntimeException(
+            sprintf('Database connection failed after %d attempts: %s', $maxRetries, $lastException?->getMessage() ?? 'Unknown error'),
+            0,
+            $lastException
+        );
     }
 
     private function registerRoutes(): void

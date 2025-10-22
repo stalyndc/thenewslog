@@ -6,7 +6,9 @@ class Auth
 {
     public const SESSION_KEY = 'admin_authenticated';
 
-    private const SESSION_TIMEOUT = 3600;
+    private const DEFAULT_SESSION_TIMEOUT = 3600;
+    private const MIN_SESSION_TIMEOUT = 300;
+    private const MAX_SESSION_TIMEOUT = 86400;
 
     public function attempt(?string $email, ?string $password): bool
     {
@@ -85,11 +87,11 @@ class Auth
         if ($configured !== false && $configured !== null && $configured !== '') {
             $value = (int) $configured;
 
-            if ($value >= 300) {
+            if ($value >= self::MIN_SESSION_TIMEOUT && $value <= self::MAX_SESSION_TIMEOUT) {
                 return $value;
             }
         }
 
-        return self::SESSION_TIMEOUT;
+        return self::DEFAULT_SESSION_TIMEOUT;
     }
 }
