@@ -28,8 +28,6 @@ class CurateController extends AdminController
 
     private TagRepository $tags;
 
-    private LoggerInterface $logger;
-
     public function __construct(
         Environment $view,
         Auth $auth,
@@ -48,7 +46,6 @@ class CurateController extends AdminController
         $this->editions = $editions;
         $this->curator = $curator;
         $this->tags = $tags;
-        $this->logger = $logger;
     }
 
     public function show(int $id): Response
