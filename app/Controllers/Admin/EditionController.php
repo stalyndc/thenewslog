@@ -68,9 +68,31 @@ class EditionController extends AdminController
 
                 if ($action === 'status') {
                     $status = $request->input('status', 'draft');
-                    $this->editions->updateStatus((int) $edition['id'], $status === 'published' ? 'published' : 'draft');
+                    $scheduledForInput = $request->input('scheduled_for');
+                    $scheduledAt = $this->parseScheduledFor($scheduledForInput);
+                    $editionId = (int) $edition['id'];
 
-                    return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=' . ($status === 'published' ? 'published' : 'draft'));
+                    if ($status === 'scheduled') {
+                        if ($scheduledAt === null) {
+                            return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=missing_schedule');
+                        }
+
+                        $this->editions->updateStatus($editionId, 'scheduled', $scheduledAt);
+
+                        return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=scheduled');
+                    }
+
+                    if ($status === 'published') {
+                        $publishedAt = date('Y-m-d H:i:s');
+                        $this->editions->updateStatus($editionId, 'published', null, $publishedAt);
+                        $this->curatedLinks->publishAllForEdition($editionId, $publishedAt);
+
+                        return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=published');
+                    }
+
+                    $this->editions->updateStatus($editionId, 'draft');
+
+                    return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=draft');
                 }
             } catch (\Throwable) {
                 return Response::redirect('/admin/edition/' . $edition['edition_date'] . '?flash=error');
@@ -90,10 +112,15 @@ class EditionController extends AdminController
             'draft' => 'Edition reverted to draft.',
             'pinned' => 'Link pinned and promoted to the top.',
             'unpinned' => 'Link unpinned.',
+            'scheduled' => 'Edition scheduled.',
             default => null,
         };
 
-        $error = $flash === 'error' ? 'Unable to update edition. Please try again.' : null;
+        $error = match ($flash) {
+            'error' => 'Unable to update edition. Please try again.',
+            'missing_schedule' => 'Please add a go-live date/time before scheduling this edition.',
+            default => null,
+        };
 
         return $this->render('admin/edition.twig', $this->withAdminMetrics([
             'date' => $edition['edition_date'],
@@ -102,5 +129,20 @@ class EditionController extends AdminController
             'message' => $error ? null : $message,
             'error' => $error,
         ]));
+    }
+
+    private function parseScheduledFor(?string $value): ?string
+    {
+        if ($value === null || trim($value) === '') {
+            return null;
+        }
+
+        $timestamp = strtotime($value);
+
+        if ($timestamp === false) {
+            return null;
+        }
+
+        return date('Y-m-d H:i:s', $timestamp);
     }
 }

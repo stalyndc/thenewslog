@@ -70,7 +70,7 @@ SQL;
         return $this->fetch($sql, ['curated_link_id' => $curatedLinkId]);
     }
 
-    public function updateStatus(int $editionId, string $status): void
+    public function updateStatus(int $editionId, string $status, ?string $scheduledFor = null, ?string $publishedAtOverride = null): void
     {
         $allowed = ['draft', 'scheduled', 'published'];
 
@@ -79,16 +79,33 @@ SQL;
         }
 
         $publishedAt = null;
+        $scheduledValue = null;
+        $isPublished = $status === 'published' ? 1 : 0;
 
         if ($status === 'published') {
-            $publishedAt = date('Y-m-d H:i:s');
+            $publishedAt = $publishedAtOverride ?? date('Y-m-d H:i:s');
+        } elseif ($status === 'scheduled') {
+            if ($scheduledFor === null) {
+                throw new \InvalidArgumentException('Scheduled editions require a "scheduled_for" timestamp.');
+            }
+            $scheduledValue = $scheduledFor;
+        }
+
+        if ($status === 'scheduled') {
+            $publishedAt = null;
+        }
+
+        if ($status === 'draft') {
+            $scheduledValue = null;
         }
 
         $this->execute(
-            'UPDATE editions SET status = :status, published_at = :published_at, updated_at = CURRENT_TIMESTAMP WHERE id = :id',
+            'UPDATE editions SET status = :status, is_published = :is_published, published_at = :published_at, scheduled_for = :scheduled_for, updated_at = CURRENT_TIMESTAMP WHERE id = :id',
             [
                 'status' => $status,
                 'published_at' => $publishedAt,
+                'scheduled_for' => $scheduledValue,
+                'is_published' => $isPublished,
                 'id' => $editionId,
             ]
         );
@@ -142,5 +159,38 @@ LIMIT 1
 SQL;
 
         return $this->fetch($sql, ['edition_date' => $date]);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function dueForPublication(int $limit = 20): array
+    {
+        $limit = max(1, min(50, $limit));
+
+        $sql = <<<'SQL'
+SELECT *
+FROM editions
+WHERE status = 'scheduled'
+  AND scheduled_for IS NOT NULL
+  AND scheduled_for <= :now
+ORDER BY scheduled_for ASC
+LIMIT :limit
+SQL;
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(':now', date('Y-m-d H:i:s'));
+        $statement->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll() ?: [];
+    }
+
+    public function clearSchedule(int $editionId): void
+    {
+        $this->execute(
+            'UPDATE editions SET scheduled_for = NULL WHERE id = :id',
+            ['id' => $editionId]
+        );
     }
 }

@@ -509,6 +509,22 @@ a:hover {
     gap: 0.75rem;
 }
 
+.form-actions--stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.form-actions--stacked .btn {
+    width: 100%;
+    max-width: 220px;
+}
+
+.input-control--compact {
+    max-width: 280px;
+}
+
 .form-inline {
     margin-top: 1.5rem;
 }

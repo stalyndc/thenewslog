@@ -371,6 +371,27 @@ SQL;
         );
     }
 
+    public function publishAllForEdition(int $editionId, ?string $publishedAt = null): void
+    {
+        $timestamp = $publishedAt ?? date('Y-m-d H:i:s');
+
+        $this->execute(
+            <<<'SQL'
+UPDATE curated_links cl
+JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id
+SET cl.published_at = :published_at,
+    cl.is_published = 1,
+    cl.updated_at = CURRENT_TIMESTAMP
+WHERE ecl.edition_id = :edition_id
+  AND cl.published_at IS NULL
+SQL,
+            [
+                'edition_id' => $editionId,
+                'published_at' => $timestamp,
+            ]
+        );
+    }
+
     public function stream(int $page = 1, int $perPage = 20): array
     {
         $perPage = max(1, min(100, $perPage));

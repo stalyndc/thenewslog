@@ -48,12 +48,14 @@ CREATE TABLE IF NOT EXISTS editions (
     status ENUM('draft','scheduled','published') NOT NULL DEFAULT 'draft',
     is_published TINYINT(1) NOT NULL DEFAULT 0,
     published_at DATETIME NULL,
+    scheduled_for DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_editions_date (edition_date),
     UNIQUE KEY uk_editions_slug (slug),
     KEY idx_editions_status (status),
     KEY idx_editions_is_published (is_published, edition_date),
+    KEY idx_editions_schedule (status, scheduled_for),
     `date` DATE GENERATED ALWAYS AS (edition_date) STORED
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

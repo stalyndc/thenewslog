@@ -8,7 +8,15 @@
         <div class="badge">Edition • {{ date }}</div>
         <h2>Manage Daily Edition</h2>
         {% if edition %}
-            <p class="edition-meta">Status: <strong>{{ edition.status|capitalize }}</strong>{% if edition.published_at %} • Published {{ edition.published_at }}{% endif %}</p>
+            <p class="edition-meta">
+                Status: <strong>{{ edition.status|capitalize }}</strong>
+                {% if edition.status == 'scheduled' and edition.scheduled_for %}
+                    • Scheduled for {{ edition.scheduled_for|date('M j, Y g:ia') }}
+                {% endif %}
+                {% if edition.published_at %}
+                    • Published {{ edition.published_at }}
+                {% endif %}
+            </p>
         {% endif %}
     </header>
 
@@ -52,16 +60,19 @@
             </div>
         </form>
 
-        <form method="post" class="form form-inline">
+        <form method="post" class="form form-inline form-schedule">
             {{ csrf_field() }}
             <input type="hidden" name="action" value="status">
-            {% if edition.status == 'published' %}
-                <input type="hidden" name="status" value="draft">
-                <button type="submit" class="btn btn-primary">Revert to Draft</button>
-            {% else %}
-                <input type="hidden" name="status" value="published">
-                <button type="submit" class="btn btn-primary">Publish Edition</button>
-            {% endif %}
+            <div class="form-group form-group--inline">
+                <label for="scheduled_for">Go live at</label>
+                {% set scheduled_value = edition.scheduled_for ? edition.scheduled_for|date('Y-m-d\\TH:i') : '' %}
+                <input id="scheduled_for" name="scheduled_for" type="datetime-local" class="input-control input-control--compact" value="{{ scheduled_value }}">
+            </div>
+            <div class="form-actions form-actions--stacked">
+                <button type="submit" name="status" value="draft" class="btn btn-secondary">Save as Draft</button>
+                <button type="submit" name="status" value="scheduled" class="btn btn-secondary">Schedule Edition</button>
+                <button type="submit" name="status" value="published" class="btn btn-primary">Publish Now</button>
+            </div>
         </form>
     {% else %}
         <div class="empty-state">
