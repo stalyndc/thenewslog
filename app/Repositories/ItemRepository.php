@@ -1,10 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
+/**
+ * Repository for managing RSS feed items.
+ *
+ * Handles CRUD operations and querying for feed items ingested from RSS feeds.
+ * Items can have statuses: 'new', 'discarded', or 'curated'.
+ */
 class ItemRepository extends BaseRepository
 {
     /**
+     * Get paginated inbox items (status='new').
+     *
+     * @param int $limit Items per page (1-100, default 25)
+     * @param int $page Page number (default 1)
+     * @param int|null $feedId Optional feed filter
      * @return array<int, array<string, mixed>>
      */
     public function inbox(int $limit = 25, int $page = 1, ?int $feedId = null): array
@@ -38,6 +51,11 @@ SQL;
     }
 
 
+    /**
+     * Find a single item by ID with feed details.
+     *
+     * @return array<string, mixed>|null
+     */
     public function find(int $id): ?array
     {
         $sql = <<<'SQL'
@@ -50,11 +68,22 @@ SQL;
         return $this->fetch($sql, ['id' => $id]);
     }
 
+    /**
+     * Find an item by its URL hash (duplicate detection).
+     *
+     * @return array<string, mixed>|null
+     */
     public function findByHash(string $hash): ?array
     {
         return $this->fetch('SELECT * FROM items WHERE url_hash = :hash', ['hash' => $hash]);
     }
 
+    /**
+     * Create a new item from feed entry.
+     *
+     * @param array<string, mixed> $attributes Item data
+     * @return int Inserted item ID
+     */
     public function create(array $attributes): int
     {
         $sql = <<<'SQL'
@@ -80,6 +109,12 @@ SQL;
         ]);
     }
 
+    /**
+     * Update item status with validation.
+     *
+     * @param string $status One of: 'new', 'discarded', 'curated'
+     * @throws \InvalidArgumentException If status is invalid
+     */
     public function updateStatus(int $id, string $status): bool
     {
         $allowed = ['new', 'discarded', 'curated'];
@@ -96,6 +131,9 @@ SQL;
         ]);
     }
 
+    /**
+     * Mark an item as curated (status='curated').
+     */
     public function markCurated(int $id): bool
     {
         $sql = 'UPDATE items SET status = \'curated\', updated_at = CURRENT_TIMESTAMP WHERE id = :id';
@@ -103,6 +141,11 @@ SQL;
         return $this->execute($sql, ['id' => $id]);
     }
 
+    /**
+     * Count new (unprocessed) items, optionally by feed.
+     *
+     * @param int|null $feedId Optional filter by feed ID
+     */
     public function countNew(?int $feedId = null): int
     {
         if ($feedId === null) {
@@ -117,6 +160,11 @@ SQL;
         return (int) ($row['aggregate'] ?? 0);
     }
 
+    /**
+     * Count items by status.
+     *
+     * @param string $status Item status ('new', 'discarded', 'curated')
+     */
     public function countByStatus(string $status): int
     {
         $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM items WHERE status = :status', ['status' => $status]);
@@ -124,6 +172,9 @@ SQL;
         return (int) ($row['aggregate'] ?? 0);
     }
 
+    /**
+     * Delete an item by ID (cascade deletes related curated_links).
+     */
     public function delete(int $id): bool
     {
         return $this->execute('DELETE FROM items WHERE id = :id', ['id' => $id]);
