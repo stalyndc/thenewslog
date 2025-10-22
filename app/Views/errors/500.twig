@@ -1,0 +1,14 @@
+{% extends 'layout.twig' %}
+
+{% block title %}500 — Server Error{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Something went wrong</h2>
+    <p>An unexpected server error occurred. Please try again later.</p>
+    {% if message is defined and message %}
+        <p><code>{{ message|e }}</code></p>
+    {% endif %}
+    <p><a href="/">Return to home</a></p>
+</section>
+{% endblock %}

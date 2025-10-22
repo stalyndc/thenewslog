@@ -99,4 +99,60 @@ class Response
 
         return $response;
     }
+
+    /**
+     * Create a response with cache control headers.
+     *
+     * @param string $content Response body
+     * @param int $maxAge Cache duration in seconds (0 = no-store)
+     * @param bool $isPublic Whether cache is public or private
+     */
+    public static function cached(string $content, int $maxAge = 3600, bool $isPublic = false): self
+    {
+        $response = new self($content);
+        $response->setHeader('Content-Type', 'text/html; charset=utf-8');
+
+        if ($maxAge === 0) {
+            $response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        } else {
+            $visibility = $isPublic ? 'public' : 'private';
+            $response->setHeader('Cache-Control', sprintf('%s, max-age=%d', $visibility, $maxAge));
+        }
+
+        return $response;
+    }
+
+    /**
+     * Set Content Security Policy header.
+     *
+     * @param array<string, string|string[]> $directives CSP directives
+     */
+    public function setCsp(array $directives): void
+    {
+        $parts = [];
+
+        foreach ($directives as $directive => $sources) {
+            $sourcesStr = is_array($sources) ? implode(' ', $sources) : $sources;
+            $parts[] = sprintf('%s %s', $directive, $sourcesStr);
+        }
+
+        $this->setHeader('Content-Security-Policy', implode('; ', $parts));
+    }
+
+    /**
+     * Set X-Content-Security-Policy for older browsers (report-only).
+     *
+     * @param array<string, string|string[]> $directives CSP directives
+     */
+    public function setCspReportOnly(array $directives): void
+    {
+        $parts = [];
+
+        foreach ($directives as $directive => $sources) {
+            $sourcesStr = is_array($sources) ? implode(' ', $sources) : $sources;
+            $parts[] = sprintf('%s %s', $directive, $sourcesStr);
+        }
+
+        $this->setHeader('Content-Security-Policy-Report-Only', implode('; ', $parts));
+    }
 }

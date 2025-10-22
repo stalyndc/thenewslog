@@ -1,0 +1,15 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Error{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Error</h2>
+    {% if error is defined and error %}
+        <p>{{ error|e }}</p>
+    {% else %}
+        <p>An error occurred while processing your request.</p>
+    {% endif %}
+    <p><a href="/">Return to home</a></p>
+</section>
+{% endblock %}
