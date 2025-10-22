@@ -12,23 +12,29 @@ class ItemRepository extends BaseRepository
         $limit = max(1, min(100, $limit));
         $page = max(1, $page);
         $offset = ($page - 1) * $limit;
+
+        $where = 'WHERE items.status = \'new\'';
+        $params = [];
+
+        if ($feedId !== null) {
+            $where .= ' AND items.feed_id = :feed_id';
+            $params['feed_id'] = $feedId;
+        }
+
         $sql = <<<'SQL'
 SELECT items.*, feeds.title AS feed_title
 FROM items
 JOIN feeds ON feeds.id = items.feed_id
-WHERE items.status = 'new'
+%s
 ORDER BY items.published_at IS NULL, items.published_at DESC, items.created_at DESC
-LIMIT %d OFFSET %d
+LIMIT :limit OFFSET :offset
 SQL;
 
-        $sql = sprintf($sql, $limit, $offset);
+        $sql = sprintf($sql, $where);
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
 
-        if ($feedId !== null) {
-            $sql = str_replace('WHERE items.status = \'new\'', 'WHERE items.status = \'new\' AND items.feed_id = :feed_id', $sql);
-            return $this->fetchAll($sql, ['feed_id' => $feedId]);
-        }
-
-        return $this->fetchAll($sql);
+        return $this->fetchAll($sql, $params);
     }
 
 

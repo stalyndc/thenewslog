@@ -51,7 +51,7 @@ abstract class BaseRepository
     {
         $statement = $this->prepare($sql, $parameters);
 
-        return true;
+        return $statement->rowCount() > 0;
     }
 
     /**

@@ -13,6 +13,7 @@ use App\Services\Csrf;
 use App\Services\Curator;
 use App\Services\Feed\ConditionalClient;
 use App\Services\FeedFetcher;
+use App\Services\RateLimiter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Dotenv\Dotenv;
@@ -141,6 +142,7 @@ class App
         });
 
         $this->container->singleton(Auth::class, static fn (): Auth => new Auth());
+        $this->container->singleton(RateLimiter::class, static fn (): RateLimiter => new RateLimiter());
         $this->container->singleton(FeedRepository::class, static fn (Container $container): FeedRepository => new FeedRepository($container->get(PDO::class)));
         $this->container->singleton(ItemRepository::class, static fn (Container $container): ItemRepository => new ItemRepository($container->get(PDO::class)));
         $this->container->singleton(CuratedLinkRepository::class, static fn (Container $container): CuratedLinkRepository => new CuratedLinkRepository($container->get(PDO::class)));
