@@ -7,6 +7,7 @@
     --color-text: #eeeeee;
     --color-muted: rgba(238, 238, 238, 0.65);
     --color-accent: #00adb5;
+    --color-pin: #f2b56b;
     --color-border: rgba(238, 238, 238, 0.1);
     --color-error: #ff6b6b;
     --max-width: 960px;
@@ -206,7 +207,8 @@ a:hover {
 }
 
 .list-links__item {
-    padding-bottom: 1rem;
+    position: relative;
+    padding: 0.5rem 0 1rem;
     border-bottom: 1px solid rgba(238, 238, 238, 0.06);
 }
 
@@ -218,6 +220,32 @@ a:hover {
 .list-links__item p {
     margin: 0;
     color: var(--color-muted);
+}
+
+.list-links__item--pinned {
+    padding-top: 1.5rem;
+}
+
+.link-pin {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(242, 181, 107, 0.18);
+    border: 1px solid rgba(242, 181, 107, 0.55);
+    color: var(--color-pin);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+
+.link-pin svg {
+    width: 18px;
+    height: 18px;
 }
 
 .link-admin-actions {
