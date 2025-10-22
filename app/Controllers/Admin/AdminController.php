@@ -9,6 +9,7 @@ use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Auth;
 use App\Services\Csrf;
+use Psr\Log\LoggerInterface;
 use Twig\Environment;
 
 abstract class AdminController extends BaseController
@@ -21,9 +22,9 @@ abstract class AdminController extends BaseController
 
     private ?FeedRepository $feeds;
 
-    public function __construct(Environment $view, Auth $auth, Csrf $csrf, ?ItemRepository $items = null, ?FeedRepository $feeds = null)
+    public function __construct(Environment $view, Auth $auth, Csrf $csrf, ?ItemRepository $items = null, ?FeedRepository $feeds = null, ?LoggerInterface $logger = null)
     {
-        parent::__construct($view);
+        parent::__construct($view, $logger);
         $this->auth = $auth;
         $this->csrf = $csrf;
         $this->items = $items;

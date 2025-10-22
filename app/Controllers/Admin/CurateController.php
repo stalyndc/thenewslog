@@ -41,7 +41,7 @@ class CurateController extends AdminController
         FeedRepository $feeds,
         LoggerInterface $logger
     ) {
-        parent::__construct($view, $auth, $csrf, $items, $feeds);
+        parent::__construct($view, $auth, $csrf, $items, $feeds, $logger);
         $this->items = $items;
         $this->curatedLinks = $curatedLinks;
         $this->editions = $editions;
@@ -53,6 +53,12 @@ class CurateController extends AdminController
     public function show(int $id): Response
     {
         $item = $this->safeFindItem($id);
+
+        if ($item === null) {
+            $this->log('warning', 'Curate page requested for non-existent item', ['item_id' => $id]);
+            return Response::redirect('/admin/inbox?flash=missing');
+        }
+
         $curated = $this->resolveCuratedFromItem($item);
         $edition = $curated ? $this->editions->findByCuratedLink((int) $curated['id']) : null;
         $existingTags = [];
