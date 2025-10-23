@@ -25,25 +25,24 @@
     <header class="app-header">
         <div class="app-header__inner">
             <div class="header-row">
-                <div>
-                    <p class="brand-title"><a href="/">The News Log</a></p>
-                    <p class="brand-subtitle">Daily human-curated intel across tech, business, and culture.</p>
+                <p class="brand-title"><a href="/">The News Log</a></p>
+                <div class="header-actions">
+                    <nav class="app-nav">
+                        <a href="/" class="{% if current_nav is defined and current_nav == 'home' %}is-active{% endif %}">Home</a>
+                        <a href="/editions" class="{% if current_nav is defined and current_nav == 'editions' %}is-active{% endif %}">Past Editions</a>
+                        <a href="/tags" class="{% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
+                        <a href="/about" class="{% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}">About</a>
+                        <a href="/contact" class="{% if current_nav is defined and current_nav == 'contact' %}is-active{% endif %}">Contact</a>
+                    </nav>
+                    <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Open menu">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
                 </div>
-                <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Open menu">
-                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
             </div>
-            <nav class="app-nav">
-                <a href="/" class="{% if current_nav is defined and current_nav == 'home' %}is-active{% endif %}">Home</a>
-                <a href="/editions" class="{% if current_nav is defined and current_nav == 'editions' %}is-active{% endif %}">Past Editions</a>
-                <a href="/tags" class="{% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
-                <a href="/about" class="{% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}">About</a>
-                <a href="/contact" class="{% if current_nav is defined and current_nav == 'contact' %}is-active{% endif %}">Contact</a>
-            </nav>
             <div id="mobile-drawer" class="mobile-drawer" data-mobile-drawer>
                 <div class="mobile-drawer__inner">
                     <a href="/" class="mobile-link {% if current_nav is defined and current_nav == 'home' %}is-active{% endif %}">Home</a>

@@ -88,9 +88,7 @@ a:hover {
 }
 
 .brand-subtitle {
-    color: var(--color-muted);
-    margin: 0;
-    font-size: 0.95rem;
+    display: none;
 }
 
 .header-row {
@@ -114,6 +112,12 @@ a:hover {
 .nav-toggle:hover,
 .nav-toggle:focus {
     background-color: rgba(0, 173, 181, 0.16);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .app-nav {
