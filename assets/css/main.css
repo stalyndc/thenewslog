@@ -108,7 +108,7 @@ a:hover {
     border: 1px solid rgba(0, 173, 181, 0.35);
     background-color: rgba(0, 173, 181, 0.08);
     color: var(--color-accent);
-    margin-left: 20px;
+    margin-left: 16px;
 }
 
 .nav-toggle:hover,
@@ -120,6 +120,7 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    margin-left: auto;
 }
 
 .app-nav {
@@ -645,10 +646,10 @@ a:hover {
 }
 
 @media (max-width: 640px) {
-    .nav-toggle { display: inline-flex; }
+    .nav-toggle { display: inline-flex; margin-left: 12px; }
     .app-nav { display: none; }
     .brand-title { font-size: 1.9rem; letter-spacing: 0.05em; }
-    .app-header { padding-top: 1.2rem; padding-bottom: 1.2rem; }
+    .app-header { padding: 1.2rem 0.35rem 1.2rem 1rem; }
 
     .admin-toolbar {
         flex-direction: column;
