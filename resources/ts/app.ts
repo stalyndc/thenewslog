@@ -301,6 +301,7 @@ function bindMobileNav(): void {
 }
 
 function initEnhancements(): void {
+  initDrawerNavigation();
   hydrateTimeAgo();
   enableReorder();
   autoDismissAlerts();
@@ -311,12 +312,10 @@ function initEnhancements(): void {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  initDrawerNavigation();
   initEnhancements();
 });
 
 document.addEventListener("htmx:afterSwap", () => {
-  initDrawerNavigation();
   initEnhancements();
 });
 
