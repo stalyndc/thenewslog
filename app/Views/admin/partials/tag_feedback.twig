@@ -1,0 +1,5 @@
+{% if message is defined and message %}
+    <p class="form-hint form-hint--{{ variant|default('info') }}">{{ message }}</p>
+{% else %}
+    <p class="form-hint form-hint--muted">Tags will be saved exactly as typed.</p>
+{% endif %}

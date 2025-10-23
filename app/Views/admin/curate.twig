@@ -77,7 +77,28 @@
 
             <div class="form-group">
                 <label for="tags">Tags (comma separated)</label>
-                <input id="tags" name="tags" type="text" class="input-control" value="{{ form.tags|default('') }}" placeholder="e.g. AI, Startups">
+                <input id="tags"
+                       name="tags"
+                       type="text"
+                       class="input-control"
+                       value="{{ form.tags|default('') }}"
+                       placeholder="e.g. AI, Startups"
+                       autocomplete="off"
+                       data-tags-input
+                       hx-get="/admin/tags/suggest"
+                       hx-trigger="keyup changed delay:250ms"
+                       hx-target="#tag-suggestions"
+                       hx-swap="innerHTML">
+                <div id="tag-feedback">
+                    {% include 'admin/partials/tag_feedback.twig' with {'message': null, 'variant': 'muted'} %}
+                </div>
+                <div id="tag-suggestions" class="tag-suggest-container"></div>
+                <div id="tag-validator"
+                     hx-get="/admin/tags/validate"
+                     hx-trigger="validate-tags from:#tags"
+                     hx-target="#tag-feedback"
+                     hx-include="#tags"
+                     hidden></div>
             </div>
 
             <div class="form-group form-group--inline">

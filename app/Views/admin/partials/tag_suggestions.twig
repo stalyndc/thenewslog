@@ -1,0 +1,11 @@
+{% if suggestions is defined and suggestions|length > 0 %}
+    <ul class="tag-suggest" role="listbox">
+        {% for tag in suggestions %}
+            <li>
+                <button type="button" class="tag-suggestion" data-tag-name="{{ tag.name }}">{{ tag.name }}</button>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="tag-suggest tag-suggest--empty">No saved tags match yet.</div>
+{% endif %}

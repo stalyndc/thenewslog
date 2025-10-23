@@ -1,5 +1,8 @@
 import { hydrateTimeAgo } from "./timeago";
 import { enableReorder } from "./reorder";
+import { pushToastById } from "./toast";
+
+declare const htmx: any;
 
 function autoDismissAlerts(): void {
   const alerts = document.querySelectorAll<HTMLElement>(".alert[data-auto-dismiss]");
@@ -27,16 +30,168 @@ function autoDismissAlerts(): void {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function bindEditionInfinite(): void {
+  if ((window as any).__editionInfiniteBound) {
+    return;
+  }
+
+  (window as any).__editionInfiniteBound = true;
+
+  document.body.addEventListener("editions:page-loaded", (event: Event) => {
+    const custom = event as CustomEvent;
+    const detail = custom.detail ?? {};
+    const list = document.getElementById("edition-list");
+    if (!list) {
+      return;
+    }
+
+    if (typeof detail.page === "number") {
+      list.dataset.editionsCurrent = String(detail.page);
+    }
+
+    if (!detail.next) {
+      const pagination = document.querySelector<HTMLElement>(".pagination--fallback");
+      if (pagination) {
+        pagination.classList.add("is-hidden");
+      }
+    }
+  });
+}
+
+function bindInboxPolling(): void {
+  if ((window as any).__inboxBound) {
+    return;
+  }
+
+  (window as any).__inboxBound = true;
+
+  document.body.addEventListener("inbox:updated", (event: Event) => {
+    const custom = event as CustomEvent;
+    const detail = custom.detail ?? {};
+    const afterInput = document.getElementById("inbox-after-id") as HTMLInputElement | null;
+    const tbody = document.getElementById("inbox-table-body") as HTMLElement | null;
+    const inboxLink = document.getElementById("admin-inbox-link") as HTMLElement | null;
+
+    const previousCount = inboxLink && inboxLink.dataset.inboxCount ? Number(inboxLink.dataset.inboxCount) : 0;
+
+    if (typeof detail.latest_id === "number" && afterInput) {
+      const currentValue = Number(afterInput.value || "0");
+      if (detail.latest_id > currentValue) {
+        afterInput.value = String(detail.latest_id);
+      }
+    }
+
+    if (tbody && typeof detail.latest_id === "number") {
+      tbody.dataset.latestId = String(detail.latest_id);
+    }
+
+    if (inboxLink && typeof detail.count === "number") {
+      inboxLink.dataset.inboxCount = String(detail.count);
+      inboxLink.textContent = detail.count > 0 ? `Inbox (${detail.count})` : "Inbox";
+    }
+
+  if (inboxLink && typeof detail.count === "number" && detail.count > previousCount) {
+      const diff = detail.count - previousCount;
+      pushToastById("inbox-toast", diff === 1 ? "1 new inbox item ready." : `${diff} new inbox items ready.`, {
+        variant: "info",
+        timeout: 5000,
+      });
+    }
+  });
+}
+
+function parseTags(value: string): string[] {
+  return value
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0);
+}
+
+function formatTags(tags: string[]): string {
+  return tags.join(", ");
+}
+
+function triggerTagValidation(): void {
+  const validator = document.getElementById("tag-validator");
+  if (validator && typeof htmx !== "undefined") {
+    htmx.trigger(validator, "validate-tags");
+  }
+}
+
+function bindTagHelpers(): void {
+  const input = document.querySelector<HTMLInputElement>("[data-tags-input]");
+  if (!input || input.dataset.helperBound === "1") {
+    return;
+  }
+
+  input.dataset.helperBound = "1";
+  input.setAttribute("autocomplete", "off");
+
+  input.addEventListener("blur", () => {
+    window.setTimeout(() => {
+      triggerTagValidation();
+    }, 150);
+  });
+
+  input.addEventListener("change", () => {
+    triggerTagValidation();
+  });
+
+  if (!(window as any).__tagSuggestionHandler) {
+    (window as any).__tagSuggestionHandler = true;
+
+    document.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      const suggestion = target.closest<HTMLButtonElement>(".tag-suggestion");
+      const tagsInput = document.querySelector<HTMLInputElement>("[data-tags-input]");
+      const container = document.getElementById("tag-suggestions");
+
+      if (!tagsInput || !container) {
+        return;
+      }
+
+      if (suggestion) {
+        const name = suggestion.dataset.tagName;
+        if (!name) {
+          return;
+        }
+
+        const tags = parseTags(tagsInput.value);
+        const exists = tags.some((tag) => tag.toLowerCase() === name.toLowerCase());
+        if (!exists) {
+          tags.push(name);
+          tagsInput.value = formatTags(tags);
+          tagsInput.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        container.innerHTML = "";
+        tagsInput.focus();
+        triggerTagValidation();
+        return;
+      }
+
+      if (!target.closest("#tag-suggestions") && !target.closest("[data-tags-input]")) {
+        container.innerHTML = "";
+      }
+    });
+  }
+}
+
+function initEnhancements(): void {
   hydrateTimeAgo();
   enableReorder();
   autoDismissAlerts();
+  bindEditionInfinite();
+  bindInboxPolling();
+  bindTagHelpers();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initEnhancements();
 });
 
 document.addEventListener("htmx:afterSwap", () => {
-  hydrateTimeAgo();
-  enableReorder();
-  autoDismissAlerts();
+  initEnhancements();
 });
 
 document.addEventListener("click", (event) => {
@@ -54,4 +209,13 @@ document.addEventListener("click", (event) => {
   navigator.clipboard.writeText(value).catch(() => {
     // ignore errors
   });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    const suggestions = document.getElementById("tag-suggestions");
+    if (suggestions) {
+      suggestions.innerHTML = "";
+    }
+  }
 });

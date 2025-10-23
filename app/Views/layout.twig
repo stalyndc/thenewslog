@@ -56,7 +56,7 @@
             </div>
             {% if admin_metrics is defined %}
                 <div class="admin-meta">
-                    <a class="admin-meta__link" href="/admin/inbox">Inbox{% if admin_metrics.inbox_count is not null %} ({{ admin_metrics.inbox_count }}){% endif %}</a>
+                    <a class="admin-meta__link" href="/admin/inbox" id="admin-inbox-link" data-inbox-count="{{ admin_metrics.inbox_count|default('') }}">Inbox{% if admin_metrics.inbox_count is not null %} ({{ admin_metrics.inbox_count }}){% endif %}</a>
                     {% if admin_metrics.last_fetch %}
                         <span class="admin-meta__status">Last fetch {{ admin_metrics.last_fetch }}</span>
                     {% endif %}

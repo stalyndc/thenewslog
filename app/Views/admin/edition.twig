@@ -29,9 +29,10 @@
     {% endif %}
 
     {% if links is defined and links|length > 0 %}
+        <div id="edition-toast" class="toast-stack" aria-live="polite"></div>
         <form method="post" class="form">
             {{ csrf_field() }}
-            <div class="order-list" data-reorder-list>
+            <div class="order-list" data-reorder-list data-reorder-endpoint="/admin/edition/{{ date }}/reorder">
                 {% for link in links %}
                     <div class="order-row" data-id="{{ link.id }}">
                         <input type="number" name="positions[{{ link.id }}]" value="{{ link.position|default(loop.index) }}" min="1" class="input-order" data-order-input>

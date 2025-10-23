@@ -8,37 +8,8 @@
             <th>Actions</th>
         </tr>
         </thead>
-        <tbody>
-        {% for item in items %}
-            <tr id="row-{{ item.id }}">
-                <td><a href="/admin/curate/{{ item.id }}">{{ item.title }}</a></td>
-                <td><span class="table-badge">{{ item.feed_title }}</span></td>
-                <td>
-                    {{ item.published_at ?: '—' }}
-                    {% if item.published_relative and item.published_at %}
-                        <span class="time-badge" data-time="{{ item.published_at }}">{{ item.published_relative }}</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <div class="table-actions">
-                        <a class="btn btn-primary btn-inline" href="/admin/curate/{{ item.id }}">Curate</a>
-                        <button type="button"
-                                class="btn btn-secondary btn-inline"
-                                hx-post="/admin/inbox/ignore"
-                                hx-vals='{"id":"{{ item.id }}"}'
-                                hx-target="#row-{{ item.id }}"
-                                hx-swap="outerHTML">Ignore</button>
-                        <button type="button"
-                                class="btn btn-danger btn-inline"
-                                hx-post="/admin/inbox/delete"
-                                hx-vals='{"id":"{{ item.id }}"}'
-                                hx-target="#row-{{ item.id }}"
-                                hx-swap="outerHTML"
-                                onclick="return confirm('Delete this item?');">Delete</button>
-                    </div>
-                </td>
-            </tr>
-        {% endfor %}
+        <tbody id="inbox-table-body" data-latest-id="{{ latest_id|default(0) }}">
+        {% include 'admin/partials/inbox_rows.twig' %}
         </tbody>
     </table>
 
@@ -66,3 +37,6 @@
         <p>No new items waiting for review.</p>
     </div>
 {% endif %}
+
+<input type="hidden" name="after_id" value="{{ latest_id|default(0) }}" id="inbox-after-id" form="inbox-poll-state" hx-swap-oob="true">
+<input type="hidden" name="feed_id" value="{{ selected_feed_id|default('') }}" id="inbox-feed-id" form="inbox-poll-state" hx-swap-oob="true">

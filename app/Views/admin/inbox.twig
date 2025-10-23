@@ -6,6 +6,7 @@
 <section class="card">
     <div class="badge">Editor Inbox</div>
     <h2>New Items</h2>
+    <div id="inbox-toast" class="toast-stack" aria-live="polite"></div>
     {% if message %}
         <div class="alert alert--success" data-auto-dismiss="10000">{{ message }}</div>
     {% endif %}
@@ -42,5 +43,17 @@
     <div id="inbox-list">
         {% include 'admin/partials/inbox_table.twig' %}
     </div>
+    <form id="inbox-poll-state" class="sr-only">
+        <input type="hidden" name="after_id" value="{{ latest_id|default(0) }}" id="inbox-after-id">
+        <input type="hidden" name="feed_id" value="{{ selected_feed_id|default('') }}" id="inbox-feed-id">
+    </form>
+    <div id="inbox-poller"
+         hx-get="/admin/inbox/poll"
+         hx-trigger="load delay:6s, every 45s"
+         hx-target="#inbox-table-body"
+         hx-swap="afterbegin"
+         hx-include="#inbox-poll-state"
+         hx-indicator="#inbox-poll-indicator"></div>
+    <div id="inbox-poll-indicator" class="poll-indicator htmx-indicator">Checking for new items…</div>
 </section>
 {% endblock %}

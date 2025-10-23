@@ -131,6 +131,51 @@ class EditionController extends AdminController
         ]));
     }
 
+    public function reorder(Request $request, string $date): Response
+    {
+        $guard = $this->guardCsrf($request);
+
+        if ($guard !== null) {
+            return $guard;
+        }
+
+        $edition = $this->editions->ensureForDate($date);
+        $positions = $request->input('positions', []);
+
+        if (!is_array($positions) || empty($positions)) {
+            return new Response('', 204);
+        }
+
+        $previous = $request->input('previous_positions', []);
+        $editionId = (int) $edition['id'];
+
+        try {
+            $this->curatedLinks->updateEditionPositions($editionId, $positions);
+        } catch (\Throwable $exception) {
+            $response = new Response('', 200);
+            $response->setHeader('HX-Trigger', json_encode([
+                'edition:order-saved' => [
+                    'message' => 'Unable to save order. Please try again.',
+                    'variant' => 'warn',
+                    'undo' => null,
+                ],
+            ]));
+
+            return $response;
+        }
+
+        $response = new Response('', 200);
+        $response->setHeader('HX-Trigger', json_encode([
+            'edition:order-saved' => [
+                'message' => 'Edition order updated.',
+                'variant' => 'success',
+                'undo' => is_array($previous) ? $previous : null,
+            ],
+        ]));
+
+        return $response;
+    }
+
     private function parseScheduledFor(?string $value): ?string
     {
         if ($value === null || trim($value) === '') {

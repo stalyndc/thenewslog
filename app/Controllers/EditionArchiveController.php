@@ -33,12 +33,14 @@ class EditionArchiveController extends BaseController
         $editions = $this->editions->publishedWithCounts($page, $perPage);
         $total = $this->editions->countPublished();
         $totalPages = max(1, (int) ceil(max(1, $total) / $perPage));
+        $nextPage = $page < $totalPages ? $page + 1 : null;
 
         return $this->render('editions.twig', [
             'current_nav' => 'editions',
             'editions' => $editions,
             'page' => $page,
             'total_pages' => $totalPages,
+            'next_page' => $nextPage,
         ]);
     }
 
@@ -64,5 +66,39 @@ class EditionArchiveController extends BaseController
             'links' => $links,
             'tagsByLink' => $tags,
         ]);
+    }
+
+    public function partial(Request $request): Response
+    {
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 12;
+
+        $editions = $this->editions->publishedWithCounts($page, $perPage);
+
+        if (empty($editions)) {
+            return new Response('', 204);
+        }
+
+        $total = $this->editions->countPublished();
+        $totalPages = max(1, (int) ceil(max(1, $total) / $perPage));
+        $nextPage = $page < $totalPages ? $page + 1 : null;
+
+        $html = $this->view->render('partials/edition_items.twig', [
+            'editions' => $editions,
+            'next_page' => $nextPage,
+            'total_pages' => $totalPages,
+        ]);
+
+        $response = new Response($html);
+        $response->setHeader('Content-Type', 'text/html; charset=utf-8');
+        $response->setHeader('HX-Trigger', json_encode([
+            'editions:page-loaded' => [
+                'page' => $page,
+                'next' => $nextPage,
+                'total_pages' => $totalPages,
+            ],
+        ]));
+
+        return $response;
     }
 }

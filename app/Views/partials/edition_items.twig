@@ -1,0 +1,28 @@
+{% for edition in editions %}
+    <li class="edition-list__item">
+        <div>
+            <a class="edition-list__date" href="/editions/{{ edition.edition_date }}">{{ edition.edition_date }}</a>
+            <p class="edition-list__meta">
+                {{ edition.link_count }} curated links
+                {% if edition.published_at %}
+                    • Published {{ edition.published_at }}
+                {% endif %}
+            </p>
+        </div>
+    </li>
+{% endfor %}
+
+{% if next_page is defined and total_pages is defined and next_page is not null and next_page <= total_pages %}
+    <li class="edition-list__load"
+        hx-get="/editions/partial?page={{ next_page }}"
+        hx-trigger="revealed once, click"
+        hx-swap="outerHTML"
+        hx-indicator=".load-more__button">
+        <button class="load-more__button" type="button">
+            Load more editions
+        </button>
+        <noscript>
+            <a href="/editions?page={{ next_page }}" class="load-more__fallback">Next page</a>
+        </noscript>
+    </li>
+{% endif %}

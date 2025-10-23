@@ -50,7 +50,56 @@ class InboxController extends AdminController
     {
         $context = $this->buildContext($request);
 
-        return $this->render('admin/partials/inbox_table.twig', $context);
+        $response = $this->render('admin/partials/inbox_table.twig', $context);
+        $response->setHeader('HX-Trigger', json_encode([
+            'inbox:updated' => [
+                'latest_id' => $context['latest_id'] ?? 0,
+                'count' => $context['total_count'] ?? 0,
+            ],
+        ]));
+
+        return $response;
+    }
+
+    public function poll(Request $request): Response
+    {
+        $afterId = (int) $request->query('after_id', 0);
+        $feedParam = $request->query('feed_id');
+        $feedId = ($feedParam !== null && $feedParam !== '') ? (int) $feedParam : null;
+
+        if ($afterId <= 0) {
+            return new Response('', 204);
+        }
+
+        $items = $this->items->inboxAfter($afterId, 25, $feedId);
+
+        if (empty($items)) {
+            return new Response('', 204);
+        }
+
+        foreach ($items as &$item) {
+            $timestamp = $item['published_at'] ?? $item['created_at'] ?? null;
+            $item['published_relative'] = $timestamp ? $this->formatRelative($timestamp) : null;
+        }
+        unset($item);
+
+        $total = $this->items->countNew($feedId);
+        $latestId = (int) ($items[0]['id'] ?? $afterId);
+
+        $html = $this->view->render('admin/partials/inbox_rows.twig', [
+            'items' => $items,
+        ]);
+
+        $response = new Response($html);
+        $response->setHeader('Content-Type', 'text/html; charset=utf-8');
+        $response->setHeader('HX-Trigger', json_encode([
+            'inbox:updated' => [
+                'latest_id' => $latestId,
+                'count' => $total,
+            ],
+        ]));
+
+        return $response;
     }
 
     public function delete(Request $request): Response
@@ -115,6 +164,7 @@ class InboxController extends AdminController
 
         $total = $this->items->countNew($feedId);
         $totalPages = max(1, (int) ceil(max(1, $total) / $perPage));
+        $latestId = isset($items[0]['id']) ? (int) $items[0]['id'] : 0;
 
         foreach ($items as &$item) {
             $timestamp = $item['published_at'] ?? $item['created_at'] ?? null;
@@ -128,6 +178,8 @@ class InboxController extends AdminController
             'total_pages' => $totalPages,
             'feeds' => $this->feeds->active(),
             'selected_feed_id' => $feedId,
+            'latest_id' => $latestId,
+            'total_count' => $total,
         ];
     }
 }

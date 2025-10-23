@@ -42,6 +42,29 @@ SQL;
     }
 
     /**
+     * Search for tags that loosely match the provided term.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function search(string $term, int $limit = 8): array
+    {
+        $keyword = trim($term);
+
+        if ($keyword === '') {
+            return [];
+        }
+
+        $statement = $this->connection->prepare(
+            'SELECT * FROM tags WHERE name LIKE :like OR slug LIKE :like ORDER BY name ASC LIMIT :limit'
+        );
+        $statement->bindValue(':like', '%' . $keyword . '%');
+        $statement->bindValue(':limit', max(1, min(25, $limit)), \PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll() ?: [];
+    }
+
+    /**
      * @param array<int, int> $tagIds
      *
      * @return array<int, array<string, mixed>>

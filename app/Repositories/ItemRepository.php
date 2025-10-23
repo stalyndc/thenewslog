@@ -50,6 +50,47 @@ SQL;
         return $this->fetchAll($sql, $params);
     }
 
+    /**
+     * Fetch inbox items newer than a given ID.
+     *
+     * @param int $afterId Last seen item ID
+     * @param int $limit Maximum number of items
+     * @param int|null $feedId Optional feed filter
+     * @return array<int, array<string, mixed>>
+     */
+    public function inboxAfter(int $afterId, int $limit = 25, ?int $feedId = null): array
+    {
+        $afterId = max(0, $afterId);
+
+        if ($afterId === 0) {
+            return [];
+        }
+
+        $limit = max(1, min(100, $limit));
+
+        $where = 'WHERE items.status = \'new\' AND items.id > :after_id';
+        $params = ['after_id' => $afterId];
+
+        if ($feedId !== null) {
+            $where .= ' AND items.feed_id = :feed_id';
+            $params['feed_id'] = $feedId;
+        }
+
+        $sql = <<<'SQL'
+SELECT items.*, feeds.title AS feed_title
+FROM items
+JOIN feeds ON feeds.id = items.feed_id
+%s
+ORDER BY items.published_at IS NULL, items.published_at DESC, items.created_at DESC
+LIMIT :limit
+SQL;
+
+        $sql = sprintf($sql, $where);
+        $params['limit'] = $limit;
+
+        return $this->fetchAll($sql, $params);
+    }
+
 
     /**
      * Find a single item by ID with feed details.
