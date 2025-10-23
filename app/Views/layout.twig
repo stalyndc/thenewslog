@@ -65,8 +65,8 @@
             <a href="/tags" class="mobile-link {% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
             <a href="/about" class="mobile-link {% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}">About</a>
             <a href="/contact" class="mobile-link {% if current_nav is defined and current_nav == 'contact' %}is-active{% endif %}">Contact</a>
-            <a href="/privacy" class="mobile-link">Privacy</a>
-            <a href="/terms" class="mobile-link">Terms</a>
+            <a href="/privacy" class="mobile-link {% if current_nav is defined and current_nav == 'privacy' %}is-active{% endif %}">Privacy</a>
+            <a href="/terms" class="mobile-link {% if current_nav is defined and current_nav == 'terms' %}is-active{% endif %}">Terms</a>
         </div>
     </nav>
 

@@ -28,11 +28,15 @@ class PageController extends BaseController
 
     public function privacy(): Response
     {
-        return $this->render('privacy.twig');
+        return $this->render('privacy.twig', [
+            'current_nav' => 'privacy',
+        ]);
     }
 
     public function terms(): Response
     {
-        return $this->render('terms.twig');
+        return $this->render('terms.twig', [
+            'current_nav' => 'terms',
+        ]);
     }
 }
