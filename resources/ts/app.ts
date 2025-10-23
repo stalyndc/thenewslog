@@ -307,15 +307,16 @@ function initEnhancements(): void {
   bindEditionInfinite();
   bindInboxPolling();
   bindTagHelpers();
-  initDrawerNavigation();
   bindMobileNav();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  initDrawerNavigation();
   initEnhancements();
 });
 
 document.addEventListener("htmx:afterSwap", () => {
+  initDrawerNavigation();
   initEnhancements();
 });
 
