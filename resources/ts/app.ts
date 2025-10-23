@@ -311,12 +311,18 @@ function initEnhancements(): void {
   bindMobileNav();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+const runEnhancements = (): void => {
   initEnhancements();
-});
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", runEnhancements, { once: true });
+} else {
+  runEnhancements();
+}
 
 document.addEventListener("htmx:afterSwap", () => {
-  initEnhancements();
+  runEnhancements();
 });
 
 document.addEventListener("click", (event) => {
