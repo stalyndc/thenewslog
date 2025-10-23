@@ -2,6 +2,8 @@ Goal
 
 Enhance TheNewsLog.org with small, maintainable interactivity using TypeScript (progressive enhancement) and htmx (server-rendered partials + AJAX), compatible with shared hosting.
 
+⚠️ Live Stream context note: the public `/stream` page has been deprecated. References below remain useful patterns for other paginated lists.
+
 | Use case                                                              | Best choice                      | Why                                                    |
 | --------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------ |
 | Inline pagination, filters, “load more”, in-place actions             | **htmx**                         | No SPA; server renders HTML fragments; zero build      |

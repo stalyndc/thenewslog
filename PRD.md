@@ -224,7 +224,7 @@ Auth: single editor account for now (password hash in DB).
 
 9) URL Structure & SEO
 
-Home: / → Today’s Edition if published; else recent stream.
+Home: / → Today’s Edition if published; else friendly placeholder (encourage newsletter signup).
 
 Editions: /editions/2025-10-19
 
@@ -238,9 +238,7 @@ sitemap.xml (editions + permalinks + tags)
 
 <link rel="alternate" type="application/rss+xml"> for site RSS:
 
-/rss/editions.xml (daily)
-
-/rss/stream.xml (every curated link)
+/rss/editions.xml (daily) — legacy `/rss/stream.xml` must redirect here.
 
 10) Frontend (lean + fast)
 
@@ -254,7 +252,7 @@ Header w/ logo, date picker (← jump to edition)
 
 “Today’s 7 Picks” list (title • source • 1-line note • tags)
 
-Secondary “More links” stream
+Empty-state message when no edition is published yet (invite readers to subscribe).
 
 Footer: subscribe form, sitemap, credits
 

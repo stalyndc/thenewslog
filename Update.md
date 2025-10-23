@@ -1,4 +1,5 @@
 STRUCTURE & FEATURE FEEDBACK
+⚠️ Update (Oct 2025): The Live Stream surface has been deprecated. Keep Daily Edition as the primary public view; any Live Stream references below remain for historical context only.
 🗓 1. Clarify “Daily Edition” vs “Live Stream”
 
 Right now they’re showing the same list because your backend is likely pulling the same table (curated_links or items).

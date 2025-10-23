@@ -39,10 +39,10 @@ Build a PHP + Composer site on Hostinger that ingests RSS, lets an editor curate
    - `/admin/feeds` CRUD for feeds.
 
 5. **Frontend**
-   - Home: show latest **published edition**; fall back to recent stream.
+   - Home: show latest **published edition**; if none published yet, show a friendly placeholder.
    - Edition page: list curated links with source and one-liners.
    - Tag pages.
-   - RSS endpoints: `/rss/editions.xml`, `/rss/stream.xml`.
+   - RSS endpoint: `/rss/daily.xml` (legacy `/rss/stream.xml` must 301 here).
 
 6. **Sitemap & SEO**
    - `scripts/generate_sitemap.php` for editions/links/tags.

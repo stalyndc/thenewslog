@@ -30,11 +30,9 @@ $append = static function (string $loc, ?string $lastMod = null) use (&$urls, $b
 };
 
 $append('/', null);
-$append('/stream', null);
 $append('/editions', null);
 $append('/tags', null);
 $append('/rss/daily.xml', null);
-$append('/rss/stream.xml', null);
 
 foreach ($editions->publishedWithCounts(1, 500) as $edition) {
     $append('/editions/' . $edition['edition_date'], $edition['published_at'] ?? $edition['updated_at'] ?? null);

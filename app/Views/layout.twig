@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="/assets/css/main.css">
     <link rel="alternate" type="application/rss+xml" title="The News Log — Daily Edition" href="/rss/daily.xml">
-    <link rel="alternate" type="application/rss+xml" title="The News Log — Live Stream" href="/rss/stream.xml">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQRE4ENQGD"></script>
     <script>
@@ -31,7 +30,6 @@
             </div>
             <nav class="app-nav">
                 <a href="/" class="{% if current_nav is defined and current_nav == 'home' %}is-active{% endif %}">Daily Edition</a>
-                <a href="/stream" class="{% if current_nav is defined and current_nav == 'stream' %}is-active{% endif %}">Live Stream</a>
                 <a href="/editions" class="{% if current_nav is defined and current_nav == 'editions' %}is-active{% endif %}">Past Editions</a>
                 <a href="/tags" class="{% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
             </nav>

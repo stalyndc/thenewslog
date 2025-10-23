@@ -392,29 +392,6 @@ SQL,
         );
     }
 
-    public function stream(int $page = 1, int $perPage = 20): array
-    {
-        $perPage = max(1, min(100, $perPage));
-        $page = max(1, $page);
-        $offset = ($page - 1) * $perPage;
-
-        $sql = 'SELECT cl.*, e.edition_date FROM curated_links cl LEFT JOIN edition_curated_link ecl ON ecl.curated_link_id = cl.id LEFT JOIN editions e ON e.id = ecl.edition_id WHERE cl.published_at IS NOT NULL ORDER BY cl.is_pinned DESC, cl.published_at DESC, cl.created_at DESC LIMIT :limit OFFSET :offset';
-
-        $statement = $this->connection->prepare($sql);
-        $statement->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll() ?: [];
-    }
-
-    public function countStream(): int
-    {
-        $row = $this->fetch('SELECT COUNT(*) AS aggregate FROM curated_links WHERE published_at IS NOT NULL');
-
-        return (int) ($row['aggregate'] ?? 0);
-    }
-
     public function streamCountForTag(int $tagId): int
     {
         $row = $this->fetch(

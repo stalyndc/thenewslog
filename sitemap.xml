@@ -4,9 +4,6 @@
     <loc>http://localhost/</loc>
   </url>
   <url>
-    <loc>http://localhost/stream</loc>
-  </url>
-  <url>
     <loc>http://localhost/editions</loc>
   </url>
   <url>
@@ -14,9 +11,6 @@
   </url>
   <url>
     <loc>http://localhost/rss/daily.xml</loc>
-  </url>
-  <url>
-    <loc>http://localhost/rss/stream.xml</loc>
   </url>
   <url>
     <loc>http://localhost/editions/2025-10-19</loc>

@@ -40,22 +40,6 @@ class RssController
         return $response;
     }
 
-    public function stream(): Response
-    {
-        $links = $this->curatedLinks->stream(1, 50);
-        $xml = $this->buildFeed(
-            'The News Log — Live Stream',
-            rtrim($this->baseUrl(), '/') . '/stream',
-            'Rolling feed of all published curated links',
-            $links
-        );
-
-        $response = new Response($xml);
-        $response->setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
-
-        return $response;
-    }
-
     /**
      * @param array<int, array<string, mixed>> $links
      */

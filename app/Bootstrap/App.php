@@ -3,6 +3,7 @@
 namespace App\Bootstrap;
 
 use App\Http\Request;
+use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
 use App\Repositories\EditionRepository;
 use App\Repositories\FeedRepository;
@@ -260,13 +261,13 @@ class App
         $this->router->post('/admin/inbox/delete', 'App\Controllers\Admin\InboxController@delete');
         $this->router->post('/admin/inbox/ignore', 'App\Controllers\Admin\InboxController@ignore');
         $this->router->post('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
-        $this->router->get('/stream', 'App\Controllers\StreamController@__invoke');
         $this->router->get('/tags', 'App\Controllers\TagController@index');
         $this->router->get('/tags/{slug}', 'App\Controllers\TagController@show');
         $this->router->get('/editions', 'App\Controllers\EditionArchiveController@index');
         $this->router->get('/editions/{date}', 'App\Controllers\EditionArchiveController@show');
         $this->router->get('/rss/daily.xml', 'App\Controllers\RssController@daily');
-        $this->router->get('/rss/stream.xml', 'App\Controllers\RssController@stream');
+        $this->router->get('/stream', static fn (): Response => Response::redirect('/editions', 301));
+        $this->router->get('/rss/stream.xml', static fn (): Response => Response::redirect('/rss/daily.xml', 301));
         $this->router->get('/sitemap.xml', 'App\Controllers\SitemapController@__invoke');
         $this->router->setNotFoundHandler('App\Controllers\ErrorController@notFound');
     }

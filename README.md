@@ -11,7 +11,7 @@ Initial scaffold generated from PRD and Agents guidelines.
 ## Local Development
 
 - Run the built-in PHP server: `php -S 127.0.0.1:8000 -t .`.
-- Visit `http://127.0.0.1:8000/` for the reader view (Daily Edition), `/stream` for the live stream, `/editions` for the archive, and `/tags` to browse topics; `/admin/login` for the admin portal.
+- Visit `http://127.0.0.1:8000/` for the reader view (Daily Edition), `/editions` for the archive, and `/tags` to browse topics; `/admin/login` for the admin portal.
 - Authenticated admin routes are under `/admin/*`; log in via `/admin` with the credentials configured in `.env`.
 
 ## Admin Workflow
@@ -34,9 +34,8 @@ Initial scaffold generated from PRD and Agents guidelines.
 
 ## RSSFeeds
 
-- Daily Edition RSS: `/rss/daily.xml`
-- Live Stream RSS: `/rss/stream.xml`
-- Both feeds include the latest 20–50 curated links with title, link, and blurb for syndication.
+- Daily Edition RSS: `/rss/daily.xml` (legacy `/rss/stream.xml` redirects here)
+- Feed includes the latest 20 curated links with title, link, and blurb for syndication.
 
 ## Frontend Assets
 

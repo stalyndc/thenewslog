@@ -6,13 +6,13 @@
 - Implemented Response/Request abstractions, 404 error handling, and Monolog logging.
 - Added migration SQL (`scripts/migrate.sql`) defining tables for feeds, items, curated links, editions, tags, subscribers, and admin users.
 - Introduced PDO bootstrap in `app/Bootstrap/App.php` and fleshed out repositories (`app/Repositories/*`) for feeds, items, and curated links.
-- Controllers now pull real data where available (home stream, admin inbox/feeds/edition/curate) with Twig templates updated to render result sets gracefully when empty.
+- Controllers now pull real data where available (home editions, admin inbox/feeds/edition/curate) with Twig templates updated to render result sets gracefully when empty.
 - Added session-based admin auth: `/admin` login, `/admin/logout`, protected admin controllers via `AdminController` base, and styled login form.
 - Completed curation workflow: POST `/admin/curate/:id` saves curated links, auto-creates editions, and provides UI feedback.
 - Implemented feed ingestion service using Feed-io + Guzzle, seed helper for default feeds, and cron script integration.
-- Split Daily Edition vs Live Stream: home now shows today's published edition (with date badge) while `/stream` lists the full published history.
+- Simplified public flow around the Daily Edition; removed the legacy `/stream` page in favor of edition-first navigation.
 - Added tagging workflow: curate form accepts tags, tag pages (`/tags`, `/tags/{slug}`) render filtered streams, and links render tag pills.
-- Added public RSS feeds (`/rss/daily.xml`, `/rss/stream.xml`) with head/footer links for discovery.
+- Added public RSS feed (`/rss/daily.xml`) with legacy `/rss/stream.xml` redirecting for compatibility; head/footer include alternate link discovery.
 - Admin edition screen now supports manual reorder + publish/draft toggle.
 - Public edition archive: `/editions` (paginated list) and `/editions/{date}` (full edition view) reuse linking/tag display.
 - Sitemap generator (`scripts/generate_sitemap.php`) now outputs `/sitemap.xml` covering editions, tags, and key routes.
