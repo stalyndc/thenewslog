@@ -49,6 +49,7 @@
                             </a>
                             {% if link.item_id is defined %}
                                 <form method="post" action="/admin/curate/{{ link.item_id }}/delete" class="link-admin-actions__form" onsubmit="return confirm('Delete this post?');">
+                                    {{ csrf_field() }}
                                     <button type="submit" class="link-icon" aria-label="Delete post">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.02.166m-1.02-.166L19.5 19.5a1.5 1.5 0 01-1.493 1.5H6.993A1.5 1.5 0 015.5 19.5L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .563c.338-.059.678-.114 1.02-.165m0 0L4.772 5.79m0 0a48.11 48.11 0 013.478-.397m0 0l.166-1.32A1.125 1.125 0 0110.528 3h2.944c.552 0 1.02.405 1.107.948l.166 1.32m-6.345 0h6.345" />
