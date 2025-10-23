@@ -40,3 +40,4 @@
 - `.env.example` documents required configuration.
 - Application logs write to `storage/logs/app.log`.
 - Database credentials expected via `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`.
+- Process reminder for future agents: implement only the changes requested by the user or spec. Avoid adding extra routes, links, or UI elements unless explicitly instructed.
