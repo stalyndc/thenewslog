@@ -177,6 +177,50 @@ function bindTagHelpers(): void {
   }
 }
 
+function initDrawerNavigation(): void {
+  const desktopNav = document.querySelector<HTMLElement>(".app-nav");
+  const drawer = document.querySelector<HTMLElement>("[data-mobile-drawer]");
+
+  if (!desktopNav || !drawer) {
+    return;
+  }
+
+  const drawerInner = drawer.querySelector<HTMLElement>(".mobile-drawer__inner");
+  if (!drawerInner) {
+    return;
+  }
+
+  const drawerLinks = Array.from(drawerInner.querySelectorAll<HTMLAnchorElement>("a"));
+
+  const findMatchingLinks = (href: string | null): HTMLAnchorElement[] =>
+    drawerLinks.filter((link) => link.getAttribute("href") === href);
+
+  desktopNav.querySelectorAll<HTMLAnchorElement>("a").forEach((navLink) => {
+    const href = navLink.getAttribute("href");
+    if (!href) {
+      return;
+    }
+
+    let matches = findMatchingLinks(href);
+    if (matches.length === 0) {
+      const clone = navLink.cloneNode(true) as HTMLAnchorElement;
+      clone.classList.add("mobile-link");
+      drawerInner.appendChild(clone);
+      matches = [clone];
+      drawerLinks.push(clone);
+    } else {
+      matches.forEach((match) => {
+        match.classList.add("mobile-link");
+      });
+    }
+
+    const isActive = navLink.classList.contains("is-active");
+    matches.forEach((match) => {
+      match.classList.toggle("is-active", isActive);
+    });
+  });
+}
+
 function bindMobileNav(): void {
   const toggle = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
   const drawer = document.querySelector<HTMLElement>("[data-mobile-drawer]");
@@ -263,6 +307,7 @@ function initEnhancements(): void {
   bindEditionInfinite();
   bindInboxPolling();
   bindTagHelpers();
+  initDrawerNavigation();
   bindMobileNav();
 }
 
