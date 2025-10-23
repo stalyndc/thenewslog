@@ -228,6 +228,13 @@ function bindMobileNav(): void {
     });
   });
 
+  drawer.querySelectorAll<HTMLElement>("[data-mobile-drawer-close]").forEach((element) => {
+    element.addEventListener("click", (event) => {
+      event.preventDefault();
+      close();
+    });
+  });
+
   if (!(window as any).__mobileNavDocumentHandlers) {
     (window as any).__mobileNavDocumentHandlers = true;
 
