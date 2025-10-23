@@ -1,0 +1,29 @@
+{% extends 'layout.twig' %}
+
+{% set current_nav = 'about' %}
+
+{% block title %}About — The News Log{% endblock %}
+
+{% block content %}
+<section class="card">
+    <header class="card__header">
+        <div class="badge">About</div>
+        <h2>What is The News Log?</h2>
+    </header>
+    <p>
+        The News Log is a daily, human‑curated briefing across tech, business, and culture.
+        We scan reputable sources, pick the most useful pieces, and add one‑line context.
+        No clickbait, no infinite feeds — just fast signal.
+    </p>
+    <p>
+        Each day we publish a compact edition you can browse in minutes. You can also explore
+        past editions and topics when you want to go deeper. Newsletter options and more 
+        discovery features are planned.
+    </p>
+    <p>
+        This page will evolve — we’ll share more about our process, sourcing standards, and
+        how to suggest links as we grow.
+    </p>
+</section>
+{% endblock %}
+

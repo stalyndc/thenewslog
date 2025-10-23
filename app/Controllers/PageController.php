@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Http\Response;
+use Twig\Environment;
+
+class PageController extends BaseController
+{
+    public function __construct(Environment $view)
+    {
+        parent::__construct($view);
+    }
+
+    public function about(): Response
+    {
+        return $this->render('about.twig', [
+            'current_nav' => 'about',
+        ]);
+    }
+
+    public function contact(): Response
+    {
+        return $this->render('contact.twig', [
+            'current_nav' => 'contact',
+        ]);
+    }
+}
+

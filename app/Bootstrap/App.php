@@ -266,6 +266,8 @@ class App
         $this->router->get('/editions', 'App\Controllers\EditionArchiveController@index');
         $this->router->get('/editions/{date}', 'App\Controllers\EditionArchiveController@show');
         $this->router->get('/rss/daily.xml', 'App\Controllers\RssController@daily');
+        $this->router->get('/about', 'App\Controllers\PageController@about');
+        $this->router->get('/contact', 'App\Controllers\PageController@contact');
         $this->router->get('/stream', static fn (): Response => Response::redirect('/editions', 301));
         $this->router->get('/rss/stream.xml', static fn (): Response => Response::redirect('/rss/daily.xml', 301));
         $this->router->get('/sitemap.xml', 'App\Controllers\SitemapController@__invoke');

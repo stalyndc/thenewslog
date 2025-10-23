@@ -5,10 +5,4 @@ Feed health dashboard – surface fetch success/failed counts, last run timestam
 Onboarding/ops checklist – document cron jobs, deploy verification, seeding steps, and environment variables to keep prod + staging in sync.
 Pick whichever fits your priorities (timed publishing, observability, or ops readiness) and we can dive in.
 
-SUMMARY
-
-   Critical Issues Found: done
-   High-Priority Bugs: done
-   Medium-Priority Issues: done
-   Code Quality Issues: done
-   Enhancement Opportunities: done
+TO DO:
