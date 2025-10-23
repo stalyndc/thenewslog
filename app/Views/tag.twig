@@ -1,4 +1,5 @@
 {% extends 'layout.twig' %}
+{% import 'partials/icons.twig' as icons %}
 
 {% set current_nav = 'tags' %}
 
@@ -17,16 +18,16 @@
                 <li class="list-links__item{% if link.is_pinned %} list-links__item--pinned{% endif %}">
                     {% if link.is_pinned %}
                         <span class="link-pin" role="img" aria-label="Pinned link" title="Pinned link">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M9.75 3.75A2.25 2.25 0 0 1 12 1.5a2.25 2.25 0 0 1 2.25 2.25v5.19l1.72 1.72a.75.75 0 0 1-.53 1.28h-2.44v5.78l-.71 2.13-.71-2.13v-5.78H8.56a.75.75 0 0 1-.53-1.28l1.72-1.72z" />
-                            </svg>
+                            {{ icons.pin() }}
                         </span>
                     {% endif %}
                     <div class="list-links__title-row">
                         <a class="link-title" href="{{ link.source_url ?? link.url }}" target="_blank" rel="noopener">
                             {{ link.title }}
                         </a>
-                        <a class="link-source" href="{{ link.source_url ?? link.url }}" target="_blank" rel="noopener" aria-label="Read source for {{ link.title }}">↗</a>
+                        <a class="link-source" href="{{ link.source_url ?? link.url }}" target="_blank" rel="noopener" aria-label="Read source for {{ link.title }}">
+                            {{ icons.external_link('icon--external') }}
+                        </a>
                     </div>
                     {% if link.source_name %}
                         <span class="badge badge--muted">{{ link.source_name }}</span>
