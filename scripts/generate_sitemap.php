@@ -35,6 +35,8 @@ $append('/tags', null);
 $append('/rss/daily.xml', null);
 $append('/about', null);
 $append('/contact', null);
+$append('/privacy', null);
+$append('/terms', null);
 
 foreach ($editions->publishedWithCounts(1, 500) as $edition) {
     $append('/editions/' . $edition['edition_date'], $edition['published_at'] ?? $edition['updated_at'] ?? null);

@@ -25,5 +25,14 @@ class PageController extends BaseController
             'current_nav' => 'contact',
         ]);
     }
-}
 
+    public function privacy(): Response
+    {
+        return $this->render('privacy.twig');
+    }
+
+    public function terms(): Response
+    {
+        return $this->render('terms.twig');
+    }
+}

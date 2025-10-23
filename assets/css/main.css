@@ -902,6 +902,13 @@ th {
     font-size: 0.85rem;
     color: var(--color-muted);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.footer-copy {
+    display: block;
 }
 
 .app-footer__nav {

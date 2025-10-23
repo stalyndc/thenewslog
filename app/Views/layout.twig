@@ -50,6 +50,8 @@
                     <a href="/tags" class="mobile-link {% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
                     <a href="/about" class="mobile-link {% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}">About</a>
                     <a href="/contact" class="mobile-link {% if current_nav is defined and current_nav == 'contact' %}is-active{% endif %}">Contact</a>
+                    <a href="/privacy" class="mobile-link">Privacy</a>
+                    <a href="/terms" class="mobile-link">Terms</a>
                 </div>
             </div>
             {% if admin_metrics is defined %}
@@ -74,7 +76,12 @@
 
     <footer class="app-footer">
         <div class="app-footer__inner">
-            <span>&copy; {{ "now"|date("Y") }} The News Log. Crafted for fast, human-curated discovery.</span>
+            <span class="footer-copy">&copy; {{ "now"|date("Y") }} The News Log. Crafted for fast, human-curated discovery.</span>
+            <nav class="app-footer__nav" aria-label="Legal links">
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms of Use</a>
+                <a href="/contact">Contact</a>
+            </nav>
         </div>
     </footer>
 </div>
