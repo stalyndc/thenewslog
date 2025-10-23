@@ -888,6 +888,8 @@ a:hover {
     opacity: 0;
     transition: opacity 0.2s ease;
     cursor: pointer;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .mobile-drawer__scrim:focus-visible {
@@ -897,6 +899,7 @@ a:hover {
 
 .mobile-drawer.is-open .mobile-drawer__scrim {
     opacity: 1;
+    pointer-events: auto;
 }
 
 .mobile-drawer__inner {
@@ -916,6 +919,7 @@ a:hover {
     padding: 1rem;
     gap: 0.5rem;
     overflow-y: auto;
+    z-index: 2;
 }
 
 .mobile-drawer.is-open .mobile-drawer__inner {
