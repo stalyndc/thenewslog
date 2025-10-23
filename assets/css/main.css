@@ -870,35 +870,12 @@ a:hover {
     z-index: 999;
     visibility: hidden;
     pointer-events: none;
+    background: rgba(15, 20, 27, 0.74);
+    backdrop-filter: blur(10px);
 }
 
 .mobile-drawer.is-open {
     visibility: visible;
-    pointer-events: auto;
-}
-
-.mobile-drawer__scrim {
-    position: absolute;
-    inset: 0;
-    border: none;
-    margin: 0;
-    padding: 0;
-    background: rgba(15, 20, 27, 0.74);
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    cursor: pointer;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.mobile-drawer__scrim:focus-visible {
-    outline: 2px solid rgba(0, 173, 181, 0.65);
-    outline-offset: 2px;
-}
-
-.mobile-drawer.is-open .mobile-drawer__scrim {
-    opacity: 1;
     pointer-events: auto;
 }
 
@@ -919,7 +896,9 @@ a:hover {
     padding: 1rem;
     gap: 0.5rem;
     overflow-y: auto;
-    z-index: 2;
+    background: rgba(34, 40, 49, 0.98);
+    border-left: 1px solid rgba(0, 173, 181, 0.25);
+    box-shadow: -20px 0 40px rgba(0,0,0,0.35);
 }
 
 .mobile-drawer.is-open .mobile-drawer__inner {
