@@ -867,7 +867,7 @@ a:hover {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 999;
+    z-index: 9998;
     visibility: hidden;
     pointer-events: none;
     background: rgba(15, 20, 27, 0.74);
@@ -886,6 +886,7 @@ a:hover {
     height: 100%;
     width: 90vw;
     max-width: 320px;
+    z-index: 9999;
     background: rgba(34, 40, 49, 0.98);
     border-left: 1px solid rgba(0, 173, 181, 0.25);
     box-shadow: -20px 0 40px rgba(0,0,0,0.35);
