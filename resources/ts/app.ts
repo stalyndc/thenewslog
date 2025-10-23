@@ -177,6 +177,78 @@ function bindTagHelpers(): void {
   }
 }
 
+function bindMobileNav(): void {
+  const toggle = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
+  const drawer = document.querySelector<HTMLElement>("[data-mobile-drawer]");
+
+  if (!toggle || !drawer || toggle.dataset.navBound === "1") {
+    return;
+  }
+
+  toggle.dataset.navBound = "1";
+
+  const body = document.body;
+
+  const isOpen = (): boolean => drawer.classList.contains("is-open");
+
+  const setState = (open: boolean): void => {
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    drawer.classList.toggle("is-open", open);
+    body.classList.toggle("is-mobile-nav-open", open);
+  };
+
+  const close = (): void => {
+    if (!isOpen()) {
+      return;
+    }
+
+    setState(false);
+  };
+
+  const open = (): void => {
+    if (isOpen()) {
+      return;
+    }
+
+    setState(true);
+  };
+
+  toggle.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (isOpen()) {
+      close();
+    } else {
+      open();
+    }
+  });
+
+  drawer.querySelectorAll<HTMLAnchorElement>("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      close();
+    });
+  });
+
+  if (!(window as any).__mobileNavDocumentHandlers) {
+    (window as any).__mobileNavDocumentHandlers = true;
+
+    document.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement | null;
+      const withinDrawer = target ? target.closest("[data-mobile-drawer]") : null;
+      const withinToggle = target ? target.closest("[data-nav-toggle]") : null;
+
+      if (!withinDrawer && !withinToggle) {
+        close();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        close();
+      }
+    });
+  }
+}
+
 function initEnhancements(): void {
   hydrateTimeAgo();
   enableReorder();
@@ -184,6 +256,7 @@ function initEnhancements(): void {
   bindEditionInfinite();
   bindInboxPolling();
   bindTagHelpers();
+  bindMobileNav();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
