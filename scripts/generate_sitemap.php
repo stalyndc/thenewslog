@@ -5,19 +5,8 @@ declare(strict_types=1);
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Bootstrap\App;
-use App\Repositories\CuratedLinkRepository;
 use App\Repositories\EditionRepository;
 use App\Repositories\TagRepository;
-
-$app = new App();
-$container = $app->container();
-
-/** @var EditionRepository $editions */
-$editions = $container->get(EditionRepository::class);
-/** @var CuratedLinkRepository $links */
-$links = $container->get(CuratedLinkRepository::class);
-/** @var TagRepository $tags */
-$tagsRepo = $container->get(TagRepository::class);
 
 $baseUrl = rtrim(getenv('BASE_URL') ?: 'http://localhost:8000', '/');
 $urls = [];
@@ -38,14 +27,32 @@ $append('/contact', null);
 $append('/privacy', null);
 $append('/terms', null);
 
-foreach ($editions->publishedWithCounts(1, 500) as $edition) {
-    $append('/editions/' . $edition['edition_date'], $edition['published_at'] ?? $edition['updated_at'] ?? null);
-}
+try {
+    $app = new App();
+    $container = $app->container();
 
-foreach ($tagsRepo->allWithCounts() as $tag) {
-    if ((int) $tag['link_count'] > 0) {
-        $append('/tags/' . $tag['slug'], null);
+    /** @var EditionRepository $editions */
+    $editions = $container->get(EditionRepository::class);
+    /** @var TagRepository $tags */
+    $tagsRepo = $container->get(TagRepository::class);
+
+    foreach ($editions->publishedWithCounts(1, 500) as $edition) {
+        $append('/editions/' . $edition['edition_date'], $edition['published_at'] ?? $edition['updated_at'] ?? null);
     }
+
+    foreach ($tagsRepo->allWithCounts() as $tag) {
+        if ((int) $tag['link_count'] > 0) {
+            $append('/tags/' . $tag['slug'], null);
+        }
+    }
+} catch (\Throwable $exception) {
+    fwrite(
+        STDERR,
+        sprintf(
+            "[sitemap] Warning: skipped database-backed URLs (%s). Core routes still generated.\n",
+            $exception->getMessage()
+        )
+    );
 }
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
