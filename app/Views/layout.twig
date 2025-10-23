@@ -43,17 +43,6 @@
                     </button>
                 </div>
             </div>
-            <div id="mobile-drawer" class="mobile-drawer" data-mobile-drawer>
-                <div class="mobile-drawer__inner">
-                    <a href="/" class="mobile-link {% if current_nav is defined and current_nav == 'home' %}is-active{% endif %}">Home</a>
-                    <a href="/editions" class="mobile-link {% if current_nav is defined and current_nav == 'editions' %}is-active{% endif %}">Past Editions</a>
-                    <a href="/tags" class="mobile-link {% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
-                    <a href="/about" class="mobile-link {% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}">About</a>
-                    <a href="/contact" class="mobile-link {% if current_nav is defined and current_nav == 'contact' %}is-active{% endif %}">Contact</a>
-                    <a href="/privacy" class="mobile-link">Privacy</a>
-                    <a href="/terms" class="mobile-link">Terms</a>
-                </div>
-            </div>
             {% if admin_metrics is defined %}
                 <div class="admin-meta">
                     <a class="admin-meta__link" href="/admin/inbox" id="admin-inbox-link" data-inbox-count="{{ admin_metrics.inbox_count|default('') }}">Inbox{% if admin_metrics.inbox_count is not null %} ({{ admin_metrics.inbox_count }}){% endif %}</a>
@@ -67,6 +56,19 @@
             {% endif %}
         </div>
     </header>
+
+    <div id="mobile-drawer-overlay" class="drawer-overlay" data-mobile-drawer-overlay></div>
+    <nav id="mobile-drawer" class="drawer-nav" data-mobile-drawer aria-label="Mobile navigation">
+        <div class="drawer-nav__inner">
+            <a href="/" class="mobile-link {% if current_nav is defined and current_nav == 'home' %}is-active{% endif %}">Home</a>
+            <a href="/editions" class="mobile-link {% if current_nav is defined and current_nav == 'editions' %}is-active{% endif %}">Past Editions</a>
+            <a href="/tags" class="mobile-link {% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
+            <a href="/about" class="mobile-link {% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}">About</a>
+            <a href="/contact" class="mobile-link {% if current_nav is defined and current_nav == 'contact' %}is-active{% endif %}">Contact</a>
+            <a href="/privacy" class="mobile-link">Privacy</a>
+            <a href="/terms" class="mobile-link">Terms</a>
+        </div>
+    </nav>
 
     <main class="app-main">
         <div class="app-main__inner">

@@ -185,7 +185,7 @@ function initDrawerNavigation(): void {
     return;
   }
 
-  const drawerInner = drawer.querySelector<HTMLElement>(".mobile-drawer__inner");
+  const drawerInner = drawer.querySelector<HTMLElement>(".drawer-nav__inner");
   if (!drawerInner) {
     return;
   }
@@ -224,6 +224,7 @@ function initDrawerNavigation(): void {
 function bindMobileNav(): void {
   const toggle = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
   const drawer = document.querySelector<HTMLElement>("[data-mobile-drawer]");
+  const overlay = document.querySelector<HTMLElement>("[data-mobile-drawer-overlay]");
 
   if (!toggle || !drawer || toggle.dataset.navBound === "1") {
     return;
@@ -238,6 +239,9 @@ function bindMobileNav(): void {
   const setState = (open: boolean): void => {
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
     drawer.classList.toggle("is-open", open);
+    if (overlay) {
+      overlay.classList.toggle("is-open", open);
+    }
     body.classList.toggle("is-mobile-nav-open", open);
   };
 
@@ -272,12 +276,12 @@ function bindMobileNav(): void {
     });
   });
 
-  drawer.addEventListener("click", (event) => {
-    if (event.target === drawer) {
+  if (overlay) {
+    overlay.addEventListener("click", (event) => {
       event.preventDefault();
       close();
-    }
-  });
+    });
+  }
 
   if (!(window as any).__mobileNavDocumentHandlers) {
     (window as any).__mobileNavDocumentHandlers = true;
