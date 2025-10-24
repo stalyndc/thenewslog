@@ -51,10 +51,6 @@ class TagController extends AdminController
             $filtered[] = $tag;
         }
 
-        if (empty($filtered)) {
-            return new Response('');
-        }
-
         return $this->render('admin/partials/tag_suggestions.twig', [
             'suggestions' => array_slice($filtered, 0, 8),
         ]);
