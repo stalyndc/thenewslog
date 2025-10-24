@@ -24,7 +24,7 @@ class TagController extends AdminController
     public function suggest(Request $request): Response
     {
         $query = (string) $request->query('tags', '');
-        $existingRaw = (string) $request->query('existing', $query);
+        $existingRaw = (string) $request->query('existing', '');
 
         $existing = array_values(array_filter(array_map('trim', explode(',', $existingRaw)), static fn ($value) => $value !== ''));
         $existingMap = [];
