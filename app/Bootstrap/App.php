@@ -272,7 +272,6 @@ class App
         $this->router->get('/editions/{date}', 'App\Controllers\EditionArchiveController@show');
         $this->router->get('/rss/daily.xml', 'App\Controllers\RssController@daily');
         $this->router->get('/about', 'App\Controllers\PageController@about');
-        $this->router->get('/contact', 'App\Controllers\PageController@contact');
         $this->router->get('/privacy', 'App\Controllers\PageController@privacy');
         $this->router->get('/terms', 'App\Controllers\PageController@terms');
         $this->router->get('/stream', static fn (): Response => Response::redirect('/editions', 301));

@@ -19,13 +19,6 @@ class PageController extends BaseController
         ]);
     }
 
-    public function contact(): Response
-    {
-        return $this->render('contact.twig', [
-            'current_nav' => 'contact',
-        ]);
-    }
-
     public function privacy(): Response
     {
         return $this->render('privacy.twig', [
