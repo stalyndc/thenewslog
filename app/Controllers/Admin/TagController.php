@@ -23,17 +23,25 @@ class TagController extends AdminController
 
     public function suggest(Request $request): Response
     {
-        $query = (string) $request->query('tags', '');
+        $queryRaw = (string) $request->query('tags', '');
         $existingRaw = (string) $request->query('existing', '');
 
-        $existing = array_values(array_filter(array_map('trim', explode(',', $existingRaw)), static fn ($value) => $value !== ''));
+        $parts = array_map('trim', explode(',', $queryRaw));
+        $active = trim((string) array_pop($parts));
+
+        if ($existingRaw !== '') {
+            $parts = array_merge($parts, array_map('trim', explode(',', $existingRaw)));
+        }
+
+        $existing = array_values(array_filter($parts, static fn ($value) => $value !== ''));
         $existingMap = [];
 
         foreach ($existing as $tag) {
             $existingMap[mb_strtolower($tag)] = true;
         }
 
-        $suggestions = $this->tags->search($query, 8);
+        $term = $active !== '' ? $active : trim($queryRaw);
+        $suggestions = $term === '' ? [] : $this->tags->search($term, 8);
 
         $filtered = [];
 

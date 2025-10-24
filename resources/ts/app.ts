@@ -137,6 +137,56 @@ function bindTagHelpers(): void {
     triggerTagValidation();
   });
 
+  let debounceId: number | undefined;
+
+  const scheduleValidation = () => {
+    if (typeof debounceId !== "undefined") {
+      window.clearTimeout(debounceId);
+    }
+
+    debounceId = window.setTimeout(() => {
+      triggerTagValidation();
+    }, 250);
+  };
+
+  input.addEventListener("input", scheduleValidation);
+
+  if (!(window as any).__tagSuggestionConfigBound) {
+    (window as any).__tagSuggestionConfigBound = true;
+
+    document.addEventListener("htmx:configRequest", (event) => {
+      const custom = event as CustomEvent;
+      const detail = custom.detail ?? {};
+
+      const path = typeof detail.path === "string" ? detail.path : "";
+      const verb = typeof detail.verb === "string" ? detail.verb.toUpperCase() : "";
+
+      if (verb !== "GET" || !path.includes("/admin/tags/suggest")) {
+        return;
+      }
+
+      const tagsInput = document.querySelector<HTMLInputElement>("[data-tags-input]");
+      if (!tagsInput) {
+        return;
+      }
+
+      const parts = tagsInput.value.split(",").map((tag) => tag.trim());
+      const active = parts.pop() ?? "";
+      const existing = parts.filter((tag) => tag.length > 0);
+
+      const parameters = detail.parameters ?? {};
+      parameters.tags = active;
+
+      if (existing.length > 0) {
+        parameters.existing = existing.join(", ");
+      } else {
+        delete parameters.existing;
+      }
+
+      detail.parameters = parameters;
+    });
+  }
+
   if (!(window as any).__tagSuggestionHandler) {
     (window as any).__tagSuggestionHandler = true;
 
