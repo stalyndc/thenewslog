@@ -89,7 +89,7 @@
                        hx-trigger="keyup changed delay:250ms"
                        hx-target="#tag-suggestions"
                        hx-swap="innerHTML"
-                       hx-vals="js:{tags: (() => {const val = document.getElementById('tags').value; const parts = val.split(','); return parts[parts.length - 1].trim();})(), existing: document.getElementById('tags').value}">
+                       hx-vals="js:{tags: (() => {const val = document.getElementById('tags').value; const parts = val.split(','); return parts[parts.length - 1].trim();})(), existing: (() => {const val = document.getElementById('tags').value; const parts = val.split(',').map(p => p.trim()); return parts.length > 1 ? parts.slice(0, -1).join(',') : '';})()}">
                 <div id="tag-feedback">
                     {% include 'admin/partials/tag_feedback.twig' with {'message': null, 'variant': 'muted'} %}
                 </div>
