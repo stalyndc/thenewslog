@@ -88,7 +88,8 @@
                        hx-get="/admin/tags/suggest"
                        hx-trigger="keyup changed delay:250ms"
                        hx-target="#tag-suggestions"
-                       hx-swap="innerHTML">
+                       hx-swap="innerHTML"
+                       hx-include="#tags">
                 <div id="tag-feedback">
                     {% include 'admin/partials/tag_feedback.twig' with {'message': null, 'variant': 'muted'} %}
                 </div>
