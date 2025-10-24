@@ -100,6 +100,36 @@ function bindInboxPolling(): void {
   });
 }
 
+type TagContext = {
+  active: string;
+  existing: string[];
+};
+
+let currentTagInput: HTMLInputElement | null = null;
+let tagSuggestionsUrl = "/admin/tags/suggest";
+let tagValidationUrl = "/admin/tags/validate";
+let tagSuggestionAbortController: AbortController | null = null;
+let tagValidationAbortController: AbortController | null = null;
+let lastSuggestionValue = "";
+let lastValidationValue = "";
+
+function ensureTagInput(): HTMLInputElement | null {
+  if (currentTagInput && document.body.contains(currentTagInput)) {
+    return currentTagInput;
+  }
+
+  currentTagInput = document.querySelector<HTMLInputElement>("[data-tags-input]") ?? null;
+  return currentTagInput;
+}
+
+function tagSuggestionContainer(): HTMLElement | null {
+  return document.getElementById("tag-suggestions");
+}
+
+function tagFeedbackContainer(): HTMLElement | null {
+  return document.getElementById("tag-feedback");
+}
+
 function parseTags(value: string): string[] {
   return value
     .split(",")
@@ -107,15 +137,156 @@ function parseTags(value: string): string[] {
     .filter((tag) => tag.length > 0);
 }
 
+function computeTagContext(value: string): TagContext {
+  const parts = value.split(",").map((tag) => tag.trim());
+
+  if (parts.length === 0) {
+    return { active: "", existing: [] };
+  }
+
+  const active = parts.pop() ?? "";
+  const existing = parts.filter((tag) => tag.length > 0);
+
+  return { active, existing };
+}
+
 function formatTags(tags: string[]): string {
   return tags.join(", ");
 }
 
-function triggerTagValidation(): void {
-  const validator = document.getElementById("tag-validator");
-  if (validator && typeof htmx !== "undefined") {
-    htmx.trigger(validator, "validate-tags");
+function clearTagSuggestions(): void {
+  if (tagSuggestionAbortController) {
+    tagSuggestionAbortController.abort();
+    tagSuggestionAbortController = null;
   }
+
+  const container = tagSuggestionContainer();
+  if (container) {
+    container.innerHTML = "";
+  }
+
+  lastSuggestionValue = "";
+}
+
+function triggerTagSuggestions(force = false): void {
+  const input = ensureTagInput();
+  const container = tagSuggestionContainer();
+
+  if (!input || !container) {
+    return;
+  }
+
+  const raw = input.value;
+  const trimmed = raw.trim();
+
+  if (trimmed === "") {
+    clearTagSuggestions();
+    return;
+  }
+
+  if (!force && raw === lastSuggestionValue) {
+    return;
+  }
+
+  if (tagSuggestionAbortController) {
+    tagSuggestionAbortController.abort();
+  }
+
+  const context = computeTagContext(raw);
+  const params = new URLSearchParams();
+  params.set("tags", context.active);
+  params.set("tags_full", raw);
+
+  if (context.existing.length > 0) {
+    params.set("existing", context.existing.join(", "));
+  }
+
+  tagSuggestionAbortController = new AbortController();
+
+  fetch(`${tagSuggestionsUrl}?${params.toString()}`, {
+    credentials: "same-origin",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      Accept: "text/html",
+    },
+    signal: tagSuggestionAbortController.signal,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch tag suggestions: ${response.status}`);
+      }
+
+      return response.text();
+    })
+    .then((html) => {
+      container.innerHTML = html;
+      lastSuggestionValue = raw;
+    })
+    .catch((error) => {
+      if ((error as Error).name === "AbortError") {
+        return;
+      }
+
+      console.error("Tag suggestion fetch failed", error);
+      clearTagSuggestions();
+    })
+    .finally(() => {
+      tagSuggestionAbortController = null;
+    });
+}
+
+function triggerTagValidation(force = false): void {
+  const input = ensureTagInput();
+  const feedback = tagFeedbackContainer();
+
+  if (!input || !feedback) {
+    return;
+  }
+
+  const raw = input.value;
+
+  if (!force && raw === lastValidationValue) {
+    return;
+  }
+
+  if (tagValidationAbortController) {
+    tagValidationAbortController.abort();
+  }
+
+  const params = new URLSearchParams();
+  params.set("tags", raw);
+
+  tagValidationAbortController = new AbortController();
+
+  fetch(`${tagValidationUrl}?${params.toString()}`, {
+    credentials: "same-origin",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      Accept: "text/html",
+    },
+    signal: tagValidationAbortController.signal,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to validate tags: ${response.status}`);
+      }
+
+      return response.text();
+    })
+    .then((html) => {
+      feedback.innerHTML = html;
+      lastValidationValue = raw;
+    })
+    .catch((error) => {
+      if ((error as Error).name === "AbortError") {
+        return;
+      }
+
+      console.error("Tag validation fetch failed", error);
+    })
+    .finally(() => {
+      tagValidationAbortController = null;
+    });
 }
 
 function bindTagHelpers(): void {
@@ -123,6 +294,12 @@ function bindTagHelpers(): void {
   if (!input || input.dataset.helperBound === "1") {
     return;
   }
+
+  currentTagInput = input;
+  tagSuggestionsUrl = input.dataset.tagsSuggestUrl ?? tagSuggestionsUrl;
+  tagValidationUrl = input.dataset.tagsValidateUrl ?? tagValidationUrl;
+  lastSuggestionValue = "";
+  lastValidationValue = "";
 
   input.dataset.helperBound = "1";
   input.setAttribute("autocomplete", "off");
@@ -134,59 +311,42 @@ function bindTagHelpers(): void {
   });
 
   input.addEventListener("change", () => {
-    triggerTagValidation();
+    triggerTagValidation(true);
   });
 
-  let debounceId: number | undefined;
+  let validationDebounceId: number | undefined;
+  let suggestionDebounceId: number | undefined;
 
   const scheduleValidation = () => {
-    if (typeof debounceId !== "undefined") {
-      window.clearTimeout(debounceId);
+    if (typeof validationDebounceId !== "undefined") {
+      window.clearTimeout(validationDebounceId);
     }
 
-    debounceId = window.setTimeout(() => {
+    validationDebounceId = window.setTimeout(() => {
       triggerTagValidation();
     }, 250);
   };
 
-  input.addEventListener("input", scheduleValidation);
+  const scheduleSuggestions = () => {
+    if (typeof suggestionDebounceId !== "undefined") {
+      window.clearTimeout(suggestionDebounceId);
+    }
 
-  if (!(window as any).__tagSuggestionConfigBound) {
-    (window as any).__tagSuggestionConfigBound = true;
+    suggestionDebounceId = window.setTimeout(() => {
+      triggerTagSuggestions();
+    }, 150);
+  };
 
-    document.addEventListener("htmx:configRequest", (event) => {
-      const custom = event as CustomEvent;
-      const detail = custom.detail ?? {};
+  input.addEventListener("input", () => {
+    scheduleValidation();
+    scheduleSuggestions();
+  });
 
-      const path = typeof detail.path === "string" ? detail.path : "";
-      const verb = typeof detail.verb === "string" ? detail.verb.toUpperCase() : "";
+  input.addEventListener("focus", () => {
+    triggerTagSuggestions(true);
+  });
 
-      if (verb !== "GET" || !path.includes("/admin/tags/suggest")) {
-        return;
-      }
-
-      const tagsInput = document.querySelector<HTMLInputElement>("[data-tags-input]");
-      if (!tagsInput) {
-        return;
-      }
-
-      const parts = tagsInput.value.split(",").map((tag) => tag.trim());
-      const active = parts.pop() ?? "";
-      const existing = parts.filter((tag) => tag.length > 0);
-
-      const parameters = detail.parameters ?? {};
-      parameters.tags = active;
-      parameters.tags_full = tagsInput.value;
-
-      if (existing.length > 0) {
-        parameters.existing = existing.join(", ");
-      } else {
-        delete parameters.existing;
-      }
-
-      detail.parameters = parameters;
-    });
-  }
+  triggerTagValidation(true);
 
   if (!(window as any).__tagSuggestionHandler) {
     (window as any).__tagSuggestionHandler = true;
@@ -194,8 +354,8 @@ function bindTagHelpers(): void {
     document.addEventListener("click", (event) => {
       const target = event.target as HTMLElement;
       const suggestion = target.closest<HTMLButtonElement>(".tag-suggestion");
-      const tagsInput = document.querySelector<HTMLInputElement>("[data-tags-input]");
-      const container = document.getElementById("tag-suggestions");
+      const tagsInput = ensureTagInput();
+      const container = tagSuggestionContainer();
 
       if (!tagsInput || !container) {
         return;
@@ -215,14 +375,15 @@ function bindTagHelpers(): void {
           tagsInput.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
-        container.innerHTML = "";
+        clearTagSuggestions();
         tagsInput.focus();
-        triggerTagValidation();
+        triggerTagValidation(true);
+        triggerTagSuggestions(true);
         return;
       }
 
       if (!target.closest("#tag-suggestions") && !target.closest("[data-tags-input]")) {
-        container.innerHTML = "";
+        clearTagSuggestions();
       }
     });
   }
@@ -399,9 +560,6 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
-    const suggestions = document.getElementById("tag-suggestions");
-    if (suggestions) {
-      suggestions.innerHTML = "";
-    }
+    clearTagSuggestions();
   }
 });
