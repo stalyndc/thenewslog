@@ -24,23 +24,38 @@ class TagController extends AdminController
     public function suggest(Request $request): Response
     {
         $queryRaw = (string) $request->query('tags', '');
+        $fullRaw = (string) $request->query('tags_full', $queryRaw);
         $existingRaw = (string) $request->query('existing', '');
 
-        $parts = array_map('trim', explode(',', $queryRaw));
-        $active = trim((string) array_pop($parts));
+        $fullParts = array_map('trim', explode(',', $fullRaw));
+        $active = trim((string) array_pop($fullParts));
 
         if ($existingRaw !== '') {
-            $parts = array_merge($parts, array_map('trim', explode(',', $existingRaw)));
+            $fullParts = array_merge($fullParts, array_map('trim', explode(',', $existingRaw)));
         }
 
-        $existing = array_values(array_filter($parts, static fn ($value) => $value !== ''));
         $existingMap = [];
 
-        foreach ($existing as $tag) {
-            $existingMap[mb_strtolower($tag)] = true;
+        foreach ($fullParts as $value) {
+            $value = trim((string) $value);
+            if ($value === '') {
+                continue;
+            }
+
+            $key = mb_strtolower($value);
+            if (isset($existingMap[$key])) {
+                continue;
+            }
+
+            $existingMap[$key] = true;
         }
 
         $term = $active !== '' ? $active : trim($queryRaw);
+
+        if ($term === '' && !empty($fullParts)) {
+            $term = trim((string) end($fullParts));
+        }
+
         $suggestions = $term === '' ? [] : $this->tags->search($term, 8);
 
         $filtered = [];

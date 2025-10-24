@@ -176,6 +176,7 @@ function bindTagHelpers(): void {
 
       const parameters = detail.parameters ?? {};
       parameters.tags = active;
+      parameters.tags_full = tagsInput.value;
 
       if (existing.length > 0) {
         parameters.existing = existing.join(", ");

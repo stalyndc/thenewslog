@@ -55,9 +55,9 @@ SQL;
         }
 
         $statement = $this->connection->prepare(
-            'SELECT * FROM tags WHERE name LIKE :like OR slug LIKE :like ORDER BY name ASC LIMIT :limit'
+            'SELECT * FROM tags WHERE LOWER(name) LIKE :like OR LOWER(slug) LIKE :like ORDER BY name ASC LIMIT :limit'
         );
-        $statement->bindValue(':like', '%' . $keyword . '%');
+        $statement->bindValue(':like', '%' . mb_strtolower($keyword) . '%');
         $statement->bindValue(':limit', max(1, min(25, $limit)), \PDO::PARAM_INT);
         $statement->execute();
 
