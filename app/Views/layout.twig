@@ -36,9 +36,10 @@
                         <a href="/about" class="{% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}">About</a>
                         {% if is_admin|default(false) or admin_metrics is defined %}
                             <a href="/admin/inbox" class="nav-admin-icon" title="Admin Inbox" aria-label="Admin Inbox">
-                                <svg viewBox="0 0 24 24" width="26" height="26" fill="#F9ED69" aria-hidden="true">
-                                    <!-- Lucide-esque wrench path for a clear spanner silhouette -->
-                                    <path d="M21.3 7.8a5 5 0 0 1-6.6 6.6L7 22H2v-5l7.6-7.6a5 5 0 0 1 8.7-1.6z" />
+                                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <!-- Feather "tool" (wrench) -->
+                                    <path d="M14.7 6.3a1 1 0 0 1 1.4 0l1.6 1.6a1 1 0 0 1 0 1.4l-8.6 8.6a2 2 0 0 1-1.4.6H5a1 1 0 0 1-1-1v-2.7a2 2 0 0 1 .6-1.4l8.6-8.6z"></path>
+                                    <path d="M16 5l3 3"></path>
                                 </svg>
                             </a>
                         {% endif %}
