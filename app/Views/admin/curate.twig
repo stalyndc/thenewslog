@@ -118,20 +118,7 @@
 
                     <div id="tag-feedback" x-html="feedbackHtml"></div>
 
-                    <div id="tag-suggestions" class="tag-suggest-container" x-show="open" x-cloak x-transition>
-                        <template x-if="suggestions.length > 0">
-                            <ul class="tag-suggest" role="listbox">
-                                <template x-for="s in suggestions" :key="s">
-                                    <li>
-                                        <button type="button" class="tag-suggestion" @click="pick(s)" x-text="s"></button>
-                                    </li>
-                                </template>
-                            </ul>
-                        </template>
-                        <template x-if="suggestions.length === 0">
-                            <div class="tag-suggest tag-suggest--empty">No saved tags match yet.</div>
-                        </template>
-                    </div>
+                    <div id="tag-suggestions" class="tag-suggest-container" x-show="open" x-cloak x-transition @click="onSuggestClick($event)" x-html="suggestionsHtml"></div>
                 </div>
             </div>
 
@@ -167,7 +154,7 @@
         return {
             inputVal: '',
             tags: [],
-            suggestions: [],
+            suggestionsHtml: '',
             open: false,
             feedbackHtml: '<p class="form-hint form-hint--muted">Tags will be saved exactly as typed.</p>',
             _suggestAbort: null,
@@ -241,17 +228,22 @@
                 })
                 .then(r => r.ok ? r.text() : Promise.reject(r.status))
                 .then(html => {
-                    // Extract plain suggestions from HTML buttons if needed
-                    const div = document.createElement('div');
-                    div.innerHTML = html;
-                    const names = Array.from(div.querySelectorAll('.tag-suggestion'))
-                        .map(btn => btn.textContent?.trim())
-                        .filter(Boolean);
-                    this.suggestions = names;
+                    this.suggestionsHtml = html && html.trim() !== '' ? html : '<div class="tag-suggest tag-suggest--empty">No saved tags match yet.</div>';
                     this.open = true;
                 })
                 .catch(() => { /* ignore */ })
                 .finally(() => { this._suggestAbort = null; });
+            },
+            onSuggestClick(e) {
+                const btn = e.target.closest && e.target.closest('.tag-suggestion');
+                if (!btn) return;
+                const name = btn.getAttribute('data-tag-name') || btn.textContent || '';
+                const v = name.trim();
+                if (!v) return;
+                if (!this.tags.includes(v)) this.tags.push(v);
+                this.inputVal = '';
+                this.open = false;
+                this.validate();
             },
             validate(force = false) {
                 if (this._validateAbort) { this._validateAbort.abort(); }
