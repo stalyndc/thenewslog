@@ -401,6 +401,29 @@ a:hover {
     text-decoration: underline;
 }
 
+.nav-admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    margin-left: 6px;
+    border-radius: 50%;
+    color: #FF2E63;
+    border: 1px solid rgba(255, 46, 99, 0.5);
+    background: linear-gradient(140deg, rgba(255, 46, 99, 0.18) 0%, rgba(255, 46, 99, 0.08) 100%);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-admin-btn:hover,
+.nav-admin-btn:focus {
+    text-decoration: none;
+    transform: translateY(-1px);
+    background: linear-gradient(140deg, rgba(255, 46, 99, 0.24) 0%, rgba(255, 46, 99, 0.12) 100%);
+    border-color: rgba(255, 46, 99, 0.65);
+}
+
 .admin-meta {
     display: flex;
     flex-wrap: wrap;
