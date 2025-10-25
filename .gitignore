@@ -8,3 +8,4 @@ package-lock.json
 dist/
 .env
 .env.*
+next.md
