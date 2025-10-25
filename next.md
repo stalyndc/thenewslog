@@ -62,9 +62,6 @@ UI/DESIGN/MOBILE ENHANCEMENTS
      •  Form state management (draft saving)
      •  Keyboard shortcuts in admin
 
-   3. Component Library Alternative? – No, stick with Twig. Adding Vue/React is
-      overkill for a curated news site. Twig + HTMX + Alpine is the sweet spot.
-
    4. Template Inheritance – You're already using it well (layout.twig). Continue
       this pattern.
 

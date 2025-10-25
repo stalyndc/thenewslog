@@ -168,6 +168,14 @@ class CurateController extends AdminController
 
         $this->items->delete($item['id']);
 
+        // Remove any tags that no longer have links after deletion
+        try {
+            $this->tags->deleteOrphans();
+        } catch (\Throwable $e) {
+            // Non-fatal; continue redirect
+            $this->log('warning', 'Failed to cleanup orphan tags after delete', ['error' => $e->getMessage()]);
+        }
+
         return Response::redirect('/admin/inbox?flash=deleted');
     }
 

@@ -11,8 +11,9 @@ class TagRepository extends BaseRepository
         $sql = <<<'SQL'
 SELECT t.*, COUNT(clt.curated_link_id) AS link_count
 FROM tags t
-LEFT JOIN curated_link_tag clt ON clt.tag_id = t.id
+JOIN curated_link_tag clt ON clt.tag_id = t.id
 GROUP BY t.id
+HAVING link_count > 0
 ORDER BY t.name ASC
 SQL;
 
@@ -169,9 +170,28 @@ SQL;
             }
 
             $this->connection->commit();
+
+            // Cleanup any tags that are no longer referenced by any curated link
+            $this->deleteOrphans();
         } catch (\Throwable $exception) {
             $this->connection->rollBack();
             throw $exception;
         }
+    }
+
+    /**
+     * Delete tags that are not referenced by any curated link.
+     */
+    public function deleteOrphans(): void
+    {
+        // Use NOT EXISTS to safely handle large tables without full scans on NOT IN NULL edge cases
+        $sql = <<<'SQL'
+DELETE FROM tags
+WHERE NOT EXISTS (
+    SELECT 1 FROM curated_link_tag clt WHERE clt.tag_id = tags.id
+)
+SQL;
+
+        $this->execute($sql);
     }
 }
