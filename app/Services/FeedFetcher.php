@@ -130,7 +130,8 @@ class FeedFetcher
                     'summary_raw' => $item->getContent() ?: null,
                     'author' => $item->getAuthor()?->getName(),
                     'published_at' => $publishedAt ? $publishedAt->format('Y-m-d H:i:s') : null,
-                    'source_name' => $resource->getTitle() ?: $feed['title'],
+                    // Prefer the human-edited feed title from our DB; fall back to feed metadata
+                    'source_name' => ($feed['title'] ?? null) ?: ($resource->getTitle() ?: null),
                     'status' => 'new',
                 ]);
 

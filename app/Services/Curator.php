@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\CuratedLinkRepository;
+use App\Repositories\FeedRepository;
 use App\Repositories\EditionRepository;
 use App\Repositories\ItemRepository;
 use App\Repositories\TagRepository;
@@ -17,16 +18,20 @@ class Curator
 
     private TagRepository $tags;
 
+    private FeedRepository $feeds;
+
     public function __construct(
         ItemRepository $items,
         CuratedLinkRepository $curatedLinks,
         EditionRepository $editions,
-        TagRepository $tags
+        TagRepository $tags,
+        FeedRepository $feeds
     ) {
         $this->items = $items;
         $this->curatedLinks = $curatedLinks;
         $this->editions = $editions;
         $this->tags = $tags;
+        $this->feeds = $feeds;
     }
 
     /**
@@ -57,11 +62,25 @@ class Curator
         $existingPublishedAt = $existing['published_at'] ?? null;
         $publishedAt = $publishNow ? date('Y-m-d H:i:s') : $existingPublishedAt;
 
+        // Prefer the feed's human-edited title for source_name when available
+        $feedTitle = null;
+        $feedId = (int) ($item['feed_id'] ?? 0);
+        if ($feedId > 0) {
+            try {
+                $feed = $this->feeds->find($feedId);
+                if (is_array($feed) && !empty($feed['title'])) {
+                    $feedTitle = (string) $feed['title'];
+                }
+            } catch (\Throwable) {
+                // ignore; fall back to item source name
+            }
+        }
+
         $attributes = [
             'item_id' => $itemId,
             'title' => $title,
             'blurb' => $blurb,
-            'source_name' => $input['source_name'] ?? ($item['source_name'] ?? null),
+            'source_name' => $input['source_name'] ?? ($feedTitle ?? ($item['source_name'] ?? null)),
             'source_url' => $item['url'] ?? null,
             'is_pinned' => $isPinned,
             'curator_notes' => $input['curator_notes'] ?? null,

@@ -177,7 +177,8 @@ class App
             $container->get(ItemRepository::class),
             $container->get(CuratedLinkRepository::class),
             $container->get(EditionRepository::class),
-            $container->get(TagRepository::class)
+            $container->get(TagRepository::class),
+            $container->get(FeedRepository::class)
         ));
         $this->container->singleton(ConditionalClient::class, static fn (): ConditionalClient => new ConditionalClient(new GuzzleClient()));
         $this->container->singleton(FeedIo::class, static fn (Container $container): FeedIo => new FeedIo(
