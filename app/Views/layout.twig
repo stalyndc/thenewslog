@@ -173,10 +173,10 @@
                 event.preventDefault();
                 this.openConfirm(message, () => {
                     target.dataset.confirming = '1';
-                    if (typeof target.requestSubmit === 'function') {
+                    if (typeof target.submit === 'function') {
+                        target.submit(); // bypass extra submit handlers
+                    } else if (typeof target.requestSubmit === 'function') {
                         target.requestSubmit();
-                    } else {
-                        target.submit();
                     }
                     window.setTimeout(() => {
                         delete target.dataset.confirming;
