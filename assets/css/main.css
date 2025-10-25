@@ -398,7 +398,12 @@ a:hover {
 }
 
 .app-nav a:not(.is-active):hover {
-    text-decoration: underline;
+    text-decoration: none;
+}
+
+/* Ensure no underline on hover for top nav */
+.app-nav a:hover {
+    text-decoration: none;
 }
 
 .nav-admin-icon {
@@ -406,6 +411,7 @@ a:hover {
     align-items: center;
     justify-content: center;
     margin-left: 8px;
+    position: relative;
 }
 
 .nav-admin-icon svg {
@@ -417,6 +423,24 @@ a:hover {
 .nav-admin-icon:hover,
 .nav-admin-icon:focus {
     text-decoration: none;
+}
+
+.nav-admin-badge {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #F25F4C; /* warm badge color */
+    color: #0b0f15;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.35);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
 
 .admin-meta {
