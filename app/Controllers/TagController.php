@@ -7,6 +7,7 @@ use App\Http\Response;
 use App\Repositories\CuratedLinkRepository;
 use App\Repositories\TagRepository;
 use Twig\Environment;
+use App\Services\Auth;
 
 class TagController extends BaseController
 {
@@ -14,11 +15,14 @@ class TagController extends BaseController
 
     private CuratedLinkRepository $curatedLinks;
 
-    public function __construct(Environment $view, TagRepository $tags, CuratedLinkRepository $curatedLinks)
+    private Auth $auth;
+
+    public function __construct(Environment $view, TagRepository $tags, CuratedLinkRepository $curatedLinks, Auth $auth)
     {
         parent::__construct($view);
         $this->tags = $tags;
         $this->curatedLinks = $curatedLinks;
+        $this->auth = $auth;
     }
 
     public function index(): Response
@@ -28,6 +32,7 @@ class TagController extends BaseController
         return $this->render('tags.twig', [
             'current_nav' => 'tags',
             'tags' => $tags,
+            'is_admin' => $this->auth->check(),
         ]);
     }
 
@@ -54,6 +59,7 @@ class TagController extends BaseController
             'tagsByLink' => $tagsMap,
             'page' => $page,
             'total_pages' => $totalPages,
+            'is_admin' => $this->auth->check(),
         ]);
     }
 }

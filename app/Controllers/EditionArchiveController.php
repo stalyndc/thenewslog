@@ -8,6 +8,7 @@ use App\Repositories\CuratedLinkRepository;
 use App\Repositories\EditionRepository;
 use App\Repositories\TagRepository;
 use Twig\Environment;
+use App\Services\Auth;
 
 class EditionArchiveController extends BaseController
 {
@@ -17,12 +18,15 @@ class EditionArchiveController extends BaseController
 
     private TagRepository $tags;
 
-    public function __construct(Environment $view, EditionRepository $editions, CuratedLinkRepository $curatedLinks, TagRepository $tags)
+    private Auth $auth;
+
+    public function __construct(Environment $view, EditionRepository $editions, CuratedLinkRepository $curatedLinks, TagRepository $tags, Auth $auth)
     {
         parent::__construct($view);
         $this->editions = $editions;
         $this->curatedLinks = $curatedLinks;
         $this->tags = $tags;
+        $this->auth = $auth;
     }
 
     public function index(Request $request): Response
@@ -41,6 +45,7 @@ class EditionArchiveController extends BaseController
             'page' => $page,
             'total_pages' => $totalPages,
             'next_page' => $nextPage,
+            'is_admin' => $this->auth->check(),
         ]);
     }
 
@@ -65,6 +70,7 @@ class EditionArchiveController extends BaseController
             'edition' => $edition,
             'links' => $links,
             'tagsByLink' => $tags,
+            'is_admin' => $this->auth->check(),
         ]);
     }
 
