@@ -61,19 +61,20 @@
             </div>
         </form>
 
-        <form method="post" class="form form-inline form-schedule">
+        {% set scheduled_value = edition.scheduled_for ? edition.scheduled_for|date('Y-m-d\\TH:i') : '' %}
+        <form method="post" class="form form-inline form-schedule" x-data="{ when: '{{ scheduled_value }}' }">
             {{ csrf_field() }}
             <input type="hidden" name="action" value="status">
             <div class="form-group form-group--inline">
                 <label for="scheduled_for">Go live at</label>
-                {% set scheduled_value = edition.scheduled_for ? edition.scheduled_for|date('Y-m-d\\TH:i') : '' %}
-                <input id="scheduled_for" name="scheduled_for" type="datetime-local" class="input-control input-control--compact" value="{{ scheduled_value }}">
+                <input id="scheduled_for" name="scheduled_for" type="datetime-local" class="input-control input-control--compact" x-model="when" value="{{ scheduled_value }}">
             </div>
             <div class="form-actions form-actions--stacked">
                 <button type="submit" name="status" value="draft" class="btn btn-secondary">Save as Draft</button>
-                <button type="submit" name="status" value="scheduled" class="btn btn-secondary">Schedule Edition</button>
+                <button type="submit" name="status" value="scheduled" class="btn btn-secondary" :disabled="!when">Schedule Edition</button>
                 <button type="submit" name="status" value="published" class="btn btn-primary">Publish Now</button>
             </div>
+            <p class="form-hint form-hint--muted" x-show="!when">Pick a date and time to enable scheduling.</p>
         </form>
     {% else %}
         <div class="empty-state">

@@ -22,7 +22,7 @@
     </script>
     {% block head %}{% endblock %}
 </head>
-<body>
+<body x-data="appShell()" x-init="init()" @keydown.escape.window="handleEscape()">
 <div class="app-shell">
     <header class="app-header">
         <div class="app-header__inner">
@@ -35,7 +35,7 @@
                         <a href="/tags" class="{% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
                         <a href="/about" class="{% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}">About</a>
                     </nav>
-                    <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Open menu">
+                    <button class="nav-toggle" :aria-expanded="mobileOpen" aria-controls="mobile-drawer" aria-label="Open menu" @click="toggleMobile()">
                         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <line x1="3" y1="6" x2="21" y2="6" />
                             <line x1="3" y1="12" x2="21" y2="12" />
@@ -58,13 +58,13 @@
         </div>
     </header>
 
-    <div id="mobile-drawer-overlay" class="drawer-overlay" data-mobile-drawer-overlay></div>
-    <nav id="mobile-drawer" class="drawer-nav" data-mobile-drawer aria-label="Mobile navigation">
+    <div id="mobile-drawer-overlay" class="drawer-overlay" :class="{ 'is-open': mobileOpen }" x-show="mobileOpen" x-transition.opacity x-cloak @click="closeMobile()"></div>
+    <nav id="mobile-drawer" class="drawer-nav" :class="{ 'is-open': mobileOpen }" x-show="mobileOpen" x-transition x-cloak aria-label="Mobile navigation">
         <div class="drawer-nav__inner">
-            <a href="/" class="mobile-link {% if current_nav is defined and current_nav == 'home' %}is-active{% endif %}">Home</a>
-            <a href="/editions" class="mobile-link {% if current_nav is defined and current_nav == 'editions' %}is-active{% endif %}">Past Editions</a>
-            <a href="/tags" class="mobile-link {% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}">Topics</a>
-            <a href="/about" class="mobile-link {% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}">About</a>
+            <a href="/" class="mobile-link {% if current_nav is defined and current_nav == 'home' %}is-active{% endif %}" @click="closeMobile()">Home</a>
+            <a href="/editions" class="mobile-link {% if current_nav is defined and current_nav == 'editions' %}is-active{% endif %}" @click="closeMobile()">Past Editions</a>
+            <a href="/tags" class="mobile-link {% if current_nav is defined and current_nav == 'tags' %}is-active{% endif %}" @click="closeMobile()">Topics</a>
+            <a href="/about" class="mobile-link {% if current_nav is defined and current_nav == 'about' %}is-active{% endif %}" @click="closeMobile()">About</a>
         </div>
     </nav>
 
@@ -94,7 +94,124 @@
         event.detail.headers['HX-CSRF-TOKEN'] = token;
     });
 </script>
-<link rel="preload" href="/assets/app.js?v=8" as="script">
-<script defer src="/assets/app.js?v=8"></script>
+<div x-show="confirmOpen" x-cloak>
+    <div class="modal-backdrop" x-show="confirmOpen" x-transition.opacity @click="closeConfirm()"></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title" x-show="confirmOpen" x-transition>
+        <div class="modal__card">
+            <h2 id="confirm-title">Are you sure?</h2>
+            <p class="modal__message" x-text="confirmMessage"></p>
+            <div class="modal__actions">
+                <button type="button" class="btn btn-secondary" @click="closeConfirm()">Cancel</button>
+                <button type="button" class="btn btn-primary" @click="runConfirm()">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    window.appShell = function appShell() {
+        return {
+            mobileOpen: false,
+            confirmOpen: false,
+            confirmMessage: '',
+            confirmAction: null,
+            init() {
+                document.addEventListener('submit', this._handleSubmit.bind(this), true);
+                document.addEventListener('click', this._handleClick.bind(this), true);
+            },
+            toggleMobile() {
+                this.mobileOpen = !this.mobileOpen;
+                document.body.classList.toggle('is-mobile-nav-open', this.mobileOpen);
+            },
+            closeMobile() {
+                if (!this.mobileOpen) {
+                    return;
+                }
+                this.mobileOpen = false;
+                document.body.classList.remove('is-mobile-nav-open');
+            },
+            handleEscape() {
+                if (this.confirmOpen) {
+                    this.closeConfirm();
+                    return;
+                }
+                if (this.mobileOpen) {
+                    this.closeMobile();
+                }
+            },
+            openConfirm(message, action) {
+                this.confirmMessage = message || 'Are you sure?';
+                this.confirmAction = action;
+                this.confirmOpen = true;
+                document.body.classList.add('is-modal-open');
+            },
+            closeConfirm() {
+                this.confirmOpen = false;
+                this.confirmMessage = '';
+                this.confirmAction = null;
+                document.body.classList.remove('is-modal-open');
+            },
+            runConfirm() {
+                const action = this.confirmAction;
+                this.closeConfirm();
+                if (typeof action === 'function') {
+                    action();
+                }
+            },
+            _handleSubmit(event) {
+                const target = event.target;
+                if (!(target instanceof HTMLFormElement)) {
+                    return;
+                }
+                const message = target.dataset.confirm;
+                if (!message) {
+                    return;
+                }
+                if (target.dataset.confirming === '1') {
+                    delete target.dataset.confirming;
+                    return;
+                }
+                event.preventDefault();
+                this.openConfirm(message, () => {
+                    target.dataset.confirming = '1';
+                    if (typeof target.requestSubmit === 'function') {
+                        target.requestSubmit();
+                    } else {
+                        target.submit();
+                    }
+                    window.setTimeout(() => {
+                        delete target.dataset.confirming;
+                    }, 0);
+                });
+            },
+            _handleClick(event) {
+                const origin = event.target;
+                if (!(origin instanceof HTMLElement)) {
+                    return;
+                }
+                const trigger = origin.closest('[data-confirm]');
+                if (!trigger || trigger instanceof HTMLFormElement) {
+                    return;
+                }
+                if (trigger.dataset.confirming === '1') {
+                    delete trigger.dataset.confirming;
+                    return;
+                }
+                const message = trigger.dataset.confirm || 'Are you sure?';
+                event.preventDefault();
+                this.openConfirm(message, () => {
+                    trigger.dataset.confirming = '1';
+                    if (trigger instanceof HTMLElement && typeof trigger.click === 'function') {
+                        trigger.click();
+                    }
+                    window.setTimeout(() => {
+                        delete trigger.dataset.confirming;
+                    }, 0);
+                });
+            },
+        };
+    };
+</script>
+<link rel="preload" href="/assets/app.js?v=9" as="script">
+<script defer src="/assets/app.js?v=9"></script>
 </body>
 </html>

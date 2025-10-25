@@ -47,6 +47,10 @@ body.is-mobile-nav-open {
     overflow: hidden;
 }
 
+body.is-modal-open {
+    overflow: hidden;
+}
+
 a {
     color: var(--color-accent);
     text-decoration: none;
@@ -242,6 +246,49 @@ a:hover {
     background: rgba(122, 200, 245, 0.15);
     border-color: rgba(122, 200, 245, 0.32);
     color: #c8e8ff;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 12, 17, 0.72);
+    backdrop-filter: blur(6px);
+    z-index: 900;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 2rem 1.5rem;
+    z-index: 901;
+}
+
+.modal__card {
+    width: min(420px, 90vw);
+    background: var(--color-surface);
+    border: 1px solid rgba(0, 173, 181, 0.35);
+    border-radius: 14px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+    padding: 1.5rem;
+}
+
+.modal__card h2 {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+}
+
+.modal__message {
+    margin: 0 0 1.25rem;
+    color: var(--color-muted);
+}
+
+.modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
 }
 
 .app-shell {

@@ -117,7 +117,7 @@
                         <td>{{ feed.active ? 'Active' : 'Inactive' }}</td>
                         <td class="table-actions">
                             <a class="btn btn-secondary btn-inline" href="/admin/feeds?edit={{ feed.id }}{% if page > 1 %}&page={{ page }}{% endif %}">Edit</a>
-                            <form method="post" action="/admin/feeds/{{ feed.id }}/delete" class="inline-form" onsubmit="return confirm('Remove this feed?');">
+                            <form method="post" action="/admin/feeds/{{ feed.id }}/delete" class="inline-form" data-confirm="Remove this feed?">
                                 {{ csrf_field() }}
                                 <button type="submit" class="btn btn-danger btn-inline">Delete</button>
                             </form>

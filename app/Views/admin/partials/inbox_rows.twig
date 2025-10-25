@@ -23,7 +23,7 @@
                         hx-vals='{"id":"{{ item.id }}"}'
                         hx-target="#row-{{ item.id }}"
                         hx-swap="outerHTML"
-                        onclick="return confirm('Delete this item?');">Delete</button>
+                        data-confirm="Delete this item?">Delete</button>
             </div>
         </td>
     </tr>
