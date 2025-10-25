@@ -120,4 +120,21 @@ class TagController extends AdminController
             'variant' => $variant,
         ]);
     }
+
+    /**
+     * Return all tags as simple JSON for client-side filtering.
+     */
+    public function all(Request $request): Response
+    {
+        $rows = $this->tags->allWithCounts();
+        $list = [];
+        foreach ($rows as $row) {
+            $name = (string) ($row['name'] ?? '');
+            if ($name !== '') {
+                $list[] = $name;
+            }
+        }
+        sort($list, SORT_STRING | SORT_FLAG_CASE);
+        return Response::json(['tags' => array_values($list)]);
+    }
 }

@@ -87,7 +87,8 @@
                     x-data="tagsField({ 
                         initial: '{{ form.tags|default('')|e('js') }}', 
                         suggestUrl: '/admin/tags/suggest', 
-                        validateUrl: '/admin/tags/validate' 
+                        validateUrl: '/admin/tags/validate',
+                        allUrl: '/admin/tags/all' 
                     })" 
                     x-init="init()" 
                     @keydown.escape.window="closeSuggest()" 
@@ -159,6 +160,8 @@
             feedbackHtml: '<p class="form-hint form-hint--muted">Tags will be saved exactly as typed.</p>',
             _suggestAbort: null,
             _validateAbort: null,
+            _allLoaded: false,
+            _all: [],
             init() {
                 this.tags = this._parseCsv(opts.initial || '');
                 this.validate(true);
@@ -211,10 +214,7 @@
             },
             fetchSuggest(force = false) {
                 const { active } = this._ctx();
-                if (!active && !force) {
-                    this.suggestions = [];
-                    return;
-                }
+                if (!active && !force) { this.suggestionsHtml = ''; this.open = false; return; }
                 if (this._suggestAbort) { this._suggestAbort.abort(); }
                 this._suggestAbort = new AbortController();
                 const params = new URLSearchParams();
@@ -231,8 +231,31 @@
                     this.suggestionsHtml = html && html.trim() !== '' ? html : '<div class="tag-suggest tag-suggest--empty">No saved tags match yet.</div>';
                     this.open = true;
                 })
-                .catch(() => { /* ignore */ })
+                .catch(() => { this._fallbackSuggest(active).catch(() => {}); })
                 .finally(() => { this._suggestAbort = null; });
+            },
+            async _ensureAllTags() {
+                if (this._allLoaded) return;
+                const res = await fetch(opts.allUrl, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error('failed');
+                const data = await res.json();
+                this._all = Array.isArray(data.tags) ? data.tags : [];
+                this._allLoaded = true;
+            },
+            async _fallbackSuggest(active) {
+                try { await this._ensureAllTags(); } catch (e) {
+                    this.suggestionsHtml = '<div class="tag-suggest tag-suggest--empty">No saved tags match yet.</div>'; this.open = true; return;
+                }
+                const term = (active || '').toLowerCase();
+                const existing = new Set(this.tags.map(t => t.toLowerCase()));
+                const matches = this._all.filter(n => n.toLowerCase().includes(term) && !existing.has(n.toLowerCase())).slice(0, 8);
+                if (matches.length === 0) {
+                    this.suggestionsHtml = '<div class="tag-suggest tag-suggest--empty">No saved tags match yet.</div>';
+                } else {
+                    const items = matches.map(n => `<li><button type=\"button\" class=\"tag-suggestion\" data-tag-name=\"${n.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}\">${n}</button></li>`).join('');
+                    this.suggestionsHtml = `<ul class=\"tag-suggest\" role=\"listbox\">${items}</ul>`;
+                }
+                this.open = true;
             },
             onSuggestClick(e) {
                 const btn = e.target.closest && e.target.closest('.tag-suggestion');

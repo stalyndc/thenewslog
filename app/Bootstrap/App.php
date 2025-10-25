@@ -262,6 +262,7 @@ class App
         $this->router->post('/admin/feeds/{id}/delete', 'App\Controllers\Admin\FeedController@destroy');
         $this->router->get('/admin/tags/suggest', 'App\Controllers\Admin\TagController@suggest');
         $this->router->get('/admin/tags/validate', 'App\Controllers\Admin\TagController@validate');
+        $this->router->get('/admin/tags/all', 'App\Controllers\Admin\TagController@all');
         $this->router->post('/admin/inbox/delete', 'App\Controllers\Admin\InboxController@delete');
         $this->router->post('/admin/inbox/ignore', 'App\Controllers\Admin\InboxController@ignore');
         $this->router->post('/admin/logout', 'App\Controllers\Admin\AuthController@logout');
