@@ -9,3 +9,4 @@ dist/
 .env
 .env.*
 next.md
+docs/AgentNotes.md
