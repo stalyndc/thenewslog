@@ -92,15 +92,28 @@ class App
 
     private function validateDependencies(): void
     {
-        $required = ['BASE_URL', 'DB_HOST', 'DB_NAME', 'DB_USER'];
+        // Required: BASE_URL, DB_NAME, DB_USER and one of DB_HOST or DB_SOCKET
         $missing = [];
 
-        foreach ($required as $key) {
-            $value = getenv($key);
+        $baseUrl = getenv('BASE_URL');
+        if ($baseUrl === false || $baseUrl === '') {
+            $missing[] = 'BASE_URL';
+        }
 
-            if ($value === false || $value === '') {
-                $missing[] = $key;
-            }
+        $dbName = getenv('DB_NAME');
+        if ($dbName === false || $dbName === '') {
+            $missing[] = 'DB_NAME';
+        }
+
+        $dbUser = getenv('DB_USER');
+        if ($dbUser === false || $dbUser === '') {
+            $missing[] = 'DB_USER';
+        }
+
+        $dbHost = getenv('DB_HOST');
+        $dbSocket = getenv('DB_SOCKET');
+        if (($dbHost === false || $dbHost === '') && ($dbSocket === false || $dbSocket === '')) {
+            $missing[] = 'DB_HOST or DB_SOCKET';
         }
 
         if (!empty($missing)) {

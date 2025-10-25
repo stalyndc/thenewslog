@@ -23,7 +23,6 @@ $append('/editions', null);
 $append('/tags', null);
 $append('/rss/daily.xml', null);
 $append('/about', null);
-$append('/contact', null);
 $append('/privacy', null);
 $append('/terms', null);
 

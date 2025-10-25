@@ -30,7 +30,8 @@ class RssController
         }
 
         $title = sprintf('The News Log — Daily Edition (%s)', date('D, M j, Y', strtotime($today)));
-        $link = rtrim($this->baseUrl(), '/') . '/?date=' . urlencode($today);
+        // Channel canonical link should reference the edition page
+        $link = rtrim($this->baseUrl(), '/') . '/editions/' . rawurlencode($today);
 
         $xml = $this->buildFeed($title, $link, 'Daily curated selection', $links);
 

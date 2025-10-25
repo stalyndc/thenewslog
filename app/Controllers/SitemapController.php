@@ -8,7 +8,8 @@ class SitemapController
 {
     public function __invoke(): Response
     {
-        $path = dirname(__DIR__, 2) . '/public/sitemap.xml';
+        // Serve sitemap generated at the project root (see README)
+        $path = dirname(__DIR__, 2) . '/sitemap.xml';
 
         if (!is_file($path)) {
             return new Response('Sitemap not generated', 404);

@@ -78,9 +78,13 @@ class Request
             return [];
         }
 
-        $parsed = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-
-        return is_array($parsed) ? $parsed : [];
+        try {
+            $parsed = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            return is_array($parsed) ? $parsed : [];
+        } catch (\Throwable) {
+            // Gracefully ignore invalid JSON to avoid 500s on bad client input
+            return [];
+        }
     }
 
     public function method(): string
