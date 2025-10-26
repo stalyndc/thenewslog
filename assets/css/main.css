@@ -162,6 +162,12 @@ a:hover {
     left: 0;
     right: 0;
 }
+/* Light theme tag suggestions */
+body.light .tag-suggest {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+}
 
 .tag-suggest--empty {
     padding: 0.4rem 0.6rem;
@@ -190,6 +196,12 @@ a:hover {
     border-color: rgba(0, 173, 181, 0.35);
     color: #ffffff;
 }
+body.light .tag-suggestion:hover,
+body.light .tag-suggestion:focus {
+    background: rgba(14, 165, 166, 0.15);
+    border-color: rgba(14, 165, 166, 0.35);
+    color: var(--color-text);
+}
 
 .chips {
     display: flex;
@@ -208,6 +220,12 @@ a:hover {
     border: 1px solid rgba(0, 173, 181, 0.35);
     color: #ffffff;
     font-size: 0.85rem;
+}
+/* Light theme chip/tag */
+body.light .chip {
+    background: rgba(14, 165, 166, 0.16);
+    border-color: rgba(14, 165, 166, 0.35);
+    color: var(--color-text);
 }
 
 .chip button {
