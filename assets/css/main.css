@@ -1076,6 +1076,12 @@ a:hover {
     padding: 1rem;
     overflow-y: auto;
 }
+/* Light theme drawer */
+body.light .drawer-nav {
+    background: rgba(255, 255, 255, 0.98);
+    border-left: 1px solid var(--color-border);
+}
+body.light .mobile-link { color: var(--color-text); }
 
 .drawer-nav.is-open {
     transform: translateX(0);
@@ -1359,6 +1365,10 @@ th {
     padding: 1.5rem 1rem;
     background: rgba(34, 40, 49, 0.9);
 }
+body.light .app-footer { background: rgba(255, 255, 255, 0.96); border-top: 1px solid var(--color-border); }
+body.light .app-footer__inner,
+body.light .app-footer__nav,
+body.light .app-footer__nav a { color: var(--color-muted); }
 
 .app-footer__inner {
     max-width: var(--max-width);
