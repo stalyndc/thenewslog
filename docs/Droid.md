@@ -299,8 +299,8 @@ lpine.js Enhancements & Frontend Stack Recommendations
 
  What You Have:
 
- •  ✅ HTMX 1.9.12 (CDN) - Server-driven interactions
- •  ✅ Alpine.js 3.x (CDN) - Lightweight reactivity (partial usage)
+ •  ✅ HTMX 1.9.x (self-hosted) - Server-driven interactions
+ •  ✅ Alpine.js 3.x (self-hosted) - Lightweight reactivity (partial usage)
  •  ✅ TypeScript - Custom modules (app.ts, reorder.ts, toast.ts,
     timeago.ts)
  •  ✅ Vite - Build tool for TS compilation
@@ -461,7 +461,7 @@ lpine.js Enhancements & Frontend Stack Recommendations
      <!-- Admin content -->
    </div>
 
- B. **Persistent Settings (Dark Mode, View Preferences)**
+ B. **Persistent Settings (Dark Mode, View Preferences)** — RESOLVED (Theme)
 
  html
      theme: Alpine.$persist('light').as('user-theme'),
@@ -472,7 +472,8 @@ lpine.js Enhancements & Frontend Stack Recommendations
      </button>
    </div>
 
- Requires: Alpine Persist Plugin (see recommendations below)
+ Status: Theme persistence implemented using Alpine Persist with a header toggle.
+ Requires: Alpine Persist Plugin (✅ loaded)
 
  C. **Infinite Scroll (Editions Archive)**
 
@@ -527,9 +528,9 @@ lpine.js Enhancements & Frontend Stack Recommendations
 
  **Essential Additions**
 
- 1. **Alpine.js Official Plugins** ⭐⭐⭐⭐⭐
+ 1. **Alpine.js Official Plugins** ⭐⭐⭐⭐⭐ — RESOLVED (Loaded)
 
- Install: CDN or npm
+ Installed: self-hosted under `assets/vendor/` (persist, intersect, focus, mask)
 
  html
    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.
@@ -553,7 +554,7 @@ lpine.js Enhancements & Frontend Stack Recommendations
  •  Intersect: Infinite scroll, lazy loading images
  •  Focus: Modal/drawer focus trapping (accessibility)
     Mask: Date input formatting, tag separators
- Priority: HIGH (Persist + Intersect)
+ Priority: DONE for loading; usage to expand as needed (Intersect available for future infinite scroll, Focus/Mask available).
 
  ──────────────────────────────────────────
 
@@ -782,14 +783,14 @@ lpine.js Enhancements & Frontend Stack Recommendations
 
  Phase 1: Quick Wins (1-2 days)
 
- 1. Add Alpine Persist plugin - User preferences (theme, view mode)
- 2. Add Alpine Intersect plugin - Infinite scroll on editions
+ 1. RESOLVED — Add Alpine Persist plugin - User preferences (theme)
+ 2. RESOLVED (loaded) — Alpine Intersect plugin; current infinite scroll uses HTMX `revealed`. Optionally migrate later.
  3. Convert toast.ts → Alpine component - Simpler code
   . Add Fuse.js for feed search - Better admin UX
  Phase 2: Enhanced UX (3-5 days)
 
  5. Replace reorder.ts with Sortable.js - Mobile-friendly drag-drop
- 6. Add Alpine Focus plugin - Better modal accessibility
+ 6. RESOLVED (loaded) — Alpine Focus plugin; modals already accessible, wire if needed.
  7. Create Alpine store for inbox state - Centralized admin state
   . Add keyboard shortcuts (hotkeys-js) - Power user features
  Phase 3: Advanced (Optional)
