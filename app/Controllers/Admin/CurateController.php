@@ -297,7 +297,8 @@ class CurateController extends AdminController
 
         foreach (['title', 'feed_title', 'source_name', 'summary_raw', 'author'] as $field) {
             if (isset($item[$field]) && is_string($item[$field])) {
-                $item[$field] = Encoding::ensureUtf8($item[$field]) ?? '';
+                $clean = Encoding::ensureUtf8($item[$field]) ?? '';
+                $item[$field] = Encoding::decodeHtmlEntities($clean) ?? $clean;
             }
         }
 

@@ -4,6 +4,16 @@ namespace App\Helpers;
 
 class Encoding
 {
+    public static function decodeHtmlEntities(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        // Decode numeric and named HTML entities to their UTF-8 characters
+        return html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
     public static function ensureUtf8(?string $value, string $replacement = ''): ?string
     {
         if ($value === null || $value === '') {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Helpers\Url;
+use App\Helpers\Encoding;
 use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Feed\ConditionalClient;
@@ -122,9 +123,12 @@ class FeedFetcher
 
                 $publishedAt = $item->getLastModified() ?: $item->getPublishedDate();
 
+                $rawTitle = $item->getTitle() ?: $link;
+                $normalizedTitle = Encoding::ensureUtf8(Encoding::decodeHtmlEntities(strip_tags($rawTitle))) ?? $rawTitle;
+
                 $this->items->create([
                     'feed_id' => (int) $feed['id'],
-                    'title' => $item->getTitle() ?: $link,
+                    'title' => $normalizedTitle,
                     'url' => $normalizedUrl,
                     'url_hash' => $hash,
                     'summary_raw' => $item->getContent() ?: null,
