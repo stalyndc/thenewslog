@@ -154,9 +154,12 @@ TheNewsLog.org — Comprehensive Code Review
  File: scripts/migrate.sql
  Observations:
  •  ✅ Good: url_hash, feed_id, published_at, status indexes exist
- •  Recommended additions:
+ •  New indexes provided:
    •  curated_links.published_at (used in ORDER BY frequently)
-   •  Consider index on items.created_at for inbox sorting
+   •  items.created_at (inbox sorting)
+ •  How to apply:
+   •  MySQL 8.0+: run `scripts/upgrade_20251026_add_indexes.sql` (uses IF NOT EXISTS)
+   •  Older MySQL: `php scripts/add_indexes.php` — checks information_schema and creates missing indexes only
 
  17. **N+1 Query Potential in Tag Display**
 
@@ -242,15 +245,15 @@ TheNewsLog.org — Comprehensive Code Review
 
  1. RESOLVED — Admin auth enforcement (via AdminController)
  2. RESOLVED — Session hardening + global security headers
- 3. Add rate limiting to tag endpoints
- 4. Fix timing attack in email comparison
+ 3. RESOLVED — Add rate limiting to tag endpoints
+ 4. RESOLVED — Fix timing attack in email comparison
  5. Review SQL sprintf pattern safety (keep pattern constrained)
 
  Phase 2: High Priority Enhancements
  6. Implement caching layer (Symfony Cache)
  7. Add monitoring/alerting for feed failures
  8. Complete or remove Mailer implementation
- 9. Fix RSS GUID generation
+ 9. RESOLVED — Fix RSS GUID generation
  10. Add error boundaries to frontend
 
  Phase 3: Quality Improvements
