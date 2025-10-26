@@ -27,6 +27,17 @@
 
         <div class="form-group">
             <label for="blurb-editor">Body <span class="form-hint" data-wordcount>0/250 words</span></label>
+            <div class="editor-toolbar">
+                <button class="btn btn-secondary btn-icon" data-cmd="bold" type="button">B</button>
+                <button class="btn btn-secondary btn-icon" data-cmd="italic" type="button"><em>I</em></button>
+                <button class="btn btn-secondary btn-icon" data-cmd="bullet" type="button">• List</button>
+                <button class="btn btn-secondary btn-icon" data-cmd="ordered" type="button">1. List</button>
+                <button class="btn btn-secondary btn-icon" data-cmd="blockquote" type="button">“”</button>
+                <button class="btn btn-secondary btn-icon" data-cmd="code" type="button">{ }</button>
+                <button class="btn btn-secondary btn-icon" data-cmd="undo" type="button">Undo</button>
+                <button class="btn btn-secondary btn-icon" data-cmd="redo" type="button">Redo</button>
+                <button class="btn btn-secondary btn-icon" data-cmd="clear" type="button">Clear</button>
+            </div>
             <div class="editor" data-editor="tiptap" data-editor-id="post-blurb" data-output-html="blurb_html" data-output-text="blurb" data-word-limit="250"></div>
             <input type="hidden" id="blurb_html" name="blurb_html" value="{{ form.blurb_html|default('')|e('html') }}">
             <input type="hidden" id="blurb" name="blurb" x-model="blurb" value="{{ form.blurb|default('')|e('html') }}">
@@ -62,4 +73,3 @@
     </form>
 </section>
 {% endblock %}
-

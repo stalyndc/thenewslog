@@ -42,6 +42,29 @@ export function initTiptap(opts: EditorOpts): void {
     },
   });
 
+  // Wire a simple toolbar if present in the same form group
+  const group = el.closest('.form-group') || el.parentElement;
+  const toolbar = group?.querySelector('.editor-toolbar');
+  if (toolbar) {
+    toolbar.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('[data-cmd]') as HTMLElement | null;
+      if (!btn) return;
+      e.preventDefault();
+      const cmd = btn.getAttribute('data-cmd');
+      switch (cmd) {
+        case 'bold': editor.chain().focus().toggleBold().run(); break;
+        case 'italic': editor.chain().focus().toggleItalic().run(); break;
+        case 'bullet': editor.chain().focus().toggleBulletList().run(); break;
+        case 'ordered': editor.chain().focus().toggleOrderedList().run(); break;
+        case 'blockquote': editor.chain().focus().toggleBlockquote().run(); break;
+        case 'code': editor.chain().focus().toggleCodeBlock().run(); break;
+        case 'undo': editor.chain().focus().undo().run(); break;
+        case 'redo': editor.chain().focus().redo().run(); break;
+        case 'clear': editor.chain().focus().clearNodes().unsetAllMarks().run(); break;
+      }
+    });
+  }
+
   // expose for debugging
   (window as any).tiptap = editor;
 }
@@ -61,4 +84,3 @@ if (document.readyState === 'loading') {
 } else {
   bootstrapEditors();
 }
-
