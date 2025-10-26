@@ -10,48 +10,20 @@ TheNewsLog.org — Comprehensive Code Review
 
  🔴 CRITICAL SECURITY ISSUES (Immediate Action Required)
 
- 1. **AuthMiddleware Not Enforced**
+ 1. RESOLVED — Admin Auth Enforcement
 
- File: app/Middleware/AuthMiddleware.php
- Severity: CRITICAL
- Issue: The middleware exists but is completely empty (TODO comment). Admin
- routes are NOT protected.
+ Status: Fixed. Admin access is enforced in `App\Controllers\Admin\AdminController`
+ (constructor check + redirects). The unused `app/Middleware/AuthMiddleware.php`
+ has been removed to avoid confusion.
 
- php
-   public function handle(): void {
-       // TODO: enforce authentication for admin routes.
-   }
+ 2. RESOLVED — Session Security Hardening
 
- Impact: Anyone can access admin routes without authentication. The
- AdminController has manual checks, but middleware should be the first line
- of defense.
- Fix: Implement proper middleware enforcement in the Router or use the
- middleware in route definitions.
-
- 2. **No Session Security Hardening**
-
- File: index.php
- Severity: HIGH
- Issue: Session configuration is basic; missing critical security flags.
- Missing:
- •  cookie_secure only set when HTTPS detected (should force HTTPS in
-    production)
- •  No session.cookie_lifetime configuration
- •  No session.gc_maxlifetime set
- •  No session fixation protection beyond regenerate_id
-
- Recommendation:
-
- php
-   session_start([
-       'cookie_httponly' => true,
-       'cookie_secure' => true, // Force HTTPS in production
-       'cookie_samesite' => 'Strict', // Changed from Lax
-       'use_strict_mode' => true,
-       'use_only_cookies' => true,
-       'cookie_lifetime' => 0, // Session cookies only
-       'gc_maxlifetime' => 3600,
-   ]);
+ Status: Fixed. `index.php` enables strict session flags before start
+ (`session.use_strict_mode`/`session.use_only_cookies`) and uses secure
+ cookie options with SameSite. Security headers were added globally (CSP
+ with nonces, HSTS on HTTPS, Referrer‑Policy, COOP/CORP, Permissions‑Policy).
+ Note: SameSite is set to Lax for admin UX; consider Strict only if it
+ does not impact flows.
 
  3. **SQL Injection via sprintf in ItemRepository**
 
@@ -68,20 +40,11 @@ TheNewsLog.org — Comprehensive Code Review
  Fix: Use query builder pattern or ensure team understands this is safe only
  because $where is hardcoded, not user input.
 
- 4. **Unserialize Without Class Restriction**
+ 4. RESOLVED — Rate Limiter Storage
 
- File: app/Services/RateLimiter.php (line 82)
- Severity: MEDIUM-HIGH
- Issue: Using unserialize() on file content with allowed_classes => false,
- which is good, but still risky.
-
- php
-   $data = @unserialize($content, ['allowed_classes' => false]);
-
- Better Alternative: Use JSON instead:
-
- php
-   $data = json_decode($content, true);
+ Status: Fixed. Rate limiter now stores attempt data as JSON and reads
+ JSON (with legacy unserialize support for older files). Types are
+ normalized and files are written with LOCK_EX.
 
  ──────────────────────────────────────────
 
@@ -179,25 +142,20 @@ TheNewsLog.org — Comprehensive Code Review
 
  📊 PERFORMANCE ISSUES
 
- 15. **No Caching Strategy Implemented**
+ 15. Page‑Level Caching Implemented (Further Data Caching Optional)
 
- Observation: Symfony Cache is installed but never used.
- Impact: Every request hits database, even for static content like published
- editions.
- Recommendation: Cache:
- •  Published edition pages (invalidate on new curation)
- •  RSS feeds (5-15 minute TTL)
- •  Tag lists and counts
- •  Feed fetch results (ETag/Last-Modified already implemented ✅)
+ Status: Improved. Public HTML endpoints now use `Response::cached()` with
+ sensible TTLs and the RSS feed sends cache headers. Feed fetching already
+ leverages ETag/Last‑Modified. Optional: introduce Symfony Cache for
+ fragment/data caching (e.g., tag counts) if needed.
 
- 16. **Missing Database Indexes**
+ 16. **Database Indexes**
 
  File: scripts/migrate.sql
  Observations:
  •  ✅ Good: url_hash, feed_id, published_at, status indexes exist
- •  ❌ Missing:
+ •  Recommended additions:
    •  curated_links.published_at (used in ORDER BY frequently)
-   •  Composite index on (is_published, edition_date) already exists ✅
    •  Consider index on items.created_at for inbox sorting
 
  17. **N+1 Query Potential in Tag Display**
@@ -280,13 +238,13 @@ TheNewsLog.org — Comprehensive Code Review
 
  📋 RECOMMENDED PRIORITY ORDER
 
- Phase 1: Critical Security (Do First)
+ Phase 1: Critical Security (Updated)
 
- 1. Implement AuthMiddleware properly
- 2. Harden session configuration
+ 1. RESOLVED — Admin auth enforcement (via AdminController)
+ 2. RESOLVED — Session hardening + global security headers
  3. Add rate limiting to tag endpoints
  4. Fix timing attack in email comparison
- 5. Review SQL sprintf pattern safety
+ 5. Review SQL sprintf pattern safety (keep pattern constrained)
 
  Phase 2: High Priority Enhancements
  6. Implement caching layer (Symfony Cache)
@@ -313,7 +271,7 @@ TheNewsLog.org — Comprehensive Code Review
 
  🎯 OVERALL ASSESSMENT
 
- Grade: B+ (Good foundation, critical security gaps)
+ Grade: A− (Good foundation; earlier critical gaps addressed)
 
  Strengths:
  •  Clean architecture with proper separation
@@ -321,10 +279,10 @@ TheNewsLog.org — Comprehensive Code Review
  •  Solid feed ingestion with conditional requests
  •  Type-safe TypeScript with modern patterns
 
- Critical Gaps:
- •  AuthMiddleware not enforced (blocking production deployment)
- •  Session security needs hardening
- •  Missing caching strategy
+ Critical Gaps (updated):
+ •  Rate limiting for certain admin AJAX endpoints (tags)
+ •  Timing‑safe email comparison in Auth
+ •  RSS GUID fallback should use a canonical URL
  •  Some error handling inconsistencies
 
  Recommendation: Address Phase 1 items before production deployment. The
@@ -848,8 +806,9 @@ lpine.js Enhancements & Frontend Stack Recommendations
  •  Fuse.js: +18KB
  •  Total: ~230KB (still excellent for a CMS)
 
- Keep in mind: You're loading from CDN (HTMX + Alpine), so actual impact
- is minimal.
+ Keep in mind: HTMX and Alpine are now self‑hosted under `assets/vendor/`
+ and CSP blocks external CDNs; bundle size considerations apply to local
+ assets.
 
  ──────────────────────────────────────────
 
