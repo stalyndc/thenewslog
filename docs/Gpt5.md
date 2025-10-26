@@ -44,6 +44,8 @@ Next Up (Correctness/Content)
   - app/Views/layout.twig with `canonical_url`; controllers now set it.
 - [x] Use `Response::cached()` for public endpoints (home, edition show, tags) and cache headers for RSS.
   - HomeController, EditionArchiveController, TagController, RssController.
+- [x] Add meta descriptions for home, editions, and tag pages.
+  - Controllers set a concise `meta_description` consumed by layout.
 - [ ] Optional: meta descriptions for edition/tag pages.
 
 Operational Notes

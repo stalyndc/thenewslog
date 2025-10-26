@@ -47,6 +47,11 @@ class HomeController extends BaseController
 
         $canonical = rtrim($this->baseUrl(), '/') . '/';
 
+        $count = is_array($links) ? count($links) : 0;
+        $meta = $count > 0
+            ? sprintf('Daily edition for %s — %d curated links.', $editionDisplay ?? $editionDate, $count)
+            : 'Daily curated links in tech, startups, AI and more.';
+
         $html = $this->view->render('home.twig', [
             'links' => $links,
             'edition_date' => $editionDate,
@@ -54,6 +59,7 @@ class HomeController extends BaseController
             'tagsByLink' => $tags,
             'is_admin' => $this->auth->check(),
             'canonical_url' => $canonical,
+            'meta_description' => $meta,
         ]);
 
         return Response::cached($html, 600, true);

@@ -30,11 +30,13 @@ class TagController extends BaseController
         $tags = $this->tags->allWithCounts();
 
         $canonical = rtrim($this->baseUrl(), '/') . '/tags';
+        $meta = 'Explore topics curated by The News Log.';
         $html = $this->view->render('tags.twig', [
             'current_nav' => 'tags',
             'tags' => $tags,
             'is_admin' => $this->auth->check(),
             'canonical_url' => $canonical,
+            'meta_description' => $meta,
         ]);
 
         return Response::cached($html, 600, true);
@@ -57,6 +59,7 @@ class TagController extends BaseController
         $totalPages = max(1, (int) ceil($total / $perPage));
 
         $canonical = rtrim($this->baseUrl(), '/') . '/tags/' . rawurlencode((string) $tag['slug']);
+        $meta = sprintf('Latest curated links about %s from The News Log.', (string) ($tag['name'] ?? $slug));
         $html = $this->view->render('tag.twig', [
             'current_nav' => 'tags',
             'tag' => $tag,
@@ -66,6 +69,7 @@ class TagController extends BaseController
             'total_pages' => $totalPages,
             'is_admin' => $this->auth->check(),
             'canonical_url' => $canonical,
+            'meta_description' => $meta,
         ]);
 
         return Response::cached($html, 600, true);

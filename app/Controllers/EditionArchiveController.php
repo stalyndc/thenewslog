@@ -40,6 +40,7 @@ class EditionArchiveController extends BaseController
         $nextPage = $page < $totalPages ? $page + 1 : null;
 
         $canonical = rtrim($this->baseUrl(), '/') . '/editions';
+        $meta = 'Browse past daily editions of The News Log.';
         $html = $this->view->render('editions.twig', [
             'current_nav' => 'editions',
             'editions' => $editions,
@@ -48,6 +49,7 @@ class EditionArchiveController extends BaseController
             'next_page' => $nextPage,
             'is_admin' => $this->auth->check(),
             'canonical_url' => $canonical,
+            'meta_description' => $meta,
         ]);
 
         return Response::cached($html, 600, true);
@@ -70,6 +72,8 @@ class EditionArchiveController extends BaseController
         $tags = $this->tags->tagsForCuratedLinks(array_column($links, 'id'));
 
         $canonical = rtrim($this->baseUrl(), '/') . '/editions/' . rawurlencode($edition['edition_date']);
+        $count = is_array($links) ? count($links) : 0;
+        $meta = sprintf('Daily Edition %s — %d curated links.', (string) $edition['edition_date'], $count);
         $html = $this->view->render('edition_show.twig', [
             'current_nav' => 'editions',
             'edition' => $edition,
@@ -77,6 +81,7 @@ class EditionArchiveController extends BaseController
             'tagsByLink' => $tags,
             'is_admin' => $this->auth->check(),
             'canonical_url' => $canonical,
+            'meta_description' => $meta,
         ]);
 
         return Response::cached($html, 900, true);
