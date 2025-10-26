@@ -70,11 +70,20 @@ Initial scaffold generated from PRD and Agents guidelines.
 - Normalize URLs (drop `#fragment` and recompute hash):
   - `php scripts/backfill_normalize_urls.php`
 
+## Database Indexes
+
+- MySQL 8.0+: run `scripts/upgrade_20251026_add_indexes.sql` to add helpful indexes using `IF NOT EXISTS`.
+- Older MySQL versions: run `php scripts/add_indexes.php`. This script checks `information_schema` and creates only missing indexes.
+
 ## Frontend Vendor Scripts
 
 - The app self-hosts required third-party scripts under `assets/vendor/`:
   - `assets/vendor/htmx.min.js` (1.9.x)
   - `assets/vendor/alpine.min.js` (3.x)
+  - `assets/vendor/alpine-persist.min.js` (Alpine plugin)
+  - `assets/vendor/alpine-intersect.min.js` (Alpine plugin)
+  - `assets/vendor/alpine-focus.min.js` (Alpine plugin)
+  - `assets/vendor/alpine-mask.min.js` (Alpine plugin)
 - Make sure these files are deployed; CSP blocks loading from external CDNs.
 
 ## Logs

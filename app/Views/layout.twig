@@ -34,7 +34,7 @@
     </script>
     {% block head %}{% endblock %}
 </head>
-<body x-data="appShell()" x-init="init()" @keydown.escape.window="handleEscape()">
+<body x-data="appShell()" x-init="init()" @keydown.escape.window="handleEscape()" :class="theme">
 <div class="app-shell">
     <header class="app-header">
         <div class="app-header__inner">
@@ -113,6 +113,10 @@
 </div>
 <script defer src="/assets/vendor/htmx.min.js"></script>
 <script defer src="/assets/vendor/alpine.min.js"></script>
+<script defer src="/assets/vendor/alpine-persist.min.js"></script>
+<script defer src="/assets/vendor/alpine-intersect.min.js"></script>
+<script defer src="/assets/vendor/alpine-focus.min.js"></script>
+<script defer src="/assets/vendor/alpine-mask.min.js"></script>
 <script nonce="{{ csp_nonce }}">
     document.addEventListener('htmx:configRequest', function (event) {
         const token = "{{ csrf_token|e('js') }}";
@@ -140,6 +144,8 @@
             confirmOpen: false,
             confirmMessage: '',
             confirmAction: null,
+            // Persisted user theme (light/dark). Requires Alpine Persist plugin.
+            theme: (window.Alpine && Alpine.store) ? Alpine.$persist('light').as('user-theme') : 'light',
             init() {
                 document.addEventListener('submit', this._handleSubmit.bind(this), true);
                 document.addEventListener('click', this._handleClick.bind(this), true);
