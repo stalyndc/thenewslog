@@ -32,6 +32,9 @@
                     {% if link.source_name %}
                         <span class="badge badge--muted">{{ link.source_name }}</span>
                     {% endif %}
+                    {% if link.published_at %}
+                        <span class="time-badge" data-time="{{ link.published_at }}">{{ link.published_at }}</span>
+                    {% endif %}
                     {% if link.blurb %}
                         <p>{{ link.blurb }}</p>
                     {% endif %}

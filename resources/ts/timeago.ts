@@ -1,26 +1,15 @@
-const MINUTE = 60 * 1000;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 function timeAgo(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) {
+  const d = dayjs(iso);
+  if (!d.isValid()) {
     return iso;
   }
 
-  const diff = Math.max(0, Date.now() - d.getTime());
-  if (diff < HOUR) {
-    const mins = Math.floor(diff / MINUTE) || 0;
-    return mins <= 1 ? "1 min ago" : `${mins} min ago`;
-  }
-
-  if (diff < DAY) {
-    const hrs = Math.floor(diff / HOUR);
-    return hrs <= 1 ? "1 hr ago" : `${hrs} hrs ago`;
-  }
-
-  const days = Math.floor(diff / DAY);
-  return days <= 1 ? "1 day ago" : `${days} days ago`;
+  return d.fromNow();
 }
 
 export function hydrateTimeAgo(): void {
