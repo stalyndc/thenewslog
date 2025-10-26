@@ -20,6 +20,46 @@ class RateLimiter
         }
     }
 
+    // Generic sliding window throttle. Allows at most $max requests per
+    // $windowSeconds for the provided $key. Returns true when the action is
+    // allowed and false when the caller should be rate limited.
+    public function allow(string $key, int $max, int $windowSeconds): bool
+    {
+        $file = $this->getThrottleFile($key);
+        $now = time();
+
+        $data = $this->readJsonFile($file) ?? ['count' => 0, 'reset_at' => $now + $windowSeconds];
+
+        if (!isset($data['count'], $data['reset_at']) || !is_int($data['count']) || !is_int($data['reset_at'])) {
+            $data = ['count' => 0, 'reset_at' => $now + $windowSeconds];
+        }
+
+        if ($now >= (int) $data['reset_at']) {
+            $data = ['count' => 0, 'reset_at' => $now + $windowSeconds];
+        }
+
+        if ($data['count'] >= $max) {
+            // Already over the limit
+            return false;
+        }
+
+        $data['count']++;
+        $this->writeJsonFile($file, $data);
+
+        return true;
+    }
+
+    public function timeToReset(string $key): int
+    {
+        $file = $this->getThrottleFile($key);
+        $now = time();
+        $data = $this->readJsonFile($file);
+        if (!is_array($data) || !isset($data['reset_at'])) {
+            return 0;
+        }
+        return max(0, (int) $data['reset_at'] - $now);
+    }
+
     public function isBlocked(string $identifier): bool
     {
         $data = $this->getAttemptData($identifier);
@@ -160,5 +200,41 @@ class RateLimiter
         $hash = hash('sha256', $identifier);
 
         return $this->storePath . '/' . $hash . '.rate';
+    }
+
+    private function getThrottleFile(string $key): string
+    {
+        $hash = hash('sha256', 'throttle:' . $key);
+        return $this->storePath . '/' . $hash . '.json';
+    }
+
+    /**
+     * @return array<string,mixed>|null
+     */
+    private function readJsonFile(string $file): ?array
+    {
+        if (!is_file($file)) {
+            return null;
+        }
+        $raw = file_get_contents($file);
+        if ($raw === false || $raw === '') {
+            return null;
+        }
+        try {
+            $decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\Throwable) {
+            return null;
+        }
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    private function writeJsonFile(string $file, array $data): void
+    {
+        try {
+            $json = json_encode($data, JSON_THROW_ON_ERROR);
+        } catch (\Throwable) {
+            $json = json_encode($data);
+        }
+        file_put_contents($file, $json === false ? '{}' : $json, LOCK_EX);
     }
 }

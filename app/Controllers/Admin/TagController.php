@@ -8,21 +8,31 @@ use App\Repositories\FeedRepository;
 use App\Repositories\ItemRepository;
 use App\Repositories\TagRepository;
 use App\Services\Auth;
+use App\Services\RateLimiter;
 use App\Services\Csrf;
 use Twig\Environment;
 
 class TagController extends AdminController
 {
     private TagRepository $tags;
+    private RateLimiter $limiter;
 
-    public function __construct(Environment $view, Auth $auth, Csrf $csrf, TagRepository $tags, ItemRepository $items, FeedRepository $feeds)
+    public function __construct(Environment $view, Auth $auth, Csrf $csrf, TagRepository $tags, ItemRepository $items, FeedRepository $feeds, RateLimiter $limiter)
     {
         parent::__construct($view, $auth, $csrf, $items, $feeds);
         $this->tags = $tags;
+        $this->limiter = $limiter;
     }
 
     public function suggest(Request $request): Response
     {
+        $ip = (string) ($request->server('REMOTE_ADDR') ?? '0.0.0.0');
+        $key = 'tags:suggest:' . $ip;
+        if (!$this->limiter->allow($key, 60, 300)) {
+            $r = new Response('', 429);
+            $r->setHeader('Retry-After', (string) $this->limiter->timeToReset($key));
+            return $r;
+        }
         $queryRaw = (string) $request->query('tags', '');
         $fullRaw = (string) $request->query('tags_full', $queryRaw);
         $existingRaw = (string) $request->query('existing', '');
@@ -81,6 +91,13 @@ class TagController extends AdminController
 
     public function validate(Request $request): Response
     {
+        $ip = (string) ($request->server('REMOTE_ADDR') ?? '0.0.0.0');
+        $key = 'tags:validate:' . $ip;
+        if (!$this->limiter->allow($key, 90, 300)) {
+            $r = new Response('', 429);
+            $r->setHeader('Retry-After', (string) $this->limiter->timeToReset($key));
+            return $r;
+        }
         $value = (string) ($request->query('tags') ?? $request->input('tags', ''));
         $raw = array_map('trim', explode(',', $value));
         $nonEmpty = array_values(array_filter($raw, static fn ($tag) => $tag !== ''));
@@ -126,6 +143,13 @@ class TagController extends AdminController
      */
     public function all(Request $request): Response
     {
+        $ip = (string) ($request->server('REMOTE_ADDR') ?? '0.0.0.0');
+        $key = 'tags:all:' . $ip;
+        if (!$this->limiter->allow($key, 30, 300)) {
+            $r = new Response('', 429);
+            $r->setHeader('Retry-After', (string) $this->limiter->timeToReset($key));
+            return $r;
+        }
         $rows = $this->tags->allWithCounts();
         $list = [];
         foreach ($rows as $row) {

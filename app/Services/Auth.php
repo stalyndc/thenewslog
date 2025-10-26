@@ -74,7 +74,9 @@ class Auth
             return false;
         }
 
-        $emailMatches = strcasecmp(trim($email), $configuredEmail) === 0;
+        $emailInput = strtolower(trim($email));
+        $emailStored = strtolower($configuredEmail);
+        $emailMatches = hash_equals($emailStored, $emailInput);
         $passwordVerified = password_verify($password, $configuredHash);
 
         return $emailMatches && $passwordVerified;

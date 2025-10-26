@@ -64,7 +64,8 @@ class RssController
                 continue;
             }
 
-            $guid = $linkRow['url'] ?? ($this->baseUrl() . '/curated/' . $id);
+            // Prefer the canonical source URL; fall back to our edition permalink
+            $guid = $linkRow['url'] ?? ($this->baseUrl() . '/editions/' . rawurlencode((string)($linkRow['edition_date'] ?? $today)) . '#link-' . $id);
             $pubDate = $this->formatRssDate($linkRow['published_at'] ?? $linkRow['updated_at'] ?? null);
 
             $itemsXml[] = sprintf(
