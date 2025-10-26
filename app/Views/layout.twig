@@ -58,9 +58,14 @@
                             </a>
                         {% endif %}
                     </nav>
-                    <button class="nav-toggle" aria-label="Toggle theme" @click="theme = theme === 'light' ? 'dark' : 'light'" title="Toggle theme">
-                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
-                            <path d="M12 3a1 1 0 0 1 1 1 7 7 0 1 0 7 7 1 1 0 1 1 2 0 9 9 0 1 1-9-9 1 1 0 0 1 0 2Z"/>
+                    <button class="theme-toggle" :aria-label="theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'" :title="theme === 'dark' ? 'Light mode' : 'Dark mode'" @click="theme = theme === 'dark' ? 'light' : 'dark'">
+                        <!-- Sun icon -->
+                        <svg x-show="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                            <path d="M12 4.5a1 1 0 0 0 1-1V2a1 1 0 1 0-2 0v1.5a1 1 0 0 0 1 1Zm0 17a1 1 0 0 0-1 1V24a1 1 0 1 0 2 0v-1.5a1 1 0 0 0-1-1ZM4.5 12a1 1 0 0 0-1-1H2a1 1 0 1 0 0 2h1.5a1 1 0 0 0 1-1Zm17 0a1 1 0 0 0 1-1H24a1 1 0 1 0 0 2h-1.5a1 1 0 0 0-1-1ZM5.05 5.05a1 1 0 0 0 1.41 0l1.06-1.06a1 1 0 1 0-1.41-1.41L5.05 3.64a1 1 0 0 0 0 1.41Zm11.43 11.43a1 1 0 0 0 1.41 0l1.06-1.06a1 1 0 1 0-1.41-1.41l-1.06 1.06a1 1 0 0 0 0 1.41ZM18.95 5.05a1 1 0 0 0 0-1.41L17.89 2.58a1 1 0 1 0-1.41 1.41l1.06 1.06a1 1 0 0 0 1.41 0ZM4.11 18.95a1 1 0 0 0 0-1.41L3.05 16.48a1 1 0 1 0-1.41 1.41l1.06 1.06a1 1 0 0 0 1.41 0ZM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/>
+                        </svg>
+                        <!-- Moon icon -->
+                        <svg x-show="theme === 'light'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 1 0 9.79 9.79Z"/>
                         </svg>
                     </button>
                     <button class="nav-toggle" :aria-expanded="mobileOpen" aria-controls="mobile-drawer" aria-label="Open menu" @click="toggleMobile()">
@@ -150,7 +155,7 @@
             confirmMessage: '',
             confirmAction: null,
             // Persisted user theme (light/dark). Requires Alpine Persist plugin.
-            theme: (window.Alpine && Alpine.store) ? Alpine.$persist('light').as('user-theme') : 'light',
+            theme: (window.Alpine && Alpine.store) ? Alpine.$persist('dark').as('user-theme') : 'dark',
             init() {
                 document.addEventListener('submit', this._handleSubmit.bind(this), true);
                 document.addEventListener('click', this._handleClick.bind(this), true);

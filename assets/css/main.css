@@ -374,6 +374,25 @@ a:hover {
     margin-left: 16px;
 }
 
+/* Theme toggle is always visible */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 173, 181, 0.35);
+    background-color: rgba(0, 173, 181, 0.08);
+    color: var(--color-accent);
+    margin-left: 10px;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus {
+    background-color: rgba(0, 173, 181, 0.16);
+}
+
 .nav-toggle:hover,
 .nav-toggle:focus {
     background-color: rgba(0, 173, 181, 0.16);
