@@ -2,7 +2,7 @@ import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 
 type EditorOpts = {
-  selector: string; // CSS selector for editor root
+  el: HTMLElement; // editor root element
   outputHtmlInputId: string; // hidden input for html
   outputTextInputId: string; // hidden input for plain text
   wordLimit?: number;
@@ -15,8 +15,7 @@ function countWords(text: string): number {
 }
 
 export function initTiptap(opts: EditorOpts): void {
-  const el = document.querySelector<HTMLElement>(opts.selector);
-  if (!el) return;
+  const el = opts.el;
 
   const htmlInput = document.getElementById(opts.outputHtmlInputId) as HTMLInputElement | null;
   const textInput = document.getElementById(opts.outputTextInputId) as HTMLInputElement | null;
@@ -74,7 +73,7 @@ export function bootstrapEditors(): void {
     const htmlInputId = root.getAttribute('data-output-html') || '';
     const textInputId = root.getAttribute('data-output-text') || '';
     const limit = parseInt(root.getAttribute('data-word-limit') || '250', 10);
-    initTiptap({ selector: `[data-editor="tiptap"][data-editor-id="${root.getAttribute('data-editor-id')}"]`, outputHtmlInputId: htmlInputId, outputTextInputId: textInputId, wordLimit: limit });
+    initTiptap({ el: root, outputHtmlInputId: htmlInputId, outputTextInputId: textInputId, wordLimit: limit });
   });
 }
 

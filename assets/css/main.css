@@ -1279,6 +1279,18 @@ body.light .btn-primary:hover {
     border-radius: 10px;
     border: 1px solid var(--color-border);
 }
+.editor .ProseMirror {
+    min-height: 120px;
+    outline: none;
+    padding: 0.25rem 0;
+    color: var(--color-text);
+}
+.editor .ProseMirror p { margin: 0 0 0.75rem; }
+.editor .ProseMirror ul, .editor .ProseMirror ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+.editor .ProseMirror blockquote {
+    border-left: 3px solid rgba(255,255,255,0.2);
+    margin: 0.5rem 0; padding: 0.25rem 0.75rem; opacity: 0.9;
+}
 .editor-toolbar {
     display: flex;
     gap: 0.5rem;
