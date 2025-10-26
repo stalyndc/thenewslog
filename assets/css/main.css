@@ -1213,8 +1213,9 @@ body.light .mobile-link { color: var(--color-text); }
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 16px 30px rgba(0, 173, 181, 0.4);
+    /* Match ring-style hover like Ignore/Delete */
+    transform: none;
+    box-shadow: 0 0 0 2px rgba(0, 173, 181, 0.35);
 }
 
 .btn-secondary {
@@ -1257,6 +1258,11 @@ body.light .btn-danger {
 }
 body.light .btn-danger:hover {
     box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.35);
+}
+
+/* Ensure primary gets the same ring feel in light mode */
+body.light .btn-primary:hover {
+    box-shadow: 0 0 0 2px rgba(0, 173, 181, 0.35);
 }
 
 .btn-inline {
