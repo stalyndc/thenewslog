@@ -1199,6 +1199,11 @@ body.light .mobile-link { color: var(--color-text); }
     text-transform: uppercase;
     letter-spacing: 0.05em;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    text-decoration: none; /* ensure anchor buttons are not underlined */
+}
+
+.btn:hover {
+    text-decoration: none; /* override global a:hover underline */
 }
 
 .btn-primary {
