@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Fast health check endpoint (static PHP, no bootstrap)
+RewriteRule ^healthz/?$ healthz.php [L]
+
 # Serve existing files/directories directly
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
@@ -7,4 +10,3 @@ RewriteRule ^ - [L]
 
 # Route everything else to the front controller
 RewriteRule ^ index.php [QSA,L]
-
