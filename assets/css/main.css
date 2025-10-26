@@ -1205,6 +1205,16 @@ body.light .mobile-link { color: var(--color-text); }
     box-shadow: 0 0 0 2px rgba(238, 238, 238, 0.15);
 }
 
+/* Improve visibility of the neutral "Ignore" pill in light mode */
+body.light .btn-secondary {
+    background: rgba(15, 23, 42, 0.08); /* soft slate tint */
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+body.light .btn-secondary:hover {
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.15);
+}
+
 .btn-danger {
     background: rgba(255, 107, 107, 0.25);
     color: #ffdada;
