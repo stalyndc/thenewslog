@@ -34,8 +34,9 @@ Next Up (Security)
 
 Next Up (Correctness/Content)
 
-- [ ] Strip URL fragments before hashing/normalizing to avoid dupes (`#...`).
-  - Files: app/Helpers/Url.php (drop fragments) and ensure `url_hash` computed without fragment.
+- [x] Strip URL fragments before hashing/normalizing to avoid dupes (`#...`).
+  - app/Helpers/Url.php drops fragments; new script to backfill existing rows.
+  - Backfill once: `php scripts/backfill_normalize_urls.php`
 
 Next Up (SEO/Perf)
 

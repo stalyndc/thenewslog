@@ -51,9 +51,8 @@ class Url
             $normalized .= '?' . $query;
         }
 
-        if (!empty($parts['fragment'])) {
-            $normalized .= '#' . $parts['fragment'];
-        }
+        // Intentionally drop URL fragments (they do not change the resource)
+        // to improve duplicate detection and canonicalization.
 
         return $normalized;
     }
