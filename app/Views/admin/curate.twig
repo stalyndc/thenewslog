@@ -64,7 +64,7 @@
             title: '{{ form.title|default('')|e('js') }}', 
             blurb: '{{ form.blurb|default('')|e('js') }}', 
             date: '{{ form.edition_date|default('')|e('js') }}', 
-            maxBlurb: 180 
+            maxWords: 250 
         }">
             {{ csrf_field() }}
             <div class="form-group">
@@ -73,9 +73,11 @@
             </div>
 
             <div class="form-group">
-                <label for="blurb">One-line Blurb <span class="form-hint" x-text="blurb.length + '/' + maxBlurb"></span></label>
-                <textarea id="blurb" name="blurb" class="input-control" rows="3" x-model="blurb" required>{{ form.blurb|default('') }}</textarea>
-                <p class="form-hint form-hint--warn" x-show="blurb.length > maxBlurb">Too long; aim for a snappy one‑liner.</p>
+                <label for="blurb">Blurb <span class="form-hint" data-wordcount>0/250 words</span></label>
+                <div class="editor" data-editor="tiptap" data-editor-id="blurb-editor" data-output-html="blurb_html" data-output-text="blurb"></div>
+                <input type="hidden" id="blurb_html" name="blurb_html" value="{{ form.blurb_html|default('')|e('html') }}">
+                <input type="hidden" id="blurb" name="blurb" x-model="blurb" value="{{ form.blurb|default('')|e('html') }}">
+                <p class="form-hint form-hint--warn" data-wordhint style="display:none">Limit is 250 words.</p>
             </div>
 
             <div class="form-group">
@@ -137,7 +139,7 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary" :disabled="!title || !date || blurb.length === 0 || blurb.length > maxBlurb">Save Curated Link</button>
+                <button type="submit" class="btn btn-primary" :disabled="!title || !date || blurb.length === 0">Save Curated Link</button>
             </div>
         </form>
 

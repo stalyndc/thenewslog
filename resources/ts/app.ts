@@ -1,6 +1,7 @@
 import { hydrateTimeAgo } from "./timeago";
 import { enableReorder } from "./reorder";
 import { pushToastById } from "./toast";
+import { bootstrapEditors } from "./editor";
 
 declare const htmx: any;
 
@@ -396,6 +397,7 @@ function initEnhancements(): void {
   bindEditionInfinite();
   bindInboxPolling();
   bindTagHelpers();
+  bootstrapEditors();
 }
 
 const runEnhancements = (): void => {

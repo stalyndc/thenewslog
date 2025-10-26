@@ -40,7 +40,9 @@
                     {% if link.published_at %}
                         <span class="time-badge" data-time="{{ link.published_at }}">{{ link.published_at }}</span>
                     {% endif %}
-                    {% if link.blurb %}
+                    {% if link.blurb_html %}
+                        <div class="blurb">{{ link.blurb_html|raw }}</div>
+                    {% elseif link.blurb %}
                         <p>{{ link.blurb }}</p>
                     {% endif %}
                     {% if is_admin|default(false) %}

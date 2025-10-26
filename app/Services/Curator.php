@@ -7,6 +7,7 @@ use App\Repositories\FeedRepository;
 use App\Repositories\EditionRepository;
 use App\Repositories\ItemRepository;
 use App\Repositories\TagRepository;
+use App\Services\HtmlSanitizer;
 use App\Helpers\Encoding;
 
 class Curator
@@ -20,19 +21,22 @@ class Curator
     private TagRepository $tags;
 
     private FeedRepository $feeds;
+    private HtmlSanitizer $sanitizer;
 
     public function __construct(
         ItemRepository $items,
         CuratedLinkRepository $curatedLinks,
         EditionRepository $editions,
         TagRepository $tags,
-        FeedRepository $feeds
+        FeedRepository $feeds,
+        HtmlSanitizer $sanitizer
     ) {
         $this->items = $items;
         $this->curatedLinks = $curatedLinks;
         $this->editions = $editions;
         $this->tags = $tags;
         $this->feeds = $feeds;
+        $this->sanitizer = $sanitizer;
     }
 
     /**
@@ -57,6 +61,10 @@ class Curator
         $blurb = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($rawBlurb) ?? $rawBlurb) ?? '';
         $blurb = trim($blurb);
 
+        // Optional rich text content from editor
+        $blurbHtmlRaw = (string) ($input['blurb_html'] ?? '');
+        $blurbHtml = trim($blurbHtmlRaw);
+
         if ($title === '' || $blurb === '') {
             throw new \InvalidArgumentException('Title and blurb are required.');
         }
@@ -66,9 +74,11 @@ class Curator
             throw new \InvalidArgumentException('Title is too long (max 255 characters).');
         }
 
-        // UI encourages a one-liner; cap at 180
-        if (strlen($blurb) > 180) {
-            throw new \InvalidArgumentException('Blurb is too long (aim for 180 characters or fewer).');
+        // Enforce word limit (<= 250 words) based on rich text or plain fallback
+        $wordSource = $blurbHtml !== '' ? strip_tags($blurbHtml) : $blurb;
+        $wordCount = str_word_count($wordSource);
+        if ($wordCount > 250) {
+            throw new \InvalidArgumentException('Blurb is too long (max 250 words).');
         }
 
         $editionDate = $this->resolveEditionDate($input['edition_date'] ?? null);
@@ -105,6 +115,7 @@ class Curator
             'item_id' => $itemId,
             'title' => $title,
             'blurb' => $blurb,
+            'blurb_html' => $blurbHtml !== '' ? $this->sanitizer->clean($blurbHtml) : null,
             'source_name' => $sourceName,
             'source_url' => $item['url'] ?? null,
             'is_pinned' => $isPinned,
@@ -146,6 +157,78 @@ class Curator
 
         return [
             'item' => $this->items->find($itemId),
+            'curated' => $this->curatedLinks->find($curatedId),
+            'edition' => $edition,
+        ];
+    }
+
+    /**
+     * Create a standalone curated post (not tied to an RSS item).
+     *
+     * @param array<string, mixed> $input
+     * @return array{curated: array<string,mixed>|null, edition: array<string,mixed>|null}
+     */
+    public function createPost(array $input = []): array
+    {
+        $rawTitle = trim((string) ($input['title'] ?? ''));
+        $title = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($rawTitle) ?? $rawTitle) ?? '';
+        $title = trim($title);
+
+        $rawBlurb = trim((string) ($input['blurb'] ?? ''));
+        $blurb = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($rawBlurb) ?? $rawBlurb) ?? '';
+        $blurb = trim($blurb);
+        $blurbHtml = trim((string) ($input['blurb_html'] ?? ''));
+
+        if ($title === '' || ($blurb === '' && $blurbHtml === '')) {
+            throw new \InvalidArgumentException('Title and blurb are required.');
+        }
+
+        if (strlen($title) > 255) {
+            throw new \InvalidArgumentException('Title is too long (max 255 characters).');
+        }
+
+        $wordSource = $blurbHtml !== '' ? strip_tags($blurbHtml) : $blurb;
+        $wordCount = str_word_count($wordSource);
+        if ($wordCount > 250) {
+            throw new \InvalidArgumentException('Blurb is too long (max 250 words).');
+        }
+
+        $editionDate = $this->resolveEditionDate($input['edition_date'] ?? null);
+        $isPinned = !empty($input['is_pinned']);
+        $publishNow = !empty($input['publish_now']);
+        $publishedAt = $publishNow ? date('Y-m-d H:i:s') : null;
+
+        $sourceName = isset($input['source_name']) ? (string) $input['source_name'] : null;
+        if (is_string($sourceName)) {
+            $sourceName = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($sourceName) ?? $sourceName);
+            if (strlen($sourceName) > 255) {
+                $sourceName = substr($sourceName, 0, 255);
+            }
+        }
+
+        $attributes = [
+            'item_id' => null,
+            'title' => $title,
+            'blurb' => $blurb,
+            'blurb_html' => $blurbHtml !== '' ? $this->sanitizer->clean($blurbHtml) : null,
+            'source_name' => $sourceName,
+            'source_url' => $input['external_url'] ?? null,
+            'is_pinned' => $isPinned,
+            'curator_notes' => $input['curator_notes'] ?? null,
+            'published_at' => $publishedAt,
+        ];
+
+        $edition = $this->editions->ensureForDate($editionDate);
+        $editionId = (int) $edition['id'];
+
+        $curatedId = $this->curatedLinks->create($attributes);
+        $position = $isPinned ? 1 : $this->curatedLinks->positionAfterPinned($editionId);
+        $this->curatedLinks->attachToEditionAtPosition($curatedId, $editionId, $position);
+
+        $tags = isset($input['tags']) ? $this->splitTags($input['tags']) : [];
+        $this->tags->syncForCuratedLink($curatedId, $tags);
+
+        return [
             'curated' => $this->curatedLinks->find($curatedId),
             'edition' => $edition,
         ];

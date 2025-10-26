@@ -1,0 +1,65 @@
+{% extends 'layout.twig' %}
+
+{% set current_nav = 'admin' %}
+
+{% block title %}New Post — The News Log{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="badge">New Post</div>
+    <h2>Create Post</h2>
+
+    {% if error %}
+        <div class="alert alert--error" data-auto-dismiss="10000">{{ error }}</div>
+    {% endif %}
+
+    {% if message %}
+        <div class="alert alert--success" data-auto-dismiss="10000">{{ message }}</div>
+    {% endif %}
+
+    <form method="post" class="form" x-data="{ title: '{{ form.title|default('')|e('js') }}', blurb: '{{ form.blurb|default('')|e('js') }}', date: '{{ form.edition_date|default('')|e('js') }}' }">
+        {{ csrf_field() }}
+
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" class="input-control" x-model="title" value="{{ form.title|default('') }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="blurb-editor">Body <span class="form-hint" data-wordcount>0/250 words</span></label>
+            <div class="editor" data-editor="tiptap" data-editor-id="post-blurb" data-output-html="blurb_html" data-output-text="blurb" data-word-limit="250"></div>
+            <input type="hidden" id="blurb_html" name="blurb_html" value="{{ form.blurb_html|default('')|e('html') }}">
+            <input type="hidden" id="blurb" name="blurb" x-model="blurb" value="{{ form.blurb|default('')|e('html') }}">
+            <p class="form-hint form-hint--warn" data-wordhint style="display:none">Limit is 250 words.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="edition_date">Edition Date</label>
+            <input id="edition_date" name="edition_date" type="date" class="input-control" x-model="date" value="{{ form.edition_date|default('') }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="tags">Tags (comma separated)</label>
+            <input id="tags" name="tags" type="text" class="input-control" value="{{ form.tags|default('') }}" data-tags-input data-tags-suggest-url="/admin/tags/suggest" data-tags-validate-url="/admin/tags/validate">
+            <div id="tag-feedback"></div>
+            <div id="tag-suggestions" class="tag-suggest-container"></div>
+        </div>
+
+        <div class="form-group form-group--inline">
+            <label class="checkbox">
+                <input type="checkbox" name="publish_now" value="1" {% if form.publish_now %}checked{% endif %}>
+                <span>Publish immediately</span>
+            </label>
+            <label class="checkbox">
+                <input type="checkbox" name="is_pinned" value="1" {% if form.is_pinned %}checked{% endif %}>
+                <span>Pin this post</span>
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" :disabled="!title || !date || blurb.length === 0">Save Post</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
+

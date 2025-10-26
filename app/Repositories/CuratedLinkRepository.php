@@ -98,16 +98,17 @@ SQL;
     {
         $sql = <<<'SQL'
 INSERT INTO curated_links (
-    item_id, title, blurb, source_name, source_url, is_pinned, curator_notes, published_at
+    item_id, title, blurb, blurb_html, source_name, source_url, is_pinned, curator_notes, published_at
 ) VALUES (
-    :item_id, :title, :blurb, :source_name, :source_url, :is_pinned, :curator_notes, :published_at
+    :item_id, :title, :blurb, :blurb_html, :source_name, :source_url, :is_pinned, :curator_notes, :published_at
 )
 SQL;
 
         return $this->insert($sql, [
             'item_id' => $attributes['item_id'],
             'title' => $attributes['title'],
-            'blurb' => $attributes['blurb'],
+            'blurb' => $attributes['blurb'] ?? '',
+            'blurb_html' => $attributes['blurb_html'] ?? null,
             'source_name' => $attributes['source_name'] ?? null,
             'source_url' => $attributes['source_url'] ?? null,
             'is_pinned' => (int) ($attributes['is_pinned'] ?? 0),
@@ -172,6 +173,7 @@ SQL;
 UPDATE curated_links
 SET title = :title,
     blurb = :blurb,
+    blurb_html = :blurb_html,
     source_name = :source_name,
     source_url = :source_url,
     is_pinned = :is_pinned,
@@ -185,6 +187,7 @@ SQL;
             'id' => $id,
             'title' => $attributes['title'] ?? '',
             'blurb' => $attributes['blurb'] ?? '',
+            'blurb_html' => $attributes['blurb_html'] ?? null,
             'source_name' => $attributes['source_name'] ?? null,
             'source_url' => $attributes['source_url'] ?? null,
             'is_pinned' => (int) ($attributes['is_pinned'] ?? 0),
