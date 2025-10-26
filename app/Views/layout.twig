@@ -114,20 +114,6 @@
 <script defer src="/assets/vendor/htmx.min.js"></script>
 <script defer src="/assets/vendor/alpine.min.js"></script>
 <script nonce="{{ csp_nonce }}">
-    // CDN fallback if local vendor scripts are missing (deploys may lag)
-    (function(){
-        function load(src){ var s=document.createElement('script'); s.defer=true; s.src=src; document.currentScript.parentNode.insertBefore(s, document.currentScript); }
-        if(!window.htmx){ load('https://unpkg.com/htmx.org@1.9.12'); }
-        if(!window.Alpine){ load('https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js'); }
-    })();
-    window.addEventListener('load', function(){
-        // Warn in console if still using CDN (reminder to upload vendor files)
-        if (!document.querySelector('script[src^="/assets/vendor/htmx"]') || !document.querySelector('script[src^="/assets/vendor/alpine"]')) {
-            console.warn('[thenewslog] Using CDN fallback for vendor scripts. Upload assets/vendor/*.js to self-host and tighten CSP.');
-        }
-    });
-    </script>
-<script nonce="{{ csp_nonce }}">
     document.addEventListener('htmx:configRequest', function (event) {
         const token = "{{ csrf_token|e('js') }}";
         event.detail.headers['X-CSRF-TOKEN'] = token;

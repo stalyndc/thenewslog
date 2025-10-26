@@ -89,8 +89,7 @@ class Response
                 "img-src 'self' https: data:",
                 "style-src 'self' https://fonts.googleapis.com",
                 "font-src 'self' https://fonts.gstatic.com data:",
-                // Temporarily allow unpkg as a CDN fallback until vendor files are deployed everywhere
-                sprintf("script-src 'self' 'nonce-%s' https://www.googletagmanager.com https://unpkg.com", $nonce),
+                sprintf("script-src 'self' 'nonce-%s' https://www.googletagmanager.com", $nonce),
                 "connect-src 'self' https://www.googletagmanager.com",
             ]);
         }
