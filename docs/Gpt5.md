@@ -75,3 +75,5 @@ Use this file as the running checklist. We’ll mark each as completed after mer
 Housekeeping
 
 - [x] Remove unused `app/Middleware/AuthMiddleware.php` to avoid confusion; auth is enforced in `AdminController` constructor.
+- [x] Rate limiter storage uses JSON (with legacy read support for serialized files).
+  - app/Services/RateLimiter.php reads JSON or legacy serialized content; writes JSON with normalized types.
