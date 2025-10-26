@@ -22,14 +22,14 @@ Completed
 
 Next Up (Security)
 
-- [ ] Add modern security headers + CSP (Content-Security-Policy) defaults in one place.
+- [x] Add modern security headers + CSP (Content-Security-Policy) defaults in one place.
   - File: app/Http/Response.php – extend `applySecurityHeaders()` with:
     - `Content-Security-Policy` allowing self, fonts.googleapis.com, fonts.gstatic.com, www.googletagmanager.com for the current layout.
     - `Permissions-Policy` (e.g., camera=(), geolocation=()).
     - `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy: same-origin`.
-- [ ] Hide exception messages in production.
+- [x] Hide exception messages in production.
   - File: index.php – render generic 500 and log with Monolog; do not echo exception text.
-- [ ] Session hardening for admin.
+- [x] Session hardening for admin.
   - File: index.php – set `cookie_samesite` to `Strict` for admin, and ensure ini settings `session.use_strict_mode=1`, `session.use_only_cookies=1`.
 
 Next Up (Correctness/Content)

@@ -76,6 +76,35 @@ class Response
             $this->headers['Referrer-Policy'] = 'strict-origin-when-cross-origin';
         }
 
+        // Modern security headers (set defaults only if not already provided)
+        if (!isset($this->headers['Content-Security-Policy'])) {
+            // Default CSP tuned for current layout: self assets, Google Fonts, GTM, inline styles/scripts allowed for now
+            // Consider tightening by adding nonces and removing 'unsafe-inline' later.
+            $this->headers['Content-Security-Policy'] = implode('; ', [
+                "default-src 'self'",
+                "base-uri 'self'",
+                "frame-ancestors 'none'",
+                "object-src 'none'",
+                "img-src 'self' https: data:",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+                "font-src 'self' https://fonts.gstatic.com data:",
+                "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+                "connect-src 'self' https://www.googletagmanager.com",
+            ]);
+        }
+
+        if (!isset($this->headers['Permissions-Policy'])) {
+            $this->headers['Permissions-Policy'] = 'geolocation=(), camera=(), microphone=(), payment=(), browsing-topics=()';
+        }
+
+        if (!isset($this->headers['Cross-Origin-Opener-Policy'])) {
+            $this->headers['Cross-Origin-Opener-Policy'] = 'same-origin';
+        }
+
+        if (!isset($this->headers['Cross-Origin-Resource-Policy'])) {
+            $this->headers['Cross-Origin-Resource-Policy'] = 'same-origin';
+        }
+
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
             if (!isset($this->headers['Strict-Transport-Security'])) {
                 $this->headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains';
