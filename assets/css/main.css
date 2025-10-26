@@ -18,13 +18,13 @@
 
 /* Light theme overrides (applied when body has class `light`) */
 body.light {
-    --color-bg: #f7f7fb;
+    --color-bg: #f3f6fb;
     --color-surface: #ffffff;
-    --color-surface-alt: #f1f3f7;
-    --color-text: #11131a;
-    --color-muted: rgba(17, 19, 26, 0.65);
-    --color-accent: #0f6e75;
-    --color-border: rgba(17, 19, 26, 0.12);
+    --color-surface-alt: #f7fafc;
+    --color-text: #0f172a; /* slate-900 */
+    --color-muted: rgba(15, 23, 42, 0.65);
+    --color-accent: #0ea5a6; /* teal-500 */
+    --color-border: rgba(15, 23, 42, 0.12);
     color-scheme: light;
 }
 
@@ -57,6 +57,20 @@ body {
 
 body.light {
     background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-bg) 100%);
+}
+
+/* Header adjustments for light theme */
+body.light .app-header {
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid var(--color-border);
+}
+body.light .brand-title { color: var(--color-text); }
+body.light .app-nav a.is-active { color: var(--color-text); box-shadow: 0 0 14px rgba(14, 165, 166, 0.25); }
+body.light .mobile-link.is-active,
+body.light .mobile-link:hover,
+body.light .mobile-link:focus {
+    background-color: rgba(14, 165, 166, 0.18);
+    color: var(--color-text);
 }
 
 body.is-mobile-nav-open {

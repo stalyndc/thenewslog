@@ -59,13 +59,21 @@
                         {% endif %}
                     </nav>
                     <button class="theme-toggle" :aria-label="theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'" :title="theme === 'dark' ? 'Light mode' : 'Dark mode'" @click="theme = theme === 'dark' ? 'light' : 'dark'">
-                        <!-- Sun icon -->
-                        <svg x-show="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
-                            <path d="M12 4.5a1 1 0 0 0 1-1V2a1 1 0 1 0-2 0v1.5a1 1 0 0 0 1 1Zm0 17a1 1 0 0 0-1 1V24a1 1 0 1 0 2 0v-1.5a1 1 0 0 0-1-1ZM4.5 12a1 1 0 0 0-1-1H2a1 1 0 1 0 0 2h1.5a1 1 0 0 0 1-1Zm17 0a1 1 0 0 0 1-1H24a1 1 0 1 0 0 2h-1.5a1 1 0 0 0-1-1ZM5.05 5.05a1 1 0 0 0 1.41 0l1.06-1.06a1 1 0 1 0-1.41-1.41L5.05 3.64a1 1 0 0 0 0 1.41Zm11.43 11.43a1 1 0 0 0 1.41 0l1.06-1.06a1 1 0 1 0-1.41-1.41l-1.06 1.06a1 1 0 0 0 0 1.41ZM18.95 5.05a1 1 0 0 0 0-1.41L17.89 2.58a1 1 0 1 0-1.41 1.41l1.06 1.06a1 1 0 0 0 1.41 0ZM4.11 18.95a1 1 0 0 0 0-1.41L3.05 16.48a1 1 0 1 0-1.41 1.41l1.06 1.06a1 1 0 0 0 1.41 0ZM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/>
+                        <!-- Sun icon (stroke like wrench) -->
+                        <svg x-show="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="4"/>
+                            <line x1="12" y1="2" x2="12" y2="5"/>
+                            <line x1="12" y1="19" x2="12" y2="22"/>
+                            <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/>
+                            <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+                            <line x1="2" y1="12" x2="5" y2="12"/>
+                            <line x1="19" y1="12" x2="22" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/>
+                            <line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
                         </svg>
-                        <!-- Moon icon -->
-                        <svg x-show="theme === 'light'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 1 0 9.79 9.79Z"/>
+                        <!-- Moon icon (stroke) -->
+                        <svg x-show="theme === 'light'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/>
                         </svg>
                     </button>
                     <button class="nav-toggle" :aria-expanded="mobileOpen" aria-controls="mobile-drawer" aria-label="Open menu" @click="toggleMobile()">
