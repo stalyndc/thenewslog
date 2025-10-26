@@ -412,6 +412,24 @@ document.addEventListener("htmx:afterSwap", () => {
   runEnhancements();
 });
 
+// Global HTMX error handling for friendlier UX
+document.addEventListener("htmx:responseError", (event: Event) => {
+  const detail: any = (event as CustomEvent).detail || {};
+  const status = detail.xhr?.status;
+  const msg = typeof status === "number" && status > 0
+    ? `Request failed (${status}). Please try again.`
+    : "Request failed. Please try again.";
+  pushToastById("app-toasts", msg, { variant: "warn", timeout: 6000 });
+});
+
+document.addEventListener("htmx:sendError", () => {
+  pushToastById("app-toasts", "Network error. Please check your connection.", { variant: "warn", timeout: 6000 });
+});
+
+document.addEventListener("htmx:timeout", () => {
+  pushToastById("app-toasts", "Request timed out. Please retry.", { variant: "warn", timeout: 6000 });
+});
+
 document.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
   const button = target.closest<HTMLElement>("[data-copy]");

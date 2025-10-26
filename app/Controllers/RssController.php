@@ -33,7 +33,7 @@ class RssController
         // Channel canonical link should reference the edition page
         $link = rtrim($this->baseUrl(), '/') . '/editions/' . rawurlencode($today);
 
-        $xml = $this->buildFeed($title, $link, 'Daily curated selection', $links);
+        $xml = $this->buildFeed($title, $link, 'Daily curated selection', $links, $today);
 
         $response = new Response($xml);
         $response->setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
@@ -45,7 +45,7 @@ class RssController
     /**
      * @param array<int, array<string, mixed>> $links
      */
-    private function buildFeed(string $title, string $link, string $description, array $links): string
+    private function buildFeed(string $title, string $link, string $description, array $links, ?string $editionDate): string
     {
         $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $itemsXml = [];
@@ -57,6 +57,7 @@ class RssController
 
             $id = $linkRow['id'] ?? null;
             $itemTitle = $linkRow['title'] ?? '';
+            // Prefer canonical source URL for <link> if present
             $itemLink = $linkRow['source_url'] ?? $linkRow['url'] ?? $link;
             $blurb = $linkRow['blurb'] ?? '';
 
@@ -64,8 +65,10 @@ class RssController
                 continue;
             }
 
-            // Prefer the canonical source URL; fall back to our edition permalink
-            $guid = $linkRow['url'] ?? ($this->baseUrl() . '/editions/' . rawurlencode((string)($linkRow['edition_date'] ?? $today)) . '#link-' . $id);
+            // GUID: prefer the original item URL for stability; otherwise fall back to our edition permalink
+            $guidEdition = (string) ($linkRow['edition_date'] ?? $editionDate ?? '');
+            $guid = $linkRow['url']
+                ?? ($this->baseUrl() . '/editions/' . rawurlencode($guidEdition) . '#link-' . $id);
             $pubDate = $this->formatRssDate($linkRow['published_at'] ?? $linkRow['updated_at'] ?? null);
 
             $itemsXml[] = sprintf(

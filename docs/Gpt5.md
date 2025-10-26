@@ -1,84 +1,32 @@
-TheNewsLog.org – Improvement Plan (Step‑by‑Step)
+Short answer: don’t install everything up front. Most core dependencies are already in place; focus next on a few high‑impact fixes, then add optional libs only when you implement those features.
 
-This checklist turns the earlier review into actionable steps. Items checked are already completed in code.
+What I found in docs/Droid.md
 
-Completed
+Many items are already resolved in the codebase (auth/session hardening, tag rate‑limiting, timing‑safe compare). Your repo reflects this.
+Optional frontend suggestions (Sortable.js, Day.js, Fuse.js, Playwright) are nice-to-haves, not blockers.
+A few concrete issues remain worth tackling before adding more dependencies.
+Recommended next steps
 
-- [x] Fix sitemap path and remove non‑existent `/contact`.
-  - app/Controllers/SitemapController.php now serves `sitemap.xml` from project root.
-  - scripts/generate_sitemap.php no longer adds `/contact`.
-- [x] Relax env validation to allow `DB_HOST` or `DB_SOCKET`.
-  - app/Bootstrap/App.php validates BASE_URL, DB_NAME, DB_USER, and host OR socket.
-- [x] Guard JSON body parsing to avoid 500s on invalid JSON.
-  - app/Http/Request.php wraps json_decode with try/catch and returns an empty array.
-- [x] RSS channel canonical points to `/editions/{date}`.
-  - app/Controllers/RssController.php.
-- [x] Add `.htaccess` front‑controller rewrite.
-  - Routes work on Hostinger/Apache.
-- [x] Decode HTML entities for titles/authors/source names at ingest and render.
-  - app/Services/FeedFetcher.php and curate page sanitization.
-- [x] Backfill script to normalize existing text fields.
-  - scripts/backfill_decode_titles.php (items, curated_links, editions).
+Fix RSS GUID fallback and undefined variable
+File: app/Controllers/RssController.php: inside buildFeed(), $today is referenced but not defined. Also ensure GUID falls back to a canonical edition permalink (e.g., "$base/editions/{edition_date}#link-{id}") when source URL is missing.
+Mailer: implement or defer cleanly
+File: app/Services/Mailer.php is a stub. Either wire PHPMailer (already in composer) with env configuration or temporarily remove subscriber flows from UI until it’s ready.
+Schema cleanup decision
+File: scripts/migrate.sql (editions): evaluate the generated date column aliasing edition_date. Keep it (and document intent) or remove if redundant.
+Optional safety refactor
+File: app/Repositories/ItemRepository.php: replace the sprintf($sql, $where) pattern with a static WHERE 1=1 + concatenation to avoid future misuse confusion (current binding is safe, this is mainly for clarity).
+Frontend resilience
+File: resources/ts/app.ts: add a global htmx:responseError handler to show a friendly toast when XHR fails; this is a quick UX win.
+Defer optional libraries until used
+Sortable.js only if you decide to replace resources/ts/reorder.ts.
+Fuse.js if you add client-side search in admin.
+Day.js if you switch timeago to a library.
+Playwright when you’re ready to invest in E2E tests.
+Install checklist (only what’s needed now)
 
-Next Up (Security)
+Backend: composer install (composer.json already includes feed-io, Guzzle, Twig, Monolog, Symfony Cache, etc.).
+Frontend: npm install && npm run build (HTMX + Alpine + plugins are already self-hosted in assets/vendor/).
+If you want, I can:
 
-- [x] Add modern security headers + CSP with nonces for inline scripts.
-  - app/Http/Response.php issues a nonce CSP and exposes `Response::cspNonce()`; Twig gets `csp_nonce`.
-  - layout scripts tagged with `nonce`. External domains allowed: GTM, unpkg.
-- [x] Hide exception messages in production.
-  - File: index.php – render generic 500 and log with Monolog; do not echo exception text.
-- [x] Session hardening for admin.
-  - File: index.php – set `cookie_samesite` to `Strict` for admin, and ensure ini settings `session.use_strict_mode=1`, `session.use_only_cookies=1`.
-
-Next Up (Correctness/Content)
-
-- [x] Strip URL fragments before hashing/normalizing to avoid dupes (`#...`).
-  - app/Helpers/Url.php drops fragments; new script to backfill existing rows.
-  - Backfill once: `php scripts/backfill_normalize_urls.php`
-- [x] Server-side validation for curated fields to prevent DB overflows.
-  - app/Services/Curator.php enforces: title ≤ 255, blurb ≤ 180 chars; normalizes text.
-
-- Next Up (SEO/Perf)
-
-- [x] Add `<link rel="canonical">` per page and per‑edition.
-  - app/Views/layout.twig with `canonical_url`; controllers now set it.
-- [x] Use `Response::cached()` for public endpoints (home, edition show, tags) and cache headers for RSS.
-  - HomeController, EditionArchiveController, TagController, RssController.
-- [x] Add meta descriptions for home, editions, and tag pages.
-  - Controllers set a concise `meta_description` consumed by layout.
-- [x] Meta descriptions wired for edition/tag pages.
-
-Operational Notes
-
-- Backfill once (safe to rerun):
-  - `php scripts/backfill_decode_titles.php`
-- Regenerate sitemap after publishing new editions:
-  - `php scripts/generate_sitemap.php > sitemap.xml`
-
-Step Execution Order
-
-1) Security headers + hide exception details.
-2) URL fragment stripping for duplicate prevention.
-3) Canonical tags and public caching for SEO/Perf.
-
-Acceptance Criteria (for each step)
-
-- Headers: Pages include CSP, HSTS stays, and other headers; no mixed‑content/CSP console errors.
-- Exceptions: in production, generic 500 page with no stack/exception string.
-- URL hashing: ingesting `https://site/article#anchor` and `https://site/article` yields one item.
-- Canonical: home/edition/tag pages return canonical link tag; RSS uses edition link; legacy `/rss/stream.xml` already 301s.
-- Cache: HTML endpoints set small `Cache-Control` max‑age; RSS sets appropriate caching.
-- Pagination rels: editions index sets `<link rel="prev|next">` when applicable.
-
-Use this file as the running checklist. We’ll mark each as completed after merge.
-
-Housekeeping
-
-- [x] Remove unused `app/Middleware/AuthMiddleware.php` to avoid confusion; auth is enforced in `AdminController` constructor.
-- [x] Rate limiter storage uses JSON (with legacy read support for serialized files).
-  - app/Services/RateLimiter.php reads JSON or legacy serialized content; writes JSON with normalized types.
-- [x] Add health endpoint for ops checks.
-  - `/healthz` returns `{ status: "ok", time: ISO8601 }` with no-store cache headers.
-- [x] Self-host HTMX/Alpine and remove unpkg.com from CSP.
-  - Layout loads `/assets/vendor/htmx.min.js` and `/assets/vendor/alpine.min.js`.
-  - CSP `script-src` no longer allows unpkg; ensure these files are present on deploy.
+Patch the RSS GUID bug and add the HTMX error handler.
+Sketch a minimal PHPMailer-backed Mailer using your .env settings.
