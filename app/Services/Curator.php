@@ -7,6 +7,7 @@ use App\Repositories\FeedRepository;
 use App\Repositories\EditionRepository;
 use App\Repositories\ItemRepository;
 use App\Repositories\TagRepository;
+use App\Helpers\Encoding;
 
 class Curator
 {
@@ -47,11 +48,27 @@ class Curator
             throw new \RuntimeException('Item not found.');
         }
 
-        $title = trim((string) ($input['title'] ?? ($item['title'] ?? '')));
-        $blurb = trim((string) ($input['blurb'] ?? ''));
+        // Normalize incoming text and enforce server-side limits
+        $rawTitle = trim((string) ($input['title'] ?? ($item['title'] ?? '')));
+        $title = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($rawTitle) ?? $rawTitle) ?? '';
+        $title = trim($title);
+
+        $rawBlurb = trim((string) ($input['blurb'] ?? ''));
+        $blurb = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($rawBlurb) ?? $rawBlurb) ?? '';
+        $blurb = trim($blurb);
 
         if ($title === '' || $blurb === '') {
             throw new \InvalidArgumentException('Title and blurb are required.');
+        }
+
+        // Enforce max lengths to avoid DB errors and keep UI concise
+        if (strlen($title) > 255) {
+            throw new \InvalidArgumentException('Title is too long (max 255 characters).');
+        }
+
+        // UI encourages a one-liner; cap at 180
+        if (strlen($blurb) > 180) {
+            throw new \InvalidArgumentException('Blurb is too long (aim for 180 characters or fewer).');
         }
 
         $editionDate = $this->resolveEditionDate($input['edition_date'] ?? null);
@@ -76,11 +93,19 @@ class Curator
             }
         }
 
+        $sourceName = $input['source_name'] ?? ($feedTitle ?? ($item['source_name'] ?? null));
+        if (is_string($sourceName)) {
+            $sourceName = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($sourceName) ?? $sourceName);
+            if (is_string($sourceName) && strlen($sourceName) > 255) {
+                $sourceName = substr($sourceName, 0, 255);
+            }
+        }
+
         $attributes = [
             'item_id' => $itemId,
             'title' => $title,
             'blurb' => $blurb,
-            'source_name' => $input['source_name'] ?? ($feedTitle ?? ($item['source_name'] ?? null)),
+            'source_name' => $sourceName,
             'source_url' => $item['url'] ?? null,
             'is_pinned' => $isPinned,
             'curator_notes' => $input['curator_notes'] ?? null,

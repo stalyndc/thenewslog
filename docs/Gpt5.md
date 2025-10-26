@@ -35,6 +35,8 @@ Next Up (Correctness/Content)
 - [x] Strip URL fragments before hashing/normalizing to avoid dupes (`#...`).
   - app/Helpers/Url.php drops fragments; new script to backfill existing rows.
   - Backfill once: `php scripts/backfill_normalize_urls.php`
+- [x] Server-side validation for curated fields to prevent DB overflows.
+  - app/Services/Curator.php enforces: title ≤ 255, blurb ≤ 180 chars; normalizes text.
 
 - Next Up (SEO/Perf)
 
