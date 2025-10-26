@@ -405,6 +405,8 @@ a:hover {
     margin-left: auto;
 }
 
+.theme-toggle svg { display: block; }
+
 .app-nav {
     display: flex;
     gap: 1rem;

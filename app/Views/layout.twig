@@ -154,11 +154,22 @@
             confirmOpen: false,
             confirmMessage: '',
             confirmAction: null,
-            // Persisted user theme (light/dark). Requires Alpine Persist plugin.
-            theme: (window.Alpine && Alpine.store) ? Alpine.$persist('dark').as('user-theme') : 'dark',
+            // Theme state (dark/light). We persist manually to avoid plugin timing issues.
+            theme: 'dark',
             init() {
                 document.addEventListener('submit', this._handleSubmit.bind(this), true);
                 document.addEventListener('click', this._handleClick.bind(this), true);
+                try {
+                    const saved = localStorage.getItem('tnl-theme');
+                    if (saved === 'light' || saved === 'dark') {
+                        this.theme = saved;
+                    }
+                    if (this.$watch) {
+                        this.$watch('theme', (v) => {
+                            try { localStorage.setItem('tnl-theme', v); } catch (e) {}
+                        });
+                    }
+                } catch (e) {}
             },
             toggleMobile() {
                 this.mobileOpen = !this.mobileOpen;
