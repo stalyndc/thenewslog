@@ -810,6 +810,12 @@ a:hover {
     background-color: rgba(34, 40, 49, 0.8);
     border: 1px solid rgba(238, 238, 238, 0.08);
 }
+/* Light theme edition list items */
+body.light .edition-list__item {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
 
 .edition-list__date {
     color: var(--color-text);
@@ -961,6 +967,12 @@ a:hover {
     color: var(--color-text);
     font-family: var(--font-body);
     font-size: 0.95rem;
+}
+/* Light theme inputs/selects */
+body.light .input-control {
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
 }
 
 .input-control:focus {
