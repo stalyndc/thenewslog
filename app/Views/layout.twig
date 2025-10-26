@@ -17,9 +17,15 @@
     {% if canonical_url is defined and canonical_url %}
         <link rel="canonical" href="{{ canonical_url }}">
     {% endif %}
+    {% if prev_url is defined and prev_url %}
+        <link rel="prev" href="{{ prev_url }}">
+    {% endif %}
+    {% if next_url is defined and next_url %}
+        <link rel="next" href="{{ next_url }}">
+    {% endif %}
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQRE4ENQGD"></script>
-    <script>
+    <script nonce="{{ csp_nonce }}">
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
@@ -107,7 +113,7 @@
 </div>
 <script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script>
+<script nonce="{{ csp_nonce }}">
     document.addEventListener('htmx:configRequest', function (event) {
         const token = "{{ csrf_token|e('js') }}";
         event.detail.headers['X-CSRF-TOKEN'] = token;
@@ -127,7 +133,7 @@
         </div>
     </div>
 </div>
-<script>
+<script nonce="{{ csp_nonce }}">
     window.appShell = function appShell() {
         return {
             mobileOpen: false,

@@ -157,6 +157,8 @@ class App
             ]);
 
             $environment->addGlobal('csrf_token', $container->get(Csrf::class)->token());
+            // Expose CSP nonce for inline script tags
+            $environment->addGlobal('csp_nonce', \App\Http\Response::cspNonce());
             $environment->addFunction(new TwigFunction('csrf_field', static function () use ($container): Markup {
                 $token = htmlspecialchars($container->get(Csrf::class)->token(), ENT_QUOTES, 'UTF-8');
 

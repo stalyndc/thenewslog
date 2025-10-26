@@ -13,6 +13,8 @@ class Response
 
     private int $status;
 
+    private static ?string $cspNonce = null;
+
     /**
      * @param array<string, string> $headers
      */
@@ -78,17 +80,16 @@ class Response
 
         // Modern security headers (set defaults only if not already provided)
         if (!isset($this->headers['Content-Security-Policy'])) {
-            // Default CSP tuned for current layout: self assets, Google Fonts, GTM, inline styles/scripts allowed for now
-            // Consider tightening by adding nonces and removing 'unsafe-inline' later.
+            $nonce = self::cspNonce();
             $this->headers['Content-Security-Policy'] = implode('; ', [
                 "default-src 'self'",
                 "base-uri 'self'",
                 "frame-ancestors 'none'",
                 "object-src 'none'",
                 "img-src 'self' https: data:",
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+                "style-src 'self' https://fonts.googleapis.com",
                 "font-src 'self' https://fonts.gstatic.com data:",
-                "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+                sprintf("script-src 'self' 'nonce-%s' https://www.googletagmanager.com https://unpkg.com", $nonce),
                 "connect-src 'self' https://www.googletagmanager.com",
             ]);
         }
@@ -183,5 +184,14 @@ class Response
         }
 
         $this->setHeader('Content-Security-Policy-Report-Only', implode('; ', $parts));
+    }
+
+    public static function cspNonce(): string
+    {
+        if (self::$cspNonce === null) {
+            self::$cspNonce = rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
+        }
+
+        return self::$cspNonce;
     }
 }

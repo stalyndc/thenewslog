@@ -22,11 +22,9 @@ Completed
 
 Next Up (Security)
 
-- [x] Add modern security headers + CSP (Content-Security-Policy) defaults in one place.
-  - File: app/Http/Response.php – extend `applySecurityHeaders()` with:
-    - `Content-Security-Policy` allowing self, fonts.googleapis.com, fonts.gstatic.com, www.googletagmanager.com for the current layout.
-    - `Permissions-Policy` (e.g., camera=(), geolocation=()).
-    - `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy: same-origin`.
+- [x] Add modern security headers + CSP with nonces for inline scripts.
+  - app/Http/Response.php issues a nonce CSP and exposes `Response::cspNonce()`; Twig gets `csp_nonce`.
+  - layout scripts tagged with `nonce`. External domains allowed: GTM, unpkg.
 - [x] Hide exception messages in production.
   - File: index.php – render generic 500 and log with Monolog; do not echo exception text.
 - [x] Session hardening for admin.
@@ -68,5 +66,6 @@ Acceptance Criteria (for each step)
 - URL hashing: ingesting `https://site/article#anchor` and `https://site/article` yields one item.
 - Canonical: home/edition/tag pages return canonical link tag; RSS uses edition link; legacy `/rss/stream.xml` already 301s.
 - Cache: HTML endpoints set small `Cache-Control` max‑age; RSS sets appropriate caching.
+- Pagination rels: editions index sets `<link rel="prev|next">` when applicable.
 
 Use this file as the running checklist. We’ll mark each as completed after merge.

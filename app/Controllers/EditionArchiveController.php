@@ -39,7 +39,10 @@ class EditionArchiveController extends BaseController
         $totalPages = max(1, (int) ceil(max(1, $total) / $perPage));
         $nextPage = $page < $totalPages ? $page + 1 : null;
 
-        $canonical = rtrim($this->baseUrl(), '/') . '/editions';
+        $base = rtrim($this->baseUrl(), '/');
+        $canonical = $base . '/editions';
+        $prevUrl = $page > 1 ? ($base . '/editions?page=' . ($page - 1)) : null;
+        $nextUrl = $page < $totalPages ? ($base . '/editions?page=' . ($page + 1)) : null;
         $meta = 'Browse past daily editions of The News Log.';
         $html = $this->view->render('editions.twig', [
             'current_nav' => 'editions',
@@ -49,6 +52,8 @@ class EditionArchiveController extends BaseController
             'next_page' => $nextPage,
             'is_admin' => $this->auth->check(),
             'canonical_url' => $canonical,
+            'prev_url' => $prevUrl,
+            'next_url' => $nextUrl,
             'meta_description' => $meta,
         ]);
 
