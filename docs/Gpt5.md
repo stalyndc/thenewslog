@@ -46,7 +46,7 @@ Next Up (Correctness/Content)
   - HomeController, EditionArchiveController, TagController, RssController.
 - [x] Add meta descriptions for home, editions, and tag pages.
   - Controllers set a concise `meta_description` consumed by layout.
-- [ ] Optional: meta descriptions for edition/tag pages.
+- [x] Meta descriptions wired for edition/tag pages.
 
 Operational Notes
 
@@ -77,3 +77,5 @@ Housekeeping
 - [x] Remove unused `app/Middleware/AuthMiddleware.php` to avoid confusion; auth is enforced in `AdminController` constructor.
 - [x] Rate limiter storage uses JSON (with legacy read support for serialized files).
   - app/Services/RateLimiter.php reads JSON or legacy serialized content; writes JSON with normalized types.
+- [x] Add health endpoint for ops checks.
+  - `/healthz` returns `{ status: "ok", time: ISO8601 }` with no-store cache headers.
