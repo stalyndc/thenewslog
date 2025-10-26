@@ -71,3 +71,7 @@ Acceptance Criteria (for each step)
 - Pagination rels: editions index sets `<link rel="prev|next">` when applicable.
 
 Use this file as the running checklist. We’ll mark each as completed after merge.
+
+Housekeeping
+
+- [x] Remove unused `app/Middleware/AuthMiddleware.php` to avoid confusion; auth is enforced in `AdminController` constructor.
