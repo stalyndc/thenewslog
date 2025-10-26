@@ -125,6 +125,14 @@ class FeedFetcher
 
                 $rawTitle = $item->getTitle() ?: $link;
                 $normalizedTitle = Encoding::ensureUtf8(Encoding::decodeHtmlEntities(strip_tags($rawTitle))) ?? $rawTitle;
+                $rawAuthor = $item->getAuthor()?->getName();
+                $normalizedAuthor = is_string($rawAuthor)
+                    ? (Encoding::ensureUtf8(Encoding::decodeHtmlEntities($rawAuthor)) ?? $rawAuthor)
+                    : null;
+                $rawSource = ($feed['title'] ?? null) ?: ($resource->getTitle() ?: null);
+                $normalizedSource = is_string($rawSource)
+                    ? (Encoding::ensureUtf8(Encoding::decodeHtmlEntities($rawSource)) ?? $rawSource)
+                    : null;
 
                 $this->items->create([
                     'feed_id' => (int) $feed['id'],
@@ -132,10 +140,10 @@ class FeedFetcher
                     'url' => $normalizedUrl,
                     'url_hash' => $hash,
                     'summary_raw' => $item->getContent() ?: null,
-                    'author' => $item->getAuthor()?->getName(),
+                    'author' => $normalizedAuthor,
                     'published_at' => $publishedAt ? $publishedAt->format('Y-m-d H:i:s') : null,
                     // Prefer the human-edited feed title from our DB; fall back to feed metadata
-                    'source_name' => ($feed['title'] ?? null) ?: ($resource->getTitle() ?: null),
+                    'source_name' => $normalizedSource,
                     'status' => 'new',
                 ]);
 
