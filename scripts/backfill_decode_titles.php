@@ -6,7 +6,6 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Bootstrap\App;
 use App\Helpers\Encoding;
-use PDO;
 
 // Bootstrap the container/DB
 $app = new App();

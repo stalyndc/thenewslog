@@ -6,7 +6,6 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Bootstrap\App;
 use App\Helpers\Url;
-use PDO;
 
 $app = new App();
 $container = $app->container();
@@ -48,4 +47,3 @@ foreach ($rows as $row) {
 }
 
 fwrite(STDOUT, sprintf("URLs updated: %d, skipped (conflicts): %d\n", $updated, $skipped));
-
