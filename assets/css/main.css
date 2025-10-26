@@ -1216,6 +1216,16 @@ body.light .mobile-link { color: var(--color-text); }
     box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.35);
 }
 
+/* Improve delete contrast in light mode */
+body.light .btn-danger {
+    background: rgba(254, 179, 177, 0.55);
+    color: #7a0d0d; /* readable red text */
+    border: 1px solid rgba(220, 38, 38, 0.25);
+}
+body.light .btn-danger:hover {
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.35);
+}
+
 .btn-inline {
     margin-left: 0.5rem;
     padding: 0.35rem 0.85rem;
