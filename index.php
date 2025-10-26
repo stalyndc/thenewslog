@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/vendor/autoload.php';
-
-use App\Bootstrap\App;
-
 // Harden session behavior before start
 ini_set('session.use_strict_mode', '1');
 ini_set('session.use_only_cookies', '1');
@@ -19,6 +15,10 @@ if (preg_match('#^/healthz/?$#', $path) === 1) {
     echo json_encode(['status' => 'ok', 'time' => gmdate('c')]);
     exit;
 }
+
+require __DIR__ . '/vendor/autoload.php';
+
+use App\Bootstrap\App;
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start([
