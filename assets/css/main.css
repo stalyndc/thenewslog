@@ -470,6 +470,8 @@ a:hover {
     height: 26px;
     color: #F9ED69;
 }
+/* Light theme wrench color */
+body.light .nav-admin-icon svg { color: #FF0000; }
 
 .nav-admin-icon:hover,
 .nav-admin-icon:focus {
@@ -542,6 +544,8 @@ a:hover {
     box-shadow: var(--shadow-elevated);
     padding: 1.5rem 1.75rem;
     margin-bottom: 1.5rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .card.card--edition {
@@ -1181,7 +1185,7 @@ body.light .mobile-link { color: var(--color-text); }
 
 .btn-primary {
     background: linear-gradient(135deg, #00adb5 0%, #4fd3d8 100%);
-    color: #0f141a;
+    color: #ffffff;
     box-shadow: 0 12px 25px rgba(0, 173, 181, 0.35);
 }
 
