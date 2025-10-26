@@ -58,6 +58,11 @@
                             </a>
                         {% endif %}
                     </nav>
+                    <button class="nav-toggle" aria-label="Toggle theme" @click="theme = theme === 'light' ? 'dark' : 'light'" title="Toggle theme">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 3a1 1 0 0 1 1 1 7 7 0 1 0 7 7 1 1 0 1 1 2 0 9 9 0 1 1-9-9 1 1 0 0 1 0 2Z"/>
+                        </svg>
+                    </button>
                     <button class="nav-toggle" :aria-expanded="mobileOpen" aria-controls="mobile-drawer" aria-label="Open menu" @click="toggleMobile()">
                         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <line x1="3" y1="6" x2="21" y2="6" />
