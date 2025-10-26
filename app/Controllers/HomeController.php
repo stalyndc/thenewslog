@@ -45,13 +45,18 @@ class HomeController extends BaseController
 
         $tags = $this->tags->tagsForCuratedLinks(array_column($links, 'id'));
 
-        return $this->render('home.twig', [
+        $canonical = rtrim($this->baseUrl(), '/') . '/';
+
+        $html = $this->view->render('home.twig', [
             'links' => $links,
             'edition_date' => $editionDate,
             'edition_display' => $editionDisplay,
             'tagsByLink' => $tags,
             'is_admin' => $this->auth->check(),
+            'canonical_url' => $canonical,
         ]);
+
+        return Response::cached($html, 600, true);
     }
 
     private function parseEditionDate(?string $value): ?string
@@ -67,5 +72,10 @@ class HomeController extends BaseController
         }
 
         return date('Y-m-d', $timestamp);
+    }
+
+    private function baseUrl(): string
+    {
+        return getenv('BASE_URL') ?: 'http://localhost:8000';
     }
 }

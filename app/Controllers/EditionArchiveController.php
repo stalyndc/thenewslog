@@ -39,14 +39,18 @@ class EditionArchiveController extends BaseController
         $totalPages = max(1, (int) ceil(max(1, $total) / $perPage));
         $nextPage = $page < $totalPages ? $page + 1 : null;
 
-        return $this->render('editions.twig', [
+        $canonical = rtrim($this->baseUrl(), '/') . '/editions';
+        $html = $this->view->render('editions.twig', [
             'current_nav' => 'editions',
             'editions' => $editions,
             'page' => $page,
             'total_pages' => $totalPages,
             'next_page' => $nextPage,
             'is_admin' => $this->auth->check(),
+            'canonical_url' => $canonical,
         ]);
+
+        return Response::cached($html, 600, true);
     }
 
     public function show(Request $request, string $date): Response
@@ -65,13 +69,17 @@ class EditionArchiveController extends BaseController
 
         $tags = $this->tags->tagsForCuratedLinks(array_column($links, 'id'));
 
-        return $this->render('edition_show.twig', [
+        $canonical = rtrim($this->baseUrl(), '/') . '/editions/' . rawurlencode($edition['edition_date']);
+        $html = $this->view->render('edition_show.twig', [
             'current_nav' => 'editions',
             'edition' => $edition,
             'links' => $links,
             'tagsByLink' => $tags,
             'is_admin' => $this->auth->check(),
+            'canonical_url' => $canonical,
         ]);
+
+        return Response::cached($html, 900, true);
     }
 
     public function partial(Request $request): Response
@@ -106,5 +114,10 @@ class EditionArchiveController extends BaseController
         ]));
 
         return $response;
+    }
+
+    private function baseUrl(): string
+    {
+        return getenv('BASE_URL') ?: 'http://localhost:8000';
     }
 }

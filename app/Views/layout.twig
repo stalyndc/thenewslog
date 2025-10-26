@@ -11,6 +11,9 @@
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link rel="shortcut icon" href="/assets/favicon.ico">
     <link rel="alternate" type="application/rss+xml" title="The News Log — Daily Edition" href="/rss/daily.xml">
+    {% if canonical_url is defined and canonical_url %}
+        <link rel="canonical" href="{{ canonical_url }}">
+    {% endif %}
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQRE4ENQGD"></script>
     <script>

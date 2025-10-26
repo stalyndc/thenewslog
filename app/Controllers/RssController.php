@@ -37,6 +37,7 @@ class RssController
 
         $response = new Response($xml);
         $response->setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
+        $response->setHeader('Cache-Control', 'public, max-age=900');
 
         return $response;
     }

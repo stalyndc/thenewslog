@@ -38,12 +38,12 @@ Next Up (Correctness/Content)
   - app/Helpers/Url.php drops fragments; new script to backfill existing rows.
   - Backfill once: `php scripts/backfill_normalize_urls.php`
 
-Next Up (SEO/Perf)
+- Next Up (SEO/Perf)
 
-- [ ] Add `<link rel="canonical">` per page and per‑edition.
-  - Files: app/Views/layout.twig; compute canonical in controllers.
-- [ ] Use `Response::cached()` for public endpoints (home, edition show, tags, RSS) with short max‑age.
-  - Files: HomeController, EditionArchiveController, EditionArchiveController@show, TagController, RssController.
+- [x] Add `<link rel="canonical">` per page and per‑edition.
+  - app/Views/layout.twig with `canonical_url`; controllers now set it.
+- [x] Use `Response::cached()` for public endpoints (home, edition show, tags) and cache headers for RSS.
+  - HomeController, EditionArchiveController, TagController, RssController.
 - [ ] Optional: meta descriptions for edition/tag pages.
 
 Operational Notes
