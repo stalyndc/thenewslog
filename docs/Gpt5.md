@@ -79,3 +79,6 @@ Housekeeping
   - app/Services/RateLimiter.php reads JSON or legacy serialized content; writes JSON with normalized types.
 - [x] Add health endpoint for ops checks.
   - `/healthz` returns `{ status: "ok", time: ISO8601 }` with no-store cache headers.
+- [x] Self-host HTMX/Alpine and remove unpkg.com from CSP.
+  - Layout loads `/assets/vendor/htmx.min.js` and `/assets/vendor/alpine.min.js`.
+  - CSP `script-src` no longer allows unpkg; ensure these files are present on deploy.

@@ -30,7 +30,8 @@ Initial scaffold generated from PRD and Agents guidelines.
 ## Sitemap
 
 - Generate sitemap: `php scripts/generate_sitemap.php > sitemap.xml` (run after publishing new editions).
-- Served at `/sitemap.xml`; add to search console or robots.txt as needed.
+- File is written to the project root and is served at `/sitemap.xml`.
+- Add to Search Console or reference from `robots.txt` as needed.
 
 ## RSSFeeds
 
@@ -55,6 +56,26 @@ Initial scaffold generated from PRD and Agents guidelines.
 - Configure Hostinger cron: `*/30 * * * * php /home/USER/public_html/scripts/cron_fetch.php >> /home/USER/logs/fetch.log 2>&1`.
 - Add a second cron for housekeeping/scheduled publishes: `* * * * * php /home/USER/public_html/scripts/cron_housekeep.php >> /home/USER/logs/housekeep.log 2>&1`.
 - Newsletter: plan to add an email subscribe form later (likely via MailerSend/Mailgun or exportable CSV service).
+
+## Health and Ops
+
+- Health check: `/healthz` returns JSON `{ status: "ok", time: "..." }` and is safe for uptime checks.
+- Application logs are written to `storage/logs/app.log`.
+- Security headers are applied globally (CSP with nonces, HSTS when HTTPS, Referrer-Policy, Permissions-Policy). External CDNs are not required.
+
+## Data Cleanup Utilities
+
+- Normalize titles/tags (decode entities, ensure UTF-8):
+  - `php scripts/backfill_decode_titles.php`
+- Normalize URLs (drop `#fragment` and recompute hash):
+  - `php scripts/backfill_normalize_urls.php`
+
+## Frontend Vendor Scripts
+
+- The app self-hosts required third-party scripts under `assets/vendor/`:
+  - `assets/vendor/htmx.min.js` (1.9.x)
+  - `assets/vendor/alpine.min.js` (3.x)
+- Make sure these files are deployed; CSP blocks loading from external CDNs.
 
 ## Logs
 

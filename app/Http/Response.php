@@ -89,7 +89,7 @@ class Response
                 "img-src 'self' https: data:",
                 "style-src 'self' https://fonts.googleapis.com",
                 "font-src 'self' https://fonts.gstatic.com data:",
-                sprintf("script-src 'self' 'nonce-%s' https://www.googletagmanager.com https://unpkg.com", $nonce),
+                sprintf("script-src 'self' 'nonce-%s' https://www.googletagmanager.com", $nonce),
                 "connect-src 'self' https://www.googletagmanager.com",
             ]);
         }
