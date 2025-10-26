@@ -13,7 +13,7 @@ ini_set('session.use_only_cookies', '1');
 // Lightweight health endpoint short-circuit to avoid full bootstrap
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($uri, PHP_URL_PATH) ?: '/';
-if ($path === '/healthz') {
+if (preg_match('#^/healthz/?$#', $path) === 1) {
     header('Content-Type', 'application/json');
     header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     echo json_encode(['status' => 'ok', 'time' => gmdate('c')]);
