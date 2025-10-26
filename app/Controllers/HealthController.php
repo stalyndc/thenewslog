@@ -23,7 +23,7 @@ class HealthController
 
     public function __invoke(Request $request): Response
     {
-        $deep = $request->query('deep') === '1';
+        $deep = $request->query('deep') === '1' || str_contains($request->path(), '/healthz/deep');
 
         $payload = [
             'status' => 'ok',
@@ -66,4 +66,3 @@ class HealthController
         return $response;
     }
 }
-
