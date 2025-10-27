@@ -2,6 +2,9 @@ import { hydrateTimeAgo } from "./timeago";
 import { enableReorder } from "./reorder";
 import { pushToastById } from "./toast";
 import { bootstrapEditors } from "./editor";
+// Trix rich text editor (self-hosted)
+import 'trix';
+import 'trix/dist/trix.css';
 
 declare const htmx: any;
 
@@ -453,4 +456,18 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     clearTagSuggestions();
   }
+});
+
+// Mirror Trix editor plain text into hidden input for Alpine/validation
+document.addEventListener('trix-change', (event: Event) => {
+  const editor = event.target as HTMLElement | null;
+  if (!editor) return;
+  const textId = editor.getAttribute('data-output-text');
+  if (!textId) return;
+  const textInput = document.getElementById(textId) as HTMLInputElement | null;
+  if (!textInput) return;
+  const plain = (editor.textContent || '').trim();
+  textInput.value = plain;
+  textInput.dispatchEvent(new Event('input', { bubbles: true }));
+  textInput.dispatchEvent(new Event('change', { bubbles: true }));
 });

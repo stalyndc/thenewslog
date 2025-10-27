@@ -6,9 +6,8 @@
     "vite": "^7.1.12"
   },
   "dependencies": {
-    "@tiptap/core": "^2.4.0",
-    "@tiptap/starter-kit": "^2.4.0",
-    "dayjs": "^1.11.11"
+    "dayjs": "^1.11.11",
+    "trix": "^2.0.0"
   },
   "scripts": {
     "dev": "vite",
