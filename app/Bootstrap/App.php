@@ -297,6 +297,7 @@ class App
         $this->router->get('/stream', static fn (): Response => Response::redirect('/editions', 301));
         $this->router->get('/rss/stream.xml', static fn (): Response => Response::redirect('/rss/daily.xml', 301));
         $this->router->get('/sitemap.xml', 'App\Controllers\SitemapController@__invoke');
+        $this->router->match(['GET', 'POST'], '/admin/posts/new', 'App\Controllers\Admin\PostController@create');
         $this->router->setNotFoundHandler('App\Controllers\ErrorController@notFound');
     }
 }
