@@ -31,7 +31,10 @@ function initSimpleEditor(opts: EditorOpts): void {
     const html = el.innerHTML;
     const text = el.textContent || '';
     if (htmlInput) htmlInput.value = html;
-    if (textInput) textInput.value = text;
+    if (textInput) {
+      textInput.value = text;
+      textInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
 
     const limit = opts.wordLimit ?? 250;
     const current = countWords(text);
@@ -41,20 +44,20 @@ function initSimpleEditor(opts: EditorOpts): void {
     if (hint) hint.classList.toggle('is-visible', current > limit);
   };
 
-  el.addEventListener('input', updateOutputs);
+  const captureSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
+      savedRange = sel.getRangeAt(0).cloneRange();
+    }
+  };
+
+  el.addEventListener('input', () => {
+    captureSelection();
+    updateOutputs();
+  });
   el.addEventListener('blur', updateOutputs);
-  el.addEventListener('keyup', () => {
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
-      savedRange = sel.getRangeAt(0).cloneRange();
-    }
-  });
-  el.addEventListener('mouseup', () => {
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
-      savedRange = sel.getRangeAt(0).cloneRange();
-    }
-  });
+  el.addEventListener('keyup', captureSelection);
+  el.addEventListener('mouseup', captureSelection);
   updateOutputs();
 
   // Toolbar (execCommand-based)
