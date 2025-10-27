@@ -74,26 +74,68 @@ function initSimpleEditor(opts: EditorOpts): void {
 
     toolbar.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest('[data-cmd]') as HTMLElement | null;
-      if (!btn) return;
+      if (!btn) {
+        return;
+      }
+
       e.preventDefault();
-      // Restore selection before executing command
       el.focus();
+
       const sel = window.getSelection();
-      if (sel && sel.rangeCount === 0 && savedRange) {
-        sel.addRange(savedRange);
+      if (!sel) {
+        return;
       }
+
+      if (sel.rangeCount === 0 || !el.contains(sel.anchorNode)) {
+        if (savedRange) {
+          sel.removeAllRanges();
+          sel.addRange(savedRange.cloneRange());
+        } else {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+          savedRange = range.cloneRange();
+        }
+      }
+
       const cmd = btn.getAttribute('data-cmd');
-      switch (cmd) {
-        case 'bold': document.execCommand('bold'); break;
-        case 'italic': document.execCommand('italic'); break;
-        case 'bullet': document.execCommand('insertUnorderedList'); break;
-        case 'ordered': document.execCommand('insertOrderedList'); break;
-        case 'blockquote': document.execCommand('formatBlock', false, 'blockquote'); break;
-        case 'code': document.execCommand('formatBlock', false, 'pre'); break;
-        case 'undo': document.execCommand('undo'); break;
-        case 'redo': document.execCommand('redo'); break;
-        case 'clear': el.innerHTML = ''; break;
+      try {
+        switch (cmd) {
+          case 'bold':
+            document.execCommand('bold');
+            break;
+          case 'italic':
+            document.execCommand('italic');
+            break;
+          case 'bullet':
+            document.execCommand('insertUnorderedList');
+            break;
+          case 'ordered':
+            document.execCommand('insertOrderedList');
+            break;
+          case 'blockquote':
+            document.execCommand('formatBlock', false, 'blockquote');
+            break;
+          case 'code':
+            document.execCommand('formatBlock', false, 'pre');
+            break;
+          case 'undo':
+            document.execCommand('undo');
+            break;
+          case 'redo':
+            document.execCommand('redo');
+            break;
+          case 'clear':
+            el.innerHTML = '';
+            savedRange = null;
+            break;
+        }
+      } catch (error) {
+        console.warn('Editor command failed', cmd, error);
       }
+
       captureSelection();
       updateOutputs();
     });
