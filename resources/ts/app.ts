@@ -458,16 +458,48 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-// Mirror Trix editor plain text into hidden input for Alpine/validation
-document.addEventListener('trix-change', (event: Event) => {
-  const editor = event.target as HTMLElement | null;
-  if (!editor) return;
+function updateWordCount(editor: HTMLElement, text: string): void {
+  const group = editor.closest('.form-group');
+  if (!group) return;
+  const counter = group.querySelector('[data-wordcount]') as HTMLElement | null;
+  const hint = group.querySelector('[data-wordhint]') as HTMLElement | null;
+  const limitAttr = editor.getAttribute('data-word-limit');
+  const limit = Number(limitAttr ?? '250');
+  const normalized = text.trim();
+  const words = normalized === '' ? 0 : normalized.split(/\s+/).length;
+  if (counter) {
+    counter.textContent = `${words}/${limit} words`;
+  }
+  if (hint) {
+    hint.style.display = words > limit ? '' : 'none';
+  }
+  if (words > limit) {
+    editor.classList.add('is-over-limit');
+  } else {
+    editor.classList.remove('is-over-limit');
+  }
+}
+
+function syncPlainText(editor: HTMLElement): void {
   const textId = editor.getAttribute('data-output-text');
   if (!textId) return;
   const textInput = document.getElementById(textId) as HTMLInputElement | null;
   if (!textInput) return;
-  const plain = (editor.textContent || '').trim();
+  const plain = (editor.textContent || '').replace(/\s+/g, ' ').trim();
   textInput.value = plain;
   textInput.dispatchEvent(new Event('input', { bubbles: true }));
   textInput.dispatchEvent(new Event('change', { bubbles: true }));
+  updateWordCount(editor, plain);
+}
+
+document.addEventListener('trix-change', (event: Event) => {
+  const editor = event.target as HTMLElement | null;
+  if (!editor) return;
+  syncPlainText(editor);
+});
+
+document.addEventListener('trix-initialize', (event: Event) => {
+  const editor = event.target as HTMLElement | null;
+  if (!editor) return;
+  syncPlainText(editor);
 });
