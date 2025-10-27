@@ -65,6 +65,13 @@ function initSimpleEditor(opts: EditorOpts): void {
   const group = el.closest('.form-group') || el.parentElement;
   const toolbar = group?.querySelector('.editor-toolbar');
   if (toolbar) {
+    toolbar.querySelectorAll<HTMLElement>('[data-cmd]').forEach((button) => {
+      button.addEventListener('mousedown', (event) => {
+        // Prevent buttons from stealing focus from the editor, preserving the selection
+        event.preventDefault();
+      });
+    });
+
     toolbar.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest('[data-cmd]') as HTMLElement | null;
       if (!btn) return;
@@ -72,8 +79,7 @@ function initSimpleEditor(opts: EditorOpts): void {
       // Restore selection before executing command
       el.focus();
       const sel = window.getSelection();
-      if (sel && savedRange) {
-        sel.removeAllRanges();
+      if (sel && sel.rangeCount === 0 && savedRange) {
         sel.addRange(savedRange);
       }
       const cmd = btn.getAttribute('data-cmd');
@@ -88,6 +94,7 @@ function initSimpleEditor(opts: EditorOpts): void {
         case 'redo': document.execCommand('redo'); break;
         case 'clear': el.innerHTML = ''; break;
       }
+      captureSelection();
       updateOutputs();
     });
   }
