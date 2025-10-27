@@ -11,15 +11,15 @@ declare(strict_types=1);
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Bootstrap\App;
-use PDO;
+// Note: use of PDO in global namespace does not require `use PDO`.
 
 $app = new App();
 $container = $app->container();
 
-/** @var PDO $pdo */
-$pdo = $container->get(PDO::class);
+/** @var \PDO $pdo */
+$pdo = $container->get(\PDO::class);
 
-function indexExists(PDO $pdo, string $table, string $index): bool
+function indexExists(\PDO $pdo, string $table, string $index): bool
 {
     $sql = 'SELECT 1 FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND INDEX_NAME = :idx LIMIT 1';
     $stmt = $pdo->prepare($sql);
@@ -27,7 +27,7 @@ function indexExists(PDO $pdo, string $table, string $index): bool
     return (bool) $stmt->fetchColumn();
 }
 
-function ensureIndex(PDO $pdo, string $table, string $index, string $definition): void
+function ensureIndex(\PDO $pdo, string $table, string $index, string $definition): void
 {
     if (indexExists($pdo, $table, $index)) {
         echo "[index] Exists: {$table}.{$index}\n";
@@ -51,4 +51,3 @@ try {
     fwrite(STDERR, "[index] Error: " . $e->getMessage() . "\n");
     exit(1);
 }
-

@@ -8,7 +8,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use App\Bootstrap\App;
 use App\Services\HtmlSanitizer;
-use PDO;
+// Note: use of PDO in global namespace does not require `use PDO`.
 
 $app = new App();
 $container = $app->container();
@@ -32,4 +32,3 @@ foreach ($rows as $row) {
 }
 
 fwrite(STDOUT, "Updated {$updated} rows\n");
-

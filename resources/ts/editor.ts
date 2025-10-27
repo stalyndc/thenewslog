@@ -40,6 +40,8 @@ export function initTiptap(opts: EditorOpts): void {
       }
     },
   });
+  // Disable fallback contenteditable if present
+  el.removeAttribute('contenteditable');
 
   // Wire a simple toolbar if present in the same form group
   const group = el.closest('.form-group') || el.parentElement;
