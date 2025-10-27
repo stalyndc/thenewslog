@@ -65,6 +65,12 @@ class Curator
         $blurbHtmlRaw = (string) ($input['blurb_html'] ?? '');
         $blurbHtml = trim($blurbHtmlRaw);
 
+        // Fallback: if plain blurb is empty but HTML is present, derive text from HTML
+        if ($blurb === '' && $blurbHtml !== '') {
+            $normalized = str_ireplace(['</p>', '<br>', '<br/>', '<br />'], ' ', $blurbHtml);
+            $blurb = trim(preg_replace('/\s+/', ' ', strip_tags($normalized)) ?? '');
+        }
+
         if ($title === '' || $blurb === '') {
             throw new \InvalidArgumentException('Title and blurb are required.');
         }
@@ -178,6 +184,11 @@ class Curator
         $blurb = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($rawBlurb) ?? $rawBlurb) ?? '';
         $blurb = trim($blurb);
         $blurbHtml = trim((string) ($input['blurb_html'] ?? ''));
+
+        if ($blurb === '' && $blurbHtml !== '') {
+            $normalized = str_ireplace(['</p>', '<br>', '<br/>', '<br />'], ' ', $blurbHtml);
+            $blurb = trim(preg_replace('/\s+/', ' ', strip_tags($normalized)) ?? '');
+        }
 
         if ($title === '' || ($blurb === '' && $blurbHtml === '')) {
             throw new \InvalidArgumentException('Title and blurb are required.');

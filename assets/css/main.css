@@ -1285,6 +1285,8 @@ body.light .btn-primary:hover {
     color: var(--color-text);
     white-space: pre-wrap;
 }
+.editor b, .editor strong { font-weight: 700; }
+.editor i, .editor em { font-style: italic; }
 .editor .ProseMirror {
     min-height: 120px;
     outline: none;
