@@ -1313,6 +1313,51 @@ body.light .btn-primary:hover {
     box-shadow: 0 0 0 2px rgba(0, 173, 181, 0.35);
 }
 
+/* Trix editor — align with input controls */
+trix-toolbar {
+    margin: 0 0 0.5rem 0;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+trix-toolbar .trix-button-group {
+    border: none;
+}
+trix-toolbar .trix-button {
+    background: rgba(238, 238, 238, 0.08);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.25rem 0.5rem;
+    margin-right: 0.35rem;
+    font-size: 0.78rem;
+}
+trix-toolbar .trix-button.trix-active {
+    background: rgba(0, 173, 181, 0.25);
+    border-color: rgba(0, 173, 181, 0.35);
+}
+trix-toolbar .trix-button-group--file-tools {
+    display: none; /* hide file attachment in this CMS */
+}
+
+trix-editor {
+    min-height: 180px; /* increase writing area */
+    padding: 0.85rem 1rem;
+    background: var(--color-input-bg, rgba(255,255,255,0.04));
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    color: var(--color-text);
+}
+trix-editor:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 173, 181, 0.35);
+}
+/* Trix content spacing */
+trix-editor .attachment {
+    margin: 0.25rem 0;
+}
+trix-editor li { margin: 0.25rem 0; }
+
 .order-list {
     display: grid;
     gap: 1rem;
