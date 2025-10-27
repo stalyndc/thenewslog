@@ -13,10 +13,26 @@ class RateLimiter
 
     public function __construct()
     {
-        $this->storePath = dirname(__DIR__, 2) . '/storage/rate_limit';
+        $primary = dirname(__DIR__, 2) . '/storage/rate_limit';
+        $this->storePath = $primary;
 
-        if (!is_dir($this->storePath)) {
-            mkdir($this->storePath, 0775, true);
+        if (!is_dir($primary)) {
+            @mkdir($primary, 0775, true);
+        }
+
+        // Fallback to system temp if storage is not writable on shared hosting
+        if (!is_dir($primary) || !is_writable($primary)) {
+            $fallback = rtrim(sys_get_temp_dir(), '/').'/thenewslog_rate_limit';
+            if (!is_dir($fallback)) {
+                @mkdir($fallback, 0775, true);
+            }
+            if (is_dir($fallback) && is_writable($fallback)) {
+                $this->storePath = $fallback;
+            } else {
+                // Last resort: use project root (may still fail, but better than fatal)
+                $this->storePath = dirname(__DIR__, 2) . '/storage';
+                @mkdir($this->storePath, 0775, true);
+            }
         }
     }
 

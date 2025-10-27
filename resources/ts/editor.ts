@@ -15,6 +15,7 @@ function initSimpleEditor(opts: EditorOpts): void {
   const el = opts.el;
   const htmlInput = document.getElementById(opts.outputHtmlInputId) as HTMLInputElement | null;
   const textInput = document.getElementById(opts.outputTextInputId) as HTMLInputElement | null;
+  let savedRange: Range | null = null;
 
   // Seed content from hidden html input if present
   if (htmlInput && htmlInput.value && el.innerHTML.trim() === '') {
@@ -42,6 +43,18 @@ function initSimpleEditor(opts: EditorOpts): void {
 
   el.addEventListener('input', updateOutputs);
   el.addEventListener('blur', updateOutputs);
+  el.addEventListener('keyup', () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
+      savedRange = sel.getRangeAt(0).cloneRange();
+    }
+  });
+  el.addEventListener('mouseup', () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
+      savedRange = sel.getRangeAt(0).cloneRange();
+    }
+  });
   updateOutputs();
 
   // Toolbar (execCommand-based)
@@ -52,7 +65,13 @@ function initSimpleEditor(opts: EditorOpts): void {
       const btn = (e.target as HTMLElement).closest('[data-cmd]') as HTMLElement | null;
       if (!btn) return;
       e.preventDefault();
+      // Restore selection before executing command
       el.focus();
+      const sel = window.getSelection();
+      if (sel && savedRange) {
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
       const cmd = btn.getAttribute('data-cmd');
       switch (cmd) {
         case 'bold': document.execCommand('bold'); break;
