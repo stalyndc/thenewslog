@@ -1,10 +1,7 @@
-import { Editor } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
-
 type EditorOpts = {
-  el: HTMLElement; // editor root element
-  outputHtmlInputId: string; // hidden input for html
-  outputTextInputId: string; // hidden input for plain text
+  el: HTMLElement;
+  outputHtmlInputId: string;
+  outputTextInputId: string;
   wordLimit?: number;
 };
 
@@ -14,79 +11,74 @@ function countWords(text: string): number {
   return normalized.split(' ').length;
 }
 
-export function initTiptap(opts: EditorOpts): void {
+function initSimpleEditor(opts: EditorOpts): void {
   const el = opts.el;
-
   const htmlInput = document.getElementById(opts.outputHtmlInputId) as HTMLInputElement | null;
   const textInput = document.getElementById(opts.outputTextInputId) as HTMLInputElement | null;
 
-  let editor: Editor | null = null;
-  try {
-    editor = new Editor({
-      element: el,
-      extensions: [StarterKit],
-      editable: true,
-      content: (htmlInput?.value && htmlInput.value.trim() !== '') ? htmlInput.value : '<p></p>',
-      onUpdate: ({ editor }) => {
-        const html = editor.getHTML();
-        const text = editor.getText();
-        if (htmlInput) htmlInput.value = html;
-        if (textInput) textInput.value = text;
-
-        const limit = opts.wordLimit ?? 250;
-        const current = countWords(text);
-        const counter = el.closest('.form-group')?.querySelector('[data-wordcount]') as HTMLElement | null;
-        if (counter) counter.textContent = `${current}/${limit} words`;
-        const hint = el.closest('.form-group')?.querySelector('[data-wordhint]') as HTMLElement | null;
-        if (hint) {
-          hint.classList.toggle('is-visible', current > limit);
-        }
-      },
-    });
-    // Disable fallback contenteditable only after successful init
-    el.removeAttribute('contenteditable');
-  } catch (e) {
-    console.error('Tiptap init failed; using contenteditable fallback', e);
-    el.setAttribute('contenteditable', 'true');
+  // Seed content from hidden html input if present
+  if (htmlInput && htmlInput.value && el.innerHTML.trim() === '') {
+    el.innerHTML = htmlInput.value;
   }
 
-  // Wire a simple toolbar if present in the same form group
+  // Ensure editable and accessible
+  el.setAttribute('contenteditable', 'true');
+  el.setAttribute('role', 'textbox');
+  el.setAttribute('aria-multiline', 'true');
+
+  const updateOutputs = () => {
+    const html = el.innerHTML;
+    const text = el.textContent || '';
+    if (htmlInput) htmlInput.value = html;
+    if (textInput) textInput.value = text;
+
+    const limit = opts.wordLimit ?? 250;
+    const current = countWords(text);
+    const counter = el.closest('.form-group')?.querySelector('[data-wordcount]') as HTMLElement | null;
+    if (counter) counter.textContent = `${current}/${limit} words`;
+    const hint = el.closest('.form-group')?.querySelector('[data-wordhint]') as HTMLElement | null;
+    if (hint) hint.classList.toggle('is-visible', current > limit);
+  };
+
+  el.addEventListener('input', updateOutputs);
+  el.addEventListener('blur', updateOutputs);
+  updateOutputs();
+
+  // Toolbar (execCommand-based)
   const group = el.closest('.form-group') || el.parentElement;
   const toolbar = group?.querySelector('.editor-toolbar');
-  if (toolbar && editor) {
+  if (toolbar) {
     toolbar.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest('[data-cmd]') as HTMLElement | null;
-      if (!btn || !editor) return;
+      if (!btn) return;
       e.preventDefault();
+      el.focus();
       const cmd = btn.getAttribute('data-cmd');
       switch (cmd) {
-        case 'bold': editor.chain().focus().toggleBold().run(); break;
-        case 'italic': editor.chain().focus().toggleItalic().run(); break;
-        case 'bullet': editor.chain().focus().toggleBulletList().run(); break;
-        case 'ordered': editor.chain().focus().toggleOrderedList().run(); break;
-        case 'blockquote': editor.chain().focus().toggleBlockquote().run(); break;
-        case 'code': editor.chain().focus().toggleCodeBlock().run(); break;
-        case 'undo': editor.chain().focus().undo().run(); break;
-        case 'redo': editor.chain().focus().redo().run(); break;
-        case 'clear': editor.chain().focus().clearNodes().unsetAllMarks().run(); break;
+        case 'bold': document.execCommand('bold'); break;
+        case 'italic': document.execCommand('italic'); break;
+        case 'bullet': document.execCommand('insertUnorderedList'); break;
+        case 'ordered': document.execCommand('insertOrderedList'); break;
+        case 'blockquote': document.execCommand('formatBlock', false, 'blockquote'); break;
+        case 'code': document.execCommand('formatBlock', false, 'pre'); break;
+        case 'undo': document.execCommand('undo'); break;
+        case 'redo': document.execCommand('redo'); break;
+        case 'clear': el.innerHTML = ''; break;
       }
+      updateOutputs();
     });
   }
-
-  // expose for debugging
-  (window as any).tiptap = editor;
 }
 
 export function bootstrapEditors(): void {
-  document.querySelectorAll<HTMLElement>('[data-editor="tiptap"]').forEach((root) => {
+  document.querySelectorAll<HTMLElement>('[data-editor]').forEach((root) => {
     const htmlInputId = root.getAttribute('data-output-html') || '';
     const textInputId = root.getAttribute('data-output-text') || '';
     const limit = parseInt(root.getAttribute('data-word-limit') || '250', 10);
-    initTiptap({ el: root, outputHtmlInputId: htmlInputId, outputTextInputId: textInputId, wordLimit: limit });
+    initSimpleEditor({ el: root, outputHtmlInputId: htmlInputId, outputTextInputId: textInputId, wordLimit: limit });
   });
 }
 
-// Auto-init on load
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', bootstrapEditors, { once: true });
 } else {

@@ -85,7 +85,7 @@
                     <button class="btn btn-secondary btn-icon" data-cmd="redo" type="button">Redo</button>
                     <button class="btn btn-secondary btn-icon" data-cmd="clear" type="button">Clear</button>
                 </div>
-                <div class="editor" data-editor="tiptap" data-editor-id="blurb-editor" data-output-html="blurb_html" data-output-text="blurb" contenteditable="true"></div>
+                <div class="editor" data-editor="simple" data-editor-id="blurb-editor" data-output-html="blurb_html" data-output-text="blurb" contenteditable="true"></div>
                 <input type="hidden" id="blurb_html" name="blurb_html" value="{{ form.blurb_html|default('')|e('html') }}">
                 <input type="hidden" id="blurb" name="blurb" x-model="blurb" value="{{ form.blurb|default('')|e('html') }}">
                 <p class="form-hint form-hint--warn" data-wordhint style="display:none">Limit is 250 words.</p>
