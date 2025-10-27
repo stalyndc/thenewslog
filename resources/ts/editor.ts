@@ -34,6 +34,7 @@ function initSimpleEditor(opts: EditorOpts): void {
     if (textInput) {
       textInput.value = text;
       textInput.dispatchEvent(new Event('input', { bubbles: true }));
+      textInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     const limit = opts.wordLimit ?? 250;
