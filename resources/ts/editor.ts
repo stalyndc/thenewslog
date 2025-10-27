@@ -20,36 +20,43 @@ export function initTiptap(opts: EditorOpts): void {
   const htmlInput = document.getElementById(opts.outputHtmlInputId) as HTMLInputElement | null;
   const textInput = document.getElementById(opts.outputTextInputId) as HTMLInputElement | null;
 
-  const editor = new Editor({
-    element: el,
-    extensions: [StarterKit],
-    content: htmlInput?.value || '',
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      const text = editor.getText();
-      if (htmlInput) htmlInput.value = html;
-      if (textInput) textInput.value = text;
+  let editor: Editor | null = null;
+  try {
+    editor = new Editor({
+      element: el,
+      extensions: [StarterKit],
+      editable: true,
+      content: (htmlInput?.value && htmlInput.value.trim() !== '') ? htmlInput.value : '<p></p>',
+      onUpdate: ({ editor }) => {
+        const html = editor.getHTML();
+        const text = editor.getText();
+        if (htmlInput) htmlInput.value = html;
+        if (textInput) textInput.value = text;
 
-      const limit = opts.wordLimit ?? 250;
-      const current = countWords(text);
-      const counter = el.closest('.form-group')?.querySelector('[data-wordcount]') as HTMLElement | null;
-      if (counter) counter.textContent = `${current}/${limit} words`;
-      const hint = el.closest('.form-group')?.querySelector('[data-wordhint]') as HTMLElement | null;
-      if (hint) {
-        hint.classList.toggle('is-visible', current > limit);
-      }
-    },
-  });
-  // Disable fallback contenteditable if present
-  el.removeAttribute('contenteditable');
+        const limit = opts.wordLimit ?? 250;
+        const current = countWords(text);
+        const counter = el.closest('.form-group')?.querySelector('[data-wordcount]') as HTMLElement | null;
+        if (counter) counter.textContent = `${current}/${limit} words`;
+        const hint = el.closest('.form-group')?.querySelector('[data-wordhint]') as HTMLElement | null;
+        if (hint) {
+          hint.classList.toggle('is-visible', current > limit);
+        }
+      },
+    });
+    // Disable fallback contenteditable only after successful init
+    el.removeAttribute('contenteditable');
+  } catch (e) {
+    console.error('Tiptap init failed; using contenteditable fallback', e);
+    el.setAttribute('contenteditable', 'true');
+  }
 
   // Wire a simple toolbar if present in the same form group
   const group = el.closest('.form-group') || el.parentElement;
   const toolbar = group?.querySelector('.editor-toolbar');
-  if (toolbar) {
+  if (toolbar && editor) {
     toolbar.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest('[data-cmd]') as HTMLElement | null;
-      if (!btn) return;
+      if (!btn || !editor) return;
       e.preventDefault();
       const cmd = btn.getAttribute('data-cmd');
       switch (cmd) {

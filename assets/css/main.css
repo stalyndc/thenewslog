@@ -1279,6 +1279,12 @@ body.light .btn-primary:hover {
     border-radius: 10px;
     border: 1px solid var(--color-border);
 }
+.editor[contenteditable="true"] {
+    min-height: 120px;
+    outline: none;
+    color: var(--color-text);
+    white-space: pre-wrap;
+}
 .editor .ProseMirror {
     min-height: 120px;
     outline: none;
