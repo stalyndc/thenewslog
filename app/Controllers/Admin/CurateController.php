@@ -102,6 +102,7 @@ class CurateController extends AdminController
         $payload = [
             'title' => $this->trimOrNull($request->input('title')),
             'blurb' => $this->trimOrNull($request->input('blurb')),
+            'blurb_html' => $this->trimOrNull($request->input('blurb_html')),
             'edition_date' => $request->input('edition_date'),
             'is_pinned' => $request->input('is_pinned') === '1',
             'publish_now' => $request->input('publish_now') === '1',
@@ -204,10 +205,12 @@ class CurateController extends AdminController
 
         $titleSource = $payload['title'] ?? ($curated['title'] ?? ($item['title'] ?? ''));
         $blurbSource = $payload['blurb'] ?? ($curated['blurb'] ?? '');
+        $blurbHtmlSource = $payload['blurb_html'] ?? ($curated['blurb_html'] ?? '');
         $editionDateSource = $payload['edition_date'] ?? $defaultDate;
 
         $title = Encoding::ensureUtf8(is_string($titleSource) ? $titleSource : (string) $titleSource) ?? '';
         $blurb = Encoding::ensureUtf8(is_string($blurbSource) ? $blurbSource : (string) $blurbSource) ?? '';
+        $blurbHtml = Encoding::ensureUtf8(is_string($blurbHtmlSource) ? $blurbHtmlSource : (string) $blurbHtmlSource) ?? '';
         $editionDate = Encoding::ensureUtf8(is_string($editionDateSource) ? $editionDateSource : (string) $editionDateSource) ?? '';
 
         if ($editionDate === '') {
@@ -217,6 +220,7 @@ class CurateController extends AdminController
         return [
             'title' => $title,
             'blurb' => $blurb,
+            'blurb_html' => $blurbHtml,
             'edition_date' => $editionDate,
             'is_pinned' => (bool) ($payload['is_pinned'] ?? (((int) ($curated['is_pinned'] ?? 0)) === 1)),
             'publish_now' => (bool) ($payload['publish_now'] ?? false),
