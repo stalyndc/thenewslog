@@ -492,17 +492,8 @@ function syncPlainText(editor: HTMLElement): void {
   textInput.dispatchEvent(new Event('input', { bubbles: true }));
   textInput.dispatchEvent(new Event('change', { bubbles: true }));
 
-  // Sync HTML content from Trix editor to the hidden blurb_html input
-  const htmlInputId = editor.getAttribute('input');
-  if (htmlInputId) {
-    const htmlInput = document.getElementById(htmlInputId) as HTMLInputElement | null;
-    if (htmlInput && (editor as any).editor) {
-      // Use Trix's editor API to get the properly formatted HTML
-      const trixEditor = (editor as any).editor;
-      const htmlContent = trixEditor.getDocument().toString();
-      htmlInput.value = htmlContent;
-    }
-  }
+  // Note: Trix automatically syncs HTML to the input element specified in input="blurb_html"
+  // We don't need to manually sync it here
 
   updateWordCount(editor, plain);
 }

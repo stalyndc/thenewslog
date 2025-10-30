@@ -962,11 +962,14 @@ body.light .edition-list__item {
 .form {
     display: grid;
     gap: 1.2rem;
+    max-width: 100%;
 }
 
 .form-group {
     display: grid;
     gap: 0.45rem;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .form-group--inline {
