@@ -34,6 +34,15 @@ try {
 } catch (Throwable $exception) {
     // Never expose exception details to the end-user during bootstrap failures
     http_response_code(500);
-    error_log('[bootstrap] ' . $exception->getMessage());
-    echo 'An unexpected error occurred. Please try again later.';
+    error_log('[bootstrap] ' . $exception->getMessage() . "\n" . $exception->getTraceAsString());
+
+    // In development, show the error. In production, show generic message.
+    $isDev = ($_SERVER['HTTP_HOST'] ?? '') === 'localhost' || str_contains($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1');
+    if ($isDev) {
+        echo '<h1>Error</h1>';
+        echo '<p>' . htmlspecialchars($exception->getMessage()) . '</p>';
+        echo '<pre>' . htmlspecialchars($exception->getTraceAsString()) . '</pre>';
+    } else {
+        echo 'An unexpected error occurred. Please try again later.';
+    }
 }
