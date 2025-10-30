@@ -62,7 +62,7 @@ class HomeController extends BaseController
             'meta_description' => $meta,
         ]);
 
-        return Response::cached($html, 600, true);
+        return Response::cached($html, 60, true);
     }
 
     private function parseEditionDate(?string $value): ?string

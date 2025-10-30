@@ -485,10 +485,24 @@ function syncPlainText(editor: HTMLElement): void {
   if (!textId) return;
   const textInput = document.getElementById(textId) as HTMLInputElement | null;
   if (!textInput) return;
+
+  // Extract plain text for word count and validation
   const plain = (editor.textContent || '').replace(/\s+/g, ' ').trim();
   textInput.value = plain;
   textInput.dispatchEvent(new Event('input', { bubbles: true }));
   textInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+  // Sync HTML content from Trix editor to the hidden blurb_html input
+  const htmlInputId = editor.getAttribute('input');
+  if (htmlInputId) {
+    const htmlInput = document.getElementById(htmlInputId) as HTMLInputElement | null;
+    if (htmlInput) {
+      // Get the HTML content from Trix editor
+      const htmlContent = editor.innerHTML || '';
+      htmlInput.value = htmlContent;
+    }
+  }
+
   updateWordCount(editor, plain);
 }
 

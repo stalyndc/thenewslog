@@ -1348,6 +1348,8 @@ trix-editor {
     border-radius: 10px;
     color: var(--color-text);
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     overflow-y: auto;
 }
 trix-editor:focus {
