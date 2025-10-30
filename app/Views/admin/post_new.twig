@@ -97,8 +97,9 @@
     </form>
 </section>
 <script>
-    // Alpine helper for tags field
-    window.tagsField = function tagsField(opts) {
+    // Alpine helper for tags field (only define if not already defined)
+    if (typeof window.tagsField === 'undefined') {
+        window.tagsField = function tagsField(opts) {
         return {
             inputVal: '',
             tags: [],
@@ -231,6 +232,7 @@
                 .finally(() => { this._validateAbort = null; });
             }
         };
-    };
+        };
+    }
 </script>
 {% endblock %}

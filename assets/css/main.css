@@ -1344,15 +1344,20 @@ trix-toolbar {
     background: transparent;
     border: none;
     padding: 0;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
 }
 trix-toolbar .trix-button-group {
     border: none;
     margin-bottom: 0;
+    flex-wrap: wrap;
+}
+trix-toolbar * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 trix-toolbar .trix-button {
     background: rgba(238, 238, 238, 0.08);
