@@ -15,9 +15,9 @@ class PostController extends AdminController
 {
     private Curator $curator;
 
-    public function __construct(Environment $view, Auth $auth, Csrf $csrf, ItemRepository $items, FeedRepository $feeds, Curator $curator)
+    public function __construct(Environment $view, Auth $auth, Csrf $csrf, ItemRepository $items, FeedRepository $feeds, Curator $curator, \Psr\Log\LoggerInterface $logger = null)
     {
-        parent::__construct($view, $auth, $csrf, $items, $feeds);
+        parent::__construct($view, $auth, $csrf, $items, $feeds, $logger);
         $this->curator = $curator;
     }
 
@@ -36,13 +36,26 @@ class PostController extends AdminController
                 ]);
 
                 return new Response($html);
-            } catch (\Throwable $e) {
+            } catch (\InvalidArgumentException $e) {
+                // Validation errors - show to user
                 $html = $this->view->render('admin/post_new.twig', [
                     'error' => $e->getMessage(),
                     'form' => $request->all(),
                 ]);
-
                 return new Response($html, 422);
+            } catch (\Throwable $e) {
+                // Unexpected errors - log and show generic message
+                if ($this->logger) {
+                    $this->logger->error('PostController::create failed', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                }
+                $html = $this->view->render('admin/post_new.twig', [
+                    'error' => 'An unexpected error occurred: ' . $e->getMessage(),
+                    'form' => $request->all(),
+                ]);
+                return new Response($html, 500);
             }
         }
 

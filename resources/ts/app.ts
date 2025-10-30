@@ -508,4 +508,23 @@ document.addEventListener('trix-initialize', (event: Event) => {
   const editor = event.target as HTMLElement | null;
   if (!editor) return;
   syncPlainText(editor);
+
+  // Force editor to fit within container
+  const forceWidth = () => {
+    editor.style.width = '100%';
+    editor.style.maxWidth = '100%';
+    editor.style.boxSizing = 'border-box';
+
+    // Also fix toolbar
+    const toolbar = editor.previousElementSibling;
+    if (toolbar && toolbar.tagName === 'TRIX-TOOLBAR') {
+      (toolbar as HTMLElement).style.width = '100%';
+      (toolbar as HTMLElement).style.maxWidth = '100%';
+      (toolbar as HTMLElement).style.boxSizing = 'border-box';
+    }
+  };
+
+  forceWidth();
+  // Run again after a short delay in case Trix overrides it
+  setTimeout(forceWidth, 100);
 });
