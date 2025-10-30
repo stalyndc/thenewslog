@@ -496,9 +496,10 @@ function syncPlainText(editor: HTMLElement): void {
   const htmlInputId = editor.getAttribute('input');
   if (htmlInputId) {
     const htmlInput = document.getElementById(htmlInputId) as HTMLInputElement | null;
-    if (htmlInput) {
-      // Get the HTML content from Trix editor
-      const htmlContent = editor.innerHTML || '';
+    if (htmlInput && (editor as any).editor) {
+      // Use Trix's editor API to get the properly formatted HTML
+      const trixEditor = (editor as any).editor;
+      const htmlContent = trixEditor.getDocument().toString();
       htmlInput.value = htmlContent;
     }
   }
