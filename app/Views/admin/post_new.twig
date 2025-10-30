@@ -40,9 +40,44 @@
 
         <div class="form-group">
             <label for="tags">Tags (comma separated)</label>
-            <input id="tags" name="tags" type="text" class="input-control" value="{{ form.tags|default('') }}" data-tags-input data-tags-suggest-url="/admin/tags/suggest" data-tags-validate-url="/admin/tags/validate">
-            <div id="tag-feedback"></div>
-            <div id="tag-suggestions" class="tag-suggest-container"></div>
+            <div
+                x-data="tagsField({
+                    initial: '{{ form.tags|default('')|e('js') }}',
+                    suggestUrl: '/admin/tags/suggest',
+                    validateUrl: '/admin/tags/validate',
+                    allUrl: '/admin/tags/all'
+                })"
+                x-init="init()"
+                @keydown.escape.window="closeSuggest()"
+                @click.outside="open=false"
+            >
+                <input id="tags"
+                       type="text"
+                       class="input-control"
+                       x-model="inputVal"
+                       placeholder="e.g. AI, Startups"
+                       autocomplete="off"
+                       @input.debounce.200ms="onInput()"
+                       @focus="open=true; fetchSuggest(true)"
+                       @keydown.enter.prevent="commit()"
+                       @keydown="if ($event.key === ',') { $event.preventDefault(); commit(); }"
+                       @keydown.backspace="maybePop($event)">
+
+                <div class="chips" x-show="tags.length > 0">
+                    <template x-for="(t,i) in tags" :key="t">
+                        <span class="chip">
+                            <span x-text="t"></span>
+                            <button type="button" @click="remove(i)" aria-label="Remove tag">×</button>
+                        </span>
+                    </template>
+                </div>
+
+                <input type="hidden" name="tags" :value="joined()">
+
+                <div id="tag-feedback" x-html="feedbackHtml"></div>
+
+                <div id="tag-suggestions" class="tag-suggest-container" x-show="open" x-cloak x-transition @click="onSuggestClick($event)" x-html="suggestionsHtml"></div>
+            </div>
         </div>
 
         <div class="form-group form-group--inline">
@@ -61,4 +96,141 @@
         </div>
     </form>
 </section>
+<script>
+    // Alpine helper for tags field
+    window.tagsField = function tagsField(opts) {
+        return {
+            inputVal: '',
+            tags: [],
+            suggestionsHtml: '',
+            open: false,
+            feedbackHtml: '<p class="form-hint form-hint--muted">Tags will be saved exactly as typed.</p>',
+            _suggestAbort: null,
+            _validateAbort: null,
+            _allLoaded: false,
+            _all: [],
+            init() {
+                this.tags = this._parseCsv(opts.initial || '');
+                this.validate(true);
+            },
+            joined() {
+                const active = this.inputVal.trim();
+                const parts = [...this.tags];
+                if (active) parts.push(active);
+                return parts.join(', ');
+            },
+            onInput() {
+                this.fetchSuggest();
+                this.validate();
+            },
+            commit() {
+                const v = this.inputVal.trim();
+                if (!v) return;
+                if (!this.tags.includes(v)) this.tags.push(v);
+                this.inputVal = '';
+                this.open = false;
+                this.validate();
+            },
+            maybePop(e) {
+                if (this.inputVal === '' && this.tags.length > 0) {
+                    e.preventDefault();
+                    this.tags.pop();
+                    this.validate();
+                }
+            },
+            remove(i) {
+                this.tags.splice(i, 1);
+                this.validate();
+            },
+            pick(s) {
+                if (!this.tags.includes(s)) {
+                    this.tags.push(s);
+                }
+                this.inputVal = '';
+                this.open = false;
+                this.validate();
+            },
+            closeSuggest() { this.open = false; },
+            _parseCsv(csv) {
+                return csv.split(',').map(t => t.trim()).filter(Boolean);
+            },
+            _ctx() {
+                const existing = [...this.tags];
+                const active = this.inputVal.trim();
+                return { existing, active };
+            },
+            fetchSuggest(force = false) {
+                const { active } = this._ctx();
+                if (!active && !force) { this.suggestionsHtml = ''; this.open = false; return; }
+                if (this._suggestAbort) { this._suggestAbort.abort(); }
+                this._suggestAbort = new AbortController();
+                const params = new URLSearchParams();
+                params.set('tags', active);
+                params.set('tags_full', this.joined());
+                if (this.tags.length) params.set('existing', this.tags.join(', '));
+                fetch(`${opts.suggestUrl}?${params.toString()}`, {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' },
+                    signal: this._suggestAbort.signal,
+                })
+                .then(r => r.ok ? r.text() : Promise.reject(r.status))
+                .then(html => {
+                    this.suggestionsHtml = html && html.trim() !== '' ? html : '<div class="tag-suggest tag-suggest--empty">No saved tags match yet.</div>';
+                    this.open = true;
+                })
+                .catch(() => { this._fallbackSuggest(active).catch(() => {}); })
+                .finally(() => { this._suggestAbort = null; });
+            },
+            async _ensureAllTags() {
+                if (this._allLoaded) return;
+                const res = await fetch(opts.allUrl, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error('failed');
+                const data = await res.json();
+                this._all = Array.isArray(data.tags) ? data.tags : [];
+                this._allLoaded = true;
+            },
+            async _fallbackSuggest(active) {
+                try { await this._ensureAllTags(); } catch (e) {
+                    this.suggestionsHtml = '<div class="tag-suggest tag-suggest--empty">No saved tags match yet.</div>'; this.open = true; return;
+                }
+                const term = (active || '').toLowerCase();
+                const existing = new Set(this.tags.map(t => t.toLowerCase()));
+                const matches = this._all.filter(n => n.toLowerCase().includes(term) && !existing.has(n.toLowerCase())).slice(0, 8);
+                if (matches.length === 0) {
+                    this.suggestionsHtml = '<div class="tag-suggest tag-suggest--empty">No saved tags match yet.</div>';
+                } else {
+                    const items = matches.map(n => `<li><button type=\"button\" class=\"tag-suggestion\" data-tag-name=\"${n.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}\">${n}</button></li>`).join('');
+                    this.suggestionsHtml = `<ul class=\"tag-suggest\" role=\"listbox\">${items}</ul>`;
+                }
+                this.open = true;
+            },
+            onSuggestClick(e) {
+                const btn = e.target.closest && e.target.closest('.tag-suggestion');
+                if (!btn) return;
+                const name = btn.getAttribute('data-tag-name') || btn.textContent || '';
+                const v = name.trim();
+                if (!v) return;
+                if (!this.tags.includes(v)) this.tags.push(v);
+                this.inputVal = '';
+                this.open = false;
+                this.validate();
+            },
+            validate(force = false) {
+                if (this._validateAbort) { this._validateAbort.abort(); }
+                this._validateAbort = new AbortController();
+                const params = new URLSearchParams();
+                params.set('tags', this.joined());
+                fetch(`${opts.validateUrl}?${params.toString()}`, {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' },
+                    signal: this._validateAbort.signal,
+                })
+                .then(r => r.ok ? r.text() : Promise.reject(r.status))
+                .then(html => { this.feedbackHtml = html; })
+                .catch(() => { /* ignore */ })
+                .finally(() => { this._validateAbort = null; });
+            }
+        };
+    };
+</script>
 {% endblock %}
