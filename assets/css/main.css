@@ -1287,6 +1287,28 @@ body.light .btn-primary:hover {
 }
 .editor b, .editor strong { font-weight: 700; }
 .editor i, .editor em { font-style: italic; }
+
+/* Blurb content formatting (for curated link descriptions) */
+.blurb { line-height: 1.6; }
+.blurb strong, .blurb b { font-weight: 700; }
+.blurb em, .blurb i { font-style: italic; }
+.blurb p { margin: 0.5rem 0; }
+.blurb ul, .blurb ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+.blurb li { margin: 0.25rem 0; }
+.blurb code {
+    background: rgba(238, 238, 238, 0.1);
+    padding: 0.125rem 0.35rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+.blurb blockquote {
+    border-left: 3px solid var(--color-accent);
+    padding-left: 1rem;
+    margin: 0.5rem 0;
+    font-style: italic;
+    opacity: 0.9;
+}
 .editor .ProseMirror {
     min-height: 120px;
     outline: none;
@@ -1319,9 +1341,15 @@ trix-toolbar {
     background: transparent;
     border: none;
     padding: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
 }
 trix-toolbar .trix-button-group {
     border: none;
+    margin-bottom: 0;
 }
 trix-toolbar .trix-button {
     background: rgba(238, 238, 238, 0.08);
@@ -1350,7 +1378,10 @@ trix-editor {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    overflow-x: hidden;
     overflow-y: auto;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 trix-editor:focus {
     outline: none;
