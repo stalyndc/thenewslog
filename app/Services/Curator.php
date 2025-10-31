@@ -245,6 +245,101 @@ class Curator
         ];
     }
 
+    /**
+     * Update a standalone curated post by curated link id.
+     *
+     * @param array<string, mixed> $input
+     * @return array{curated: array<string,mixed>|null, edition: array<string,mixed>|null}
+     */
+    public function updatePost(int $curatedId, array $input = []): array
+    {
+        $existing = $this->curatedLinks->find($curatedId);
+
+        if ($existing === null) {
+            throw new \RuntimeException('Post not found.');
+        }
+
+        $rawTitle = trim((string) ($input['title'] ?? ($existing['title'] ?? '')));
+        $title = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($rawTitle) ?? $rawTitle) ?? '';
+        $title = trim($title);
+
+        $rawBlurb = trim((string) ($input['blurb'] ?? ($existing['blurb'] ?? '')));
+        $blurb = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($rawBlurb) ?? $rawBlurb) ?? '';
+        $blurb = trim($blurb);
+        $blurbHtml = trim((string) ($input['blurb_html'] ?? ($existing['blurb_html'] ?? '')));
+
+        if ($blurb === '' && $blurbHtml !== '') {
+            $normalized = str_ireplace(['</p>', '<br>', '<br/>', '<br />'], ' ', $blurbHtml);
+            $blurb = trim(preg_replace('/\s+/', ' ', strip_tags($normalized)) ?? '');
+        }
+
+        if ($title === '' || ($blurb === '' && $blurbHtml === '')) {
+            throw new \InvalidArgumentException('Title and blurb are required.');
+        }
+
+        if (strlen($title) > 255) {
+            throw new \InvalidArgumentException('Title is too long (max 255 characters).');
+        }
+
+        $wordSource = $blurbHtml !== '' ? strip_tags($blurbHtml) : $blurb;
+        $wordCount = str_word_count($wordSource);
+        if ($wordCount > 250) {
+            throw new \InvalidArgumentException('Blurb is too long (max 250 words).');
+        }
+
+        $editionDate = $this->resolveEditionDate($input['edition_date'] ?? null);
+        $isPinned = !empty($input['is_pinned']);
+        $publishNow = !empty($input['publish_now']);
+        $existingPublishedAt = $existing['published_at'] ?? null;
+        $publishedAt = $publishNow ? date('Y-m-d H:i:s') : $existingPublishedAt;
+
+        $sourceName = isset($input['source_name']) ? (string) $input['source_name'] : ($existing['source_name'] ?? null);
+        if (is_string($sourceName)) {
+            $sourceName = Encoding::decodeHtmlEntities(Encoding::ensureUtf8($sourceName) ?? $sourceName);
+            if (strlen((string) $sourceName) > 255) {
+                $sourceName = substr((string) $sourceName, 0, 255);
+            }
+        }
+
+        $attributes = [
+            'title' => $title,
+            'blurb' => $blurb,
+            'blurb_html' => $blurbHtml !== '' ? $this->sanitizer->clean($blurbHtml) : null,
+            'source_name' => $sourceName,
+            'source_url' => $input['external_url'] ?? ($existing['source_url'] ?? null),
+            'is_pinned' => $isPinned,
+            'curator_notes' => $input['curator_notes'] ?? ($existing['curator_notes'] ?? null),
+            'published_at' => $publishedAt,
+        ];
+
+        $edition = $this->editions->ensureForDate($editionDate);
+        $editionId = (int) $edition['id'];
+
+        $this->curatedLinks->update($curatedId, $attributes);
+
+        // Manage pivot/position relative to edition and pinning
+        $previousPivot = $this->curatedLinks->pivotForCuratedLink($curatedId);
+        $previousEditionId = $previousPivot['edition_id'] ?? null;
+
+        if ($previousEditionId === null || (int) $previousEditionId !== $editionId) {
+            if ($previousEditionId !== null) {
+                $this->curatedLinks->detachFromEdition((int) $previousEditionId, $curatedId);
+            }
+            $position = $isPinned ? 1 : $this->curatedLinks->positionAfterPinned($editionId);
+            $this->curatedLinks->attachToEditionAtPosition($curatedId, $editionId, $position);
+        } elseif ($isPinned) {
+            $this->curatedLinks->moveToTopOfEdition($curatedId, $editionId);
+        }
+
+        $tags = isset($input['tags']) ? $this->splitTags($input['tags']) : [];
+        $this->tags->syncForCuratedLink($curatedId, $tags);
+
+        return [
+            'curated' => $this->curatedLinks->find($curatedId),
+            'edition' => $edition,
+        ];
+    }
+
     private function splitTags(null|string|array $value): array
     {
         if ($value === null) {

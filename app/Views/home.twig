@@ -51,6 +51,10 @@
                                 <a class="link-icon" href="/admin/curate/{{ link.item_id }}" aria-label="Edit blurb">
                                     {{ icons.edit('icon--action') }}
                                 </a>
+                            {% else %}
+                                <a class="link-icon" href="/admin/posts/{{ link.id }}/edit" aria-label="Edit post">
+                                    {{ icons.edit('icon--action') }}
+                                </a>
                             {% endif %}
                             {% if link.item_id %}
                                 <form method="post" action="/admin/curate/{{ link.item_id }}/delete" class="link-admin-actions__form" data-confirm="Delete this post?">

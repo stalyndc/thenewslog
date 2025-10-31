@@ -299,6 +299,7 @@ class App
         $this->router->get('/sitemap.xml', 'App\Controllers\SitemapController@__invoke');
         $this->router->match(['GET', 'POST'], '/admin/posts/new', 'App\Controllers\Admin\PostController@create');
         $this->router->post('/admin/posts/{id}/delete', 'App\Controllers\Admin\PostController@destroy');
+        $this->router->match(['GET', 'POST'], '/admin/posts/{id}/edit', 'App\Controllers\Admin\PostController@edit');
         $this->router->setNotFoundHandler('App\Controllers\ErrorController@notFound');
     }
 }

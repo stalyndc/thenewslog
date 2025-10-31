@@ -55,6 +55,8 @@
                             </button>
                             {% if link.item_id %}
                                 <a class="order-link" href="/admin/curate/{{ link.item_id }}">Edit</a>
+                            {% else %}
+                                <a class="order-link" href="/admin/posts/{{ link.id }}/edit">Edit</a>
                             {% endif %}
                         </div>
                     </div>
