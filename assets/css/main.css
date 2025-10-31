@@ -1349,12 +1349,26 @@ trix-toolbar {
     box-sizing: border-box !important;
     display: flex !important;
     flex-wrap: wrap !important;
+    gap: 0.35rem;
+}
+trix-toolbar .trix-button-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: visible !important;
+    justify-content: flex-start !important;
+    gap: 0.35rem;
 }
 trix-toolbar .trix-button-group {
     border: none;
     margin-bottom: 0;
     margin-left: 0;
+    gap: 0.35rem;
     flex-wrap: wrap;
+}
+trix-toolbar .trix-button-group:not(:first-child) {
+    margin-left: 0 !important;
 }
 trix-toolbar * {
     max-width: 100% !important;

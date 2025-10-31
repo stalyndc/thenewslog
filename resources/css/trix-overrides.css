@@ -15,6 +15,7 @@ trix-toolbar {
     box-sizing: border-box !important;
     display: flex !important;
     flex-wrap: wrap !important;
+    gap: 0.35rem;
 }
 
 trix-toolbar .trix-button-row {
@@ -24,6 +25,7 @@ trix-toolbar .trix-button-row {
     overflow-x: visible !important;
     box-sizing: border-box !important;
     justify-content: flex-start !important;
+    gap: 0.35rem;
 }
 
 trix-toolbar .trix-button-group {
@@ -31,6 +33,10 @@ trix-toolbar .trix-button-group {
     margin-bottom: 0 !important;
     margin-left: 0 !important;
     flex-wrap: wrap !important;
+    gap: 0.35rem !important;
+}
+trix-toolbar .trix-button-group:not(:first-child) {
+    margin-left: 0 !important;
 }
 
 trix-toolbar * {
