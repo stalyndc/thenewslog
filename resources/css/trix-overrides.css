@@ -23,6 +23,7 @@ trix-toolbar .trix-button-row {
     max-width: 100% !important;
     overflow-x: visible !important;
     box-sizing: border-box !important;
+    justify-content: flex-start !important;
 }
 
 trix-toolbar .trix-button-group {
