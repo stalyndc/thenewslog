@@ -1,0 +1,96 @@
+/**
+ * Trix Editor Customization
+ * These styles override Trix defaults to ensure proper width constraints
+ * and match the application design system.
+ */
+
+/* Toolbar — ensure it wraps and stays within container */
+trix-toolbar {
+    margin: 0 0 0.5rem 0 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+trix-toolbar .trix-button-row {
+    flex-wrap: wrap !important;
+    width: 100%;
+    max-width: 100%;
+}
+
+trix-toolbar .trix-button-group {
+    border: none !important;
+    margin-bottom: 0 !important;
+    flex-wrap: wrap !important;
+}
+
+trix-toolbar * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+trix-toolbar .trix-button {
+    background: rgba(238, 238, 238, 0.08) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 999px !important;
+    padding: 0.22rem 0.55rem !important;
+    margin: 0 0.3rem 0.3rem 0 !important;
+    font-size: 0.75rem !important;
+}
+
+trix-toolbar .trix-button.trix-active {
+    background: rgba(0, 173, 181, 0.25) !important;
+    border-color: rgba(0, 173, 181, 0.35) !important;
+}
+
+trix-toolbar .trix-button-group--file-tools {
+    display: none !important; /* hide file attachment in this CMS */
+}
+
+/* Editor — constrain width and ensure proper layout */
+trix-editor {
+    min-height: 140px !important;
+    padding: 0.75rem 0.9rem !important;
+    background: var(--color-input-bg, rgba(255,255,255,0.04)) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 10px !important;
+    color: var(--color-text) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+trix-editor:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(0, 173, 181, 0.35) !important;
+}
+
+trix-editor.is-over-limit {
+    border-color: rgba(248, 113, 113, 0.8) !important;
+    box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.45) !important;
+}
+
+/* Constrain all Trix internal elements */
+trix-editor * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Trix content spacing */
+trix-editor .attachment {
+    margin: 0.25rem 0 !important;
+}
+
+trix-editor li {
+    margin: 0.25rem 0 !important;
+}

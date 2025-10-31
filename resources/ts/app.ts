@@ -5,6 +5,8 @@ import { bootstrapEditors } from "./editor";
 // Trix rich text editor (self-hosted)
 import 'trix';
 import 'trix/dist/trix.css';
+// Trix customizations - MUST come after trix.css to override defaults
+import '../css/trix-overrides.css';
 
 declare const htmx: any;
 
