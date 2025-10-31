@@ -591,7 +591,7 @@ body.light .nav-admin-icon svg { color: #FF0000; }
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.85rem;
+    gap: 1.25rem;
 }
 
 .list-links__item h3 {
@@ -603,8 +603,8 @@ body.light .nav-admin-icon svg { color: #FF0000; }
 
 .list-links__item {
     position: relative;
-    padding: 0.35rem 0 0.75rem;
-    border-bottom: 1px solid rgba(238, 238, 238, 0.08);
+    padding: 0.5rem 0 1.25rem;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .list-links__item:last-child {
@@ -615,10 +615,11 @@ body.light .nav-admin-icon svg { color: #FF0000; }
 .list-links__item p {
     margin: 0;
     color: var(--color-muted);
+    line-height: 1.55;
 }
 
 .list-links__item .badge--muted {
-    margin-top: 0.35rem;
+    margin-top: 0.5rem;
 }
 
 .list-links__item--pinned {
