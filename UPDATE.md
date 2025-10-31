@@ -6,6 +6,19 @@ A comprehensive review of the codebase reveals that **significant bugs have been
 
 ---
 
+## ⚠️ IMPORTANT: Live Stream Feature Removed
+
+**The "Live Stream" feature has been permanently removed from the application.**
+
+- **What was removed:** The `/stream` page and `/rss/stream.xml` feed
+- **Current behavior:** These URLs now permanently redirect (301) to `/editions` and `/rss/daily.xml` respectively
+- **Why:** Simplified the product to focus on curated daily editions only
+- **Note for AI assistants:** If you see references to "Live Stream" in old documentation files (Update.md, ADD_TYPESCRIPT_HTMX.md), ignore them. The feature no longer exists.
+
+**Current architecture:** Daily editions only - no real-time feed.
+
+---
+
 ## ✅ FIXED ISSUES
 
 ### 1. Trix Editor Width Overflow (RESOLVED)
