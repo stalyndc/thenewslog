@@ -24,7 +24,10 @@ class PostController extends AdminController
     public function create(Request $request): Response
     {
         if ($request->method() === 'POST') {
-            $this->csrf->validate($request);
+            // Validate CSRF token extracted from request body or headers.
+            // (Previous code incorrectly passed the Request object to validate(),
+            // triggering a TypeError and a 500.)
+            $this->csrf->assertValid($this->csrf->extractToken($request));
             try {
                 $result = $this->curator->createPost($request->all());
                 $edition = $result['edition'] ?? null;
@@ -71,4 +74,3 @@ class PostController extends AdminController
         return new Response($html);
     }
 }
-
