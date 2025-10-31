@@ -19,8 +19,10 @@ trix-toolbar {
 
 trix-toolbar .trix-button-row {
     flex-wrap: wrap !important;
-    width: 100%;
-    max-width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: visible !important;
+    box-sizing: border-box !important;
 }
 
 trix-toolbar .trix-button-group {
