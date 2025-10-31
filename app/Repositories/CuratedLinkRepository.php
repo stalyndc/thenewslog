@@ -2,8 +2,14 @@
 
 namespace App\Repositories;
 
+use PDOException;
+
 class CuratedLinkRepository extends BaseRepository
 {
+    private ?bool $supportsRichBlurbs = null;
+    private ?int $blurbColumnLimit = null;
+    private bool $blurbLimitLoaded = false;
+
     /**
      * @return array<int, array<string, mixed>>
      */
@@ -96,25 +102,9 @@ SQL;
 
     public function create(array $attributes): int
     {
-        $sql = <<<'SQL'
-INSERT INTO curated_links (
-    item_id, title, blurb, blurb_html, source_name, source_url, is_pinned, curator_notes, published_at
-) VALUES (
-    :item_id, :title, :blurb, :blurb_html, :source_name, :source_url, :is_pinned, :curator_notes, :published_at
-)
-SQL;
+        $this->assertBlurbLengthWithinLimit((string) ($attributes['blurb'] ?? ''));
 
-        return $this->insert($sql, [
-            'item_id' => $attributes['item_id'],
-            'title' => $attributes['title'],
-            'blurb' => $attributes['blurb'] ?? '',
-            'blurb_html' => $attributes['blurb_html'] ?? null,
-            'source_name' => $attributes['source_name'] ?? null,
-            'source_url' => $attributes['source_url'] ?? null,
-            'is_pinned' => (int) ($attributes['is_pinned'] ?? 0),
-            'curator_notes' => $attributes['curator_notes'] ?? null,
-            'published_at' => $attributes['published_at'] ?? null,
-        ]);
+        return $this->insertCuratedLink($attributes, $this->supportsRichBlurbs());
     }
 
     public function attachToEdition(int $curatedLinkId, int $editionId, int $position): bool
@@ -169,31 +159,9 @@ SQL;
 
     public function update(int $id, array $attributes): bool
     {
-        $sql = <<<'SQL'
-UPDATE curated_links
-SET title = :title,
-    blurb = :blurb,
-    blurb_html = :blurb_html,
-    source_name = :source_name,
-    source_url = :source_url,
-    is_pinned = :is_pinned,
-    curator_notes = :curator_notes,
-    published_at = :published_at,
-    updated_at = CURRENT_TIMESTAMP
-WHERE id = :id
-SQL;
+        $this->assertBlurbLengthWithinLimit((string) ($attributes['blurb'] ?? ''));
 
-        return $this->execute($sql, [
-            'id' => $id,
-            'title' => $attributes['title'] ?? '',
-            'blurb' => $attributes['blurb'] ?? '',
-            'blurb_html' => $attributes['blurb_html'] ?? null,
-            'source_name' => $attributes['source_name'] ?? null,
-            'source_url' => $attributes['source_url'] ?? null,
-            'is_pinned' => (int) ($attributes['is_pinned'] ?? 0),
-            'curator_notes' => $attributes['curator_notes'] ?? null,
-            'published_at' => $attributes['published_at'] ?? null,
-        ]);
+        return $this->performUpdate($id, $attributes, $this->supportsRichBlurbs());
     }
 
     public function nextPositionForEdition(int $editionId): int
@@ -266,6 +234,218 @@ SQL;
         $count = (int) ($result['pinned_count'] ?? 0);
 
         return max(1, $count + 1);
+    }
+
+    private function insertCuratedLink(array $attributes, bool $includeRichHtml): int
+    {
+        $sql = $includeRichHtml
+            ? <<<'SQL'
+INSERT INTO curated_links (
+    item_id, title, blurb, blurb_html, source_name, source_url, is_pinned, curator_notes, published_at
+) VALUES (
+    :item_id, :title, :blurb, :blurb_html, :source_name, :source_url, :is_pinned, :curator_notes, :published_at
+)
+SQL
+            : <<<'SQL'
+INSERT INTO curated_links (
+    item_id, title, blurb, source_name, source_url, is_pinned, curator_notes, published_at
+) VALUES (
+    :item_id, :title, :blurb, :source_name, :source_url, :is_pinned, :curator_notes, :published_at
+)
+SQL;
+
+        $parameters = [
+            'item_id' => $attributes['item_id'] ?? null,
+            'title' => $attributes['title'] ?? '',
+            'blurb' => $attributes['blurb'] ?? '',
+            'source_name' => $attributes['source_name'] ?? null,
+            'source_url' => $attributes['source_url'] ?? null,
+            'is_pinned' => (int) ($attributes['is_pinned'] ?? 0),
+            'curator_notes' => $attributes['curator_notes'] ?? null,
+            'published_at' => $attributes['published_at'] ?? null,
+        ];
+
+        if ($includeRichHtml) {
+            $parameters['blurb_html'] = $attributes['blurb_html'] ?? null;
+        }
+
+        try {
+            return $this->insert($sql, $parameters);
+        } catch (PDOException $exception) {
+            if ($includeRichHtml && $this->isUnknownColumn($exception, 'blurb_html')) {
+                $this->supportsRichBlurbs = false;
+
+                return $this->insertCuratedLink($attributes, false);
+            }
+
+            if ($this->isDataTooLongForColumn($exception, 'blurb')) {
+                throw new \InvalidArgumentException(
+                    $this->blurbLengthErrorMessage(),
+                    0,
+                    $exception
+                );
+            }
+
+            throw $exception;
+        }
+    }
+
+    private function performUpdate(int $id, array $attributes, bool $includeRichHtml): bool
+    {
+        $sql = $includeRichHtml
+            ? <<<'SQL'
+UPDATE curated_links
+SET title = :title,
+    blurb = :blurb,
+    blurb_html = :blurb_html,
+    source_name = :source_name,
+    source_url = :source_url,
+    is_pinned = :is_pinned,
+    curator_notes = :curator_notes,
+    published_at = :published_at,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = :id
+SQL
+            : <<<'SQL'
+UPDATE curated_links
+SET title = :title,
+    blurb = :blurb,
+    source_name = :source_name,
+    source_url = :source_url,
+    is_pinned = :is_pinned,
+    curator_notes = :curator_notes,
+    published_at = :published_at,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = :id
+SQL;
+
+        $parameters = [
+            'id' => $id,
+            'title' => $attributes['title'] ?? '',
+            'blurb' => $attributes['blurb'] ?? '',
+            'source_name' => $attributes['source_name'] ?? null,
+            'source_url' => $attributes['source_url'] ?? null,
+            'is_pinned' => (int) ($attributes['is_pinned'] ?? 0),
+            'curator_notes' => $attributes['curator_notes'] ?? null,
+            'published_at' => $attributes['published_at'] ?? null,
+        ];
+
+        if ($includeRichHtml) {
+            $parameters['blurb_html'] = $attributes['blurb_html'] ?? null;
+        }
+
+        try {
+            return $this->execute($sql, $parameters);
+        } catch (PDOException $exception) {
+            if ($includeRichHtml && $this->isUnknownColumn($exception, 'blurb_html')) {
+                $this->supportsRichBlurbs = false;
+
+                return $this->performUpdate($id, $attributes, false);
+            }
+
+            if ($this->isDataTooLongForColumn($exception, 'blurb')) {
+                throw new \InvalidArgumentException(
+                    $this->blurbLengthErrorMessage(),
+                    0,
+                    $exception
+                );
+            }
+
+            throw $exception;
+        }
+    }
+
+    private function supportsRichBlurbs(): bool
+    {
+        if ($this->supportsRichBlurbs !== null) {
+            return $this->supportsRichBlurbs;
+        }
+
+        try {
+            $statement = $this->connection->query(
+                "SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'curated_links' AND COLUMN_NAME = 'blurb_html' LIMIT 1"
+            );
+
+            $this->supportsRichBlurbs = $statement !== false && $statement->fetchColumn() !== false;
+        } catch (\Throwable) {
+            // If we cannot detect support, optimistically assume it's available and fall back on error handling.
+            $this->supportsRichBlurbs = true;
+        }
+
+        return $this->supportsRichBlurbs;
+    }
+
+    private function assertBlurbLengthWithinLimit(string $blurb): void
+    {
+        $limit = $this->blurbCharacterLimit();
+
+        if ($limit === null || $limit <= 0) {
+            return;
+        }
+
+        $length = function_exists('mb_strlen') ? mb_strlen($blurb, 'UTF-8') : strlen($blurb);
+
+        if ($length > $limit) {
+            throw new \InvalidArgumentException($this->blurbLengthErrorMessage());
+        }
+    }
+
+    private function blurbCharacterLimit(): ?int
+    {
+        if ($this->blurbLimitLoaded) {
+            return $this->blurbColumnLimit;
+        }
+
+        try {
+            $statement = $this->connection->query(
+                "SELECT CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'curated_links' AND COLUMN_NAME = 'blurb' LIMIT 1"
+            );
+
+            $value = $statement !== false ? $statement->fetchColumn() : false;
+            $this->blurbColumnLimit = ($value === false || $value === null) ? null : (int) $value;
+        } catch (\Throwable) {
+            $this->blurbColumnLimit = null;
+        }
+
+        $this->blurbLimitLoaded = true;
+
+        return $this->blurbColumnLimit;
+    }
+
+    private function blurbLengthErrorMessage(): string
+    {
+        $limit = $this->blurbColumnLimit;
+
+        if ($limit !== null && $limit > 0) {
+            return sprintf(
+                'The summary is too long for the current database schema (max %d characters). Please shorten it or run scripts/upgrade_20251027_rich_blurb.sql to upgrade the curated_links table.',
+                $limit
+            );
+        }
+
+        return 'The summary is too long for the current database schema. Please shorten it or run scripts/upgrade_20251027_rich_blurb.sql to upgrade the curated_links table.';
+    }
+
+    private function isUnknownColumn(PDOException $exception, string $column): bool
+    {
+        if ($exception->getCode() === '42S22') {
+            return true;
+        }
+
+        $message = $exception->getMessage();
+
+        return stripos($message, sprintf("Unknown column '%s'", $column)) !== false;
+    }
+
+    private function isDataTooLongForColumn(PDOException $exception, string $column): bool
+    {
+        if ($exception->getCode() === '22001') {
+            return true;
+        }
+
+        $message = $exception->getMessage();
+
+        return stripos($message, sprintf("Data too long for column '%s'", $column)) !== false;
     }
 
     public function attachToEditionAtPosition(int $curatedLinkId, int $editionId, int $position): void
