@@ -1353,6 +1353,7 @@ trix-toolbar {
 trix-toolbar .trix-button-group {
     border: none;
     margin-bottom: 0;
+    margin-left: 0;
     flex-wrap: wrap;
 }
 trix-toolbar * {

@@ -29,6 +29,7 @@ trix-toolbar .trix-button-row {
 trix-toolbar .trix-button-group {
     border: none !important;
     margin-bottom: 0 !important;
+    margin-left: 0 !important;
     flex-wrap: wrap !important;
 }
 
