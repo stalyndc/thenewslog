@@ -5,6 +5,8 @@ namespace App\Controllers\Admin;
 use App\Http\Request;
 use App\Http\Response;
 use App\Repositories\FeedRepository;
+use App\Repositories\CuratedLinkRepository;
+use App\Repositories\TagRepository;
 use App\Repositories\ItemRepository;
 use App\Services\Auth;
 use App\Services\Csrf;
@@ -14,19 +16,21 @@ use Twig\Environment;
 class PostController extends AdminController
 {
     private Curator $curator;
+    private CuratedLinkRepository $curatedLinks;
+    private TagRepository $tags;
 
-    public function __construct(Environment $view, Auth $auth, Csrf $csrf, ItemRepository $items, FeedRepository $feeds, Curator $curator, \Psr\Log\LoggerInterface $logger = null)
+    public function __construct(Environment $view, Auth $auth, Csrf $csrf, ItemRepository $items, FeedRepository $feeds, Curator $curator, CuratedLinkRepository $curatedLinks, TagRepository $tags, \Psr\Log\LoggerInterface $logger = null)
     {
         parent::__construct($view, $auth, $csrf, $items, $feeds, $logger);
         $this->curator = $curator;
+        $this->curatedLinks = $curatedLinks;
+        $this->tags = $tags;
     }
 
     public function create(Request $request): Response
     {
         if ($request->method() === 'POST') {
             // Validate CSRF token extracted from request body or headers.
-            // (Previous code incorrectly passed the Request object to validate(),
-            // triggering a TypeError and a 500.)
             $this->csrf->assertValid($this->csrf->extractToken($request));
             try {
                 $result = $this->curator->createPost($request->all());
@@ -72,5 +76,33 @@ class PostController extends AdminController
         ]);
 
         return new Response($html);
+    }
+
+    public function destroy(Request $request, int $id): Response
+    {
+        $this->csrf->assertValid($this->csrf->extractToken($request));
+
+        try {
+            $this->curatedLinks->delete($id);
+
+            // Cleanup unused tags (best‑effort)
+            try { $this->tags->deleteOrphans(); } catch (\Throwable) {}
+
+            $back = $request->header('Referer');
+            if (!is_string($back) || $back === '') {
+                $back = '/admin/inbox?flash=deleted';
+            }
+
+            return Response::redirect($back);
+        } catch (\Throwable $e) {
+            if ($this->logger) {
+                $this->logger->error('PostController::destroy failed', [
+                    'curated_id' => $id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return new Response('Failed to delete post.', 500);
+        }
     }
 }

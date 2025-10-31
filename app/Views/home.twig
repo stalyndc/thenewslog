@@ -47,11 +47,20 @@
                     {% endif %}
                     {% if is_admin|default(false) %}
                         <div class="link-admin-actions">
-                            <a class="link-icon" href="/admin/curate/{{ link.item_id ?? link.id }}" aria-label="Edit blurb">
-                                {{ icons.edit('icon--action') }}
-                            </a>
-                            {% if link.item_id is defined %}
+                            {% if link.item_id %}
+                                <a class="link-icon" href="/admin/curate/{{ link.item_id }}" aria-label="Edit blurb">
+                                    {{ icons.edit('icon--action') }}
+                                </a>
+                            {% endif %}
+                            {% if link.item_id %}
                                 <form method="post" action="/admin/curate/{{ link.item_id }}/delete" class="link-admin-actions__form" data-confirm="Delete this post?">
+                                    {{ csrf_field() }}
+                                    <button type="submit" class="link-icon" aria-label="Delete post">
+                                        {{ icons.trash('icon--action') }}
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form method="post" action="/admin/posts/{{ link.id }}/delete" class="link-admin-actions__form" data-confirm="Delete this post?">
                                     {{ csrf_field() }}
                                     <button type="submit" class="link-icon" aria-label="Delete post">
                                         {{ icons.trash('icon--action') }}
